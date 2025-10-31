@@ -21,17 +21,17 @@ async function fetchData() {
       return;
     }
 
-    // Assicuriamoci che la cartella data esista
+    // Crea la cartella "data" se non esiste
     if (!fs.existsSync("./data")) {
       fs.mkdirSync("./data");
     }
 
     for (const item of data.items) {
-      const fields = item.fieldData;
+      const fields = item.fieldData || {}; // <- qui leggiamo i dati corretti
 
       const companyName = fields["name"] || "unknown";
-      const reviews = parseInt(fields["numero-review"]) || 0;
-      const rating = parseFloat(fields["recensioni-ovreview-numero-4-6-5"]) || 0;
+      const reviews = Number(fields["numero-review"]) || 0;
+      const rating = Number(fields["recensioni-ovreview-numero-4-6-5"]) || 0;
 
       const output = {
         company: companyName,
@@ -40,14 +40,14 @@ async function fetchData() {
         updated: new Date().toISOString(),
       };
 
-      // Sanitize nome file (tutto minuscolo, no spazi)
+      // Nome file pulito
       const fileName = companyName.toLowerCase().replace(/\s+/g, "-");
-
       fs.writeFileSync(`./data/${fileName}.json`, JSON.stringify(output, null, 2));
-      console.log(`✅ File creato: data/${fileName}.json`);
+
+      console.log(`✅ File aggiornato: data/${fileName}.json`);
     }
 
-    console.log("🎉 Tutti i file sono stati aggiornati con successo!");
+    console.log("🎉 Tutti i file sono stati aggiornati correttamente!");
   } catch (err) {
     console.error("❌ Errore nel fetch Webflow:", err);
   }
