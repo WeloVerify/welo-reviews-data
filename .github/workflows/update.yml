@@ -1,9 +1,12 @@
 name: Update Welo Reviews
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:   # lo puoi avviare anche a mano
   schedule:
-    - cron: "0 * * * *" # ogni ora
+    - cron: "0 0 * * *"   # ogni giorno alle 00:00 (timezone Rome)
+
+env:
+  TZ: Europe/Rome     # forza il fuso orario italiano
 
 permissions:
   contents: write
