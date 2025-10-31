@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -30,9 +32,11 @@ jobs:
           COLLECTION_ID: "674d7153240404723fc12f5a"
 
       - name: Commit and push data
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/
           git commit -m "Daily update $(date)" || echo "No changes"
-          git push
+          git push https://x-access-token:${GH_PAT}@github.com/WeloVerify/welo-reviews-data.git HEAD:main
