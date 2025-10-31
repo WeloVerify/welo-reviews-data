@@ -1,15 +1,12 @@
 (() => {
   document.addEventListener("DOMContentLoaded", async function () {
-    const scriptTag = document.currentScript;
-    const companySlug = scriptTag?.getAttribute("data-welo") || "welo";
+    const widgetDiv = document.querySelector(".welo-widget[data-welo]");
+    if (!widgetDiv) return;
 
-    /* --- CREA UN SEGNAPOSTO INVISIBILE NELLA POSIZIONE ORIGINALE --- */
-    const placeholder = document.createElement("div");
-    placeholder.setAttribute("data-welo-placeholder", companySlug);
-    scriptTag.parentNode.insertBefore(placeholder, scriptTag);
+    const companySlug = widgetDiv.getAttribute("data-welo") || "welo";
 
-    /* --- URL DATI AZIENDA (JSON, AGGIORNATO IN REAL-TIME) --- */
-    const dataUrl = `https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data/data/${companySlug}.json`;
+    /* --- URL DATI JSON (sempre live, no cache) --- */
+    const dataUrl = `https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data/data/${companySlug}.json?t=${Date.now()}`;
 
     /* --- IMMAGINI --- */
     const logoUrl =
@@ -20,48 +17,39 @@
     /* --- LINK ALLA PAGINA WELO --- */
     const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
 
-    /* --- FORMATTAZIONE NUMERI (1.5K, 2.3M ecc.) --- */
-    function formatReviews(num) {
-      if (num < 10000) return num.toLocaleString("it-IT");
-      if (num < 1000000) {
-        const k = (num / 1000).toFixed(1);
-        return k.endsWith(".0") ? `${parseInt(k)}K` : `${k}K`;
-      }
-      const m = (num / 1000000).toFixed(1);
-      return m.endsWith(".0") ? `${parseInt(m)}M` : `${m}M`;
-    }
+    /* --- FORMATTATORE NUMERI (1.2K, 3.4M ecc.) --- */
+    const formatReviews = (num) =>
+      num < 10000
+        ? num.toLocaleString("it-IT")
+        : num < 1000000
+        ? `${(num / 1000).toFixed(1).replace(/\.0$/, "")}K`
+        : `${(num / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
 
-    /* --- RECUPERA I DATI (NO CACHE, SEMPRE AGGIORNATO) --- */
+    /* --- RECUPERA DATI JSON --- */
     let data;
     try {
-      const res = await fetch(`${dataUrl}?t=${Date.now()}`, { cache: "no-store" });
-      if (!res.ok) throw new Error("Errore caricamento dati");
+      const res = await fetch(dataUrl, { cache: "no-store" });
+      if (!res.ok) throw new Error("Errore caricamento JSON");
       data = await res.json();
     } catch (err) {
-      console.warn("Welo Widget: errore nel caricamento dati. Uso fallback locale.", err);
-      data = { company: "Welo", reviews: 1495, rating: 4.6 };
+      console.warn("Welo Widget: errore caricamento dati, fallback attivo", err);
+      data = { reviews: 1495, rating: 4.6 };
     }
 
     const formattedReviews = formatReviews(data.reviews || 0);
 
-    /* --- CREA IL BADGE --- */
-    const badge = document.createElement("a");
-    badge.className = "welo-badge-xr92";
-    badge.href = weloPageUrl;
-    badge.target = "_blank";
-    badge.rel = "noopener noreferrer";
-    badge.innerHTML = `
-      <strong>${formattedReviews}</strong>
-      <span>Recensioni verificate da</span>
-      <img src="${logoUrl}" alt="Welo" class="welo-logo-xr92" />
-      <strong>Welo</strong>
-      <span class="welo-divider-xr92">|</span>
-      <strong>${(data.rating || 0).toFixed(1)}</strong>
-      <img src="${starUrl}" alt="Rating star" class="welo-star-xr92" />
+    /* --- CREA BADGE HTML --- */
+    widgetDiv.innerHTML = `
+      <a class="welo-badge-xr92" href="${weloPageUrl}" target="_blank" rel="noopener noreferrer">
+        <strong>${formattedReviews}</strong>
+        <span>Recensioni verificate da</span>
+        <img src="${logoUrl}" alt="Welo" class="welo-logo-xr92" />
+        <strong>Welo</strong>
+        <span class="welo-divider-xr92">|</span>
+        <strong>${(data.rating || 0).toFixed(1)}</strong>
+        <img src="${starUrl}" alt="Rating star" class="welo-star-xr92" />
+      </a>
     `;
-
-    /* --- INSERISCE IL BADGE IN PAGINA, NEL PUNTO ORIGINALE --- */
-    placeholder.replaceWith(badge);
 
     /* --- STILI --- */
     const style = document.createElement("style");
@@ -105,4 +93,5 @@
     document.head.appendChild(style);
   });
 })();
+
 
