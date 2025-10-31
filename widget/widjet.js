@@ -87,5 +87,3 @@
     document.head.appendChild(style);
   });
 })();
-
-
