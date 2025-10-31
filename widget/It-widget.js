@@ -8,7 +8,6 @@
     /* --- URL JSON (RAW GITHUB, ZERO CACHE) --- */
     const dataUrl = `https://raw.githubusercontent.com/WeloVerify/welo-reviews-data/main/data/${companySlug}.json?ts=${Date.now()}`;
 
-    /* --- IMMAGINI --- */
     const logoUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png";
     const starUrl =
@@ -84,9 +83,6 @@
         .welo-badge-xr92 { font-size: 12.5px; padding: 8px 12px; }
       }
     `;
-    document.head.appendChild(style);
-  });
-})();
     document.head.appendChild(style);
   });
 })();
