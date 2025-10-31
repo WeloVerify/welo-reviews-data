@@ -15,15 +15,17 @@ async function fetchData() {
     });
 
     const data = await response.json();
+
     if (!data.items || data.items.length === 0) {
-      console.log("Nessun elemento trovato nella collection Webflow.");
+      console.log("❌ Nessun elemento trovato nella collection Webflow.");
       return;
     }
 
+    // prendiamo il primo item
     const item = data.items[0];
     const fields = item.fieldData;
 
-    // Preleva i dati principali
+    // leggi i campi esatti
     const companyName = fields["name"] || "unknown";
     const reviews = parseInt(fields["numero-review"]) || 0;
     const rating = parseFloat(fields["recensioni-ovreview-numero-4-6-5"]) || 0;
@@ -35,13 +37,16 @@ async function fetchData() {
       updated: new Date().toISOString(),
     };
 
-    // Salva i dati nel file JSON
-    fs.writeFileSync("./data/welo.json", JSON.stringify(output, null, 2));
-    console.log("✅ File aggiornato con successo:", output);
+    // crea file leggibile per ogni azienda
+    const fileName = `./data/${companyName.toLowerCase()}.json`;
+    fs.writeFileSync(fileName, JSON.stringify(output, null, 2));
+    console.log(`✅ File salvato: ${fileName}`, output);
+
   } catch (err) {
     console.error("❌ Errore nel fetch Webflow:", err);
   }
 }
 
 fetchData();
+
 
