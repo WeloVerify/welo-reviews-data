@@ -37,7 +37,7 @@
     widgetDiv.innerHTML = `
       <a class="welo-badge-xr92" href="${weloPageUrl}" target="_blank" rel="noopener noreferrer">
         <strong>${formattedReviews}</strong>
-        <span>Recensioni verificate da</span>
+        <span>Reviews verified by</span>
         <img src="${logoUrl}" alt="Welo" class="welo-logo-xr92" />
         <strong>Welo</strong>
         <span class="welo-divider-xr92">|</span>
