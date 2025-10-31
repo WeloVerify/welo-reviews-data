@@ -1,43 +1,47 @@
-import axios from "axios";
-import fs from "fs-extra";
+import fs from "fs";
+import fetch from "node-fetch";
 
-const token = process.env.WEBFLOW_TOKEN;
-const collectionId = process.env.COLLECTION_ID;
+const WEBFLOW_TOKEN = process.env.WEBFLOW_TOKEN;
+const COLLECTION_ID = process.env.COLLECTION_ID;
+const URL = `https://api.webflow.com/collections/${COLLECTION_ID}/items?limit=100`;
 
-async function main() {
-  console.log("📡 Fetching Webflow CMS data...");
+async function fetchData() {
+  try {
+    const response = await fetch(URL, {
+      headers: {
+        Authorization: `Bearer ${WEBFLOW_TOKEN}`,
+        "accept-version": "1.0.0",
+      },
+    });
 
-  const res = await axios.get(`https://api.webflow.com/v2/collections/${collectionId}/items`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+    const data = await response.json();
+    if (!data.items || data.items.length === 0) {
+      console.log("Nessun elemento trovato nella collection Webflow.");
+      return;
+    }
 
-  const items = res.data.items;
-  await fs.ensureDir("data");
+    const item = data.items[0];
+    const fields = item.fieldData;
 
-  for (const item of items) {
-    // 🔹 Campi dal CMS
-    const name = item.fieldData["nome-azienda"] || "unknown";
-    const reviews = item.fieldData["numero-review"] || 0;
-    const rating = item.fieldData["recensioni-ovreview-numero"] || 0;
+    // Preleva i dati principali
+    const companyName = fields["name"] || "unknown";
+    const reviews = parseInt(fields["numero-review"]) || 0;
+    const rating = parseFloat(fields["recensioni-ovreview-numero-4-6-5"]) || 0;
 
-    // 🔹 Slug leggibile per il nome file
-    const company = name.toLowerCase().replace(/\s+/g, "-");
-
-    const data = {
-      company,
-      reviews,
-      rating,
-      updated: new Date().toISOString()
+    const output = {
+      company: companyName,
+      reviews: reviews,
+      rating: rating,
+      updated: new Date().toISOString(),
     };
 
-    await fs.writeJson(`data/${company}.json`, data, { spaces: 2 });
-    console.log(`✅ Updated ${company}.json`);
+    // Salva i dati nel file JSON
+    fs.writeFileSync("./data/welo.json", JSON.stringify(output, null, 2));
+    console.log("✅ File aggiornato con successo:", output);
+  } catch (err) {
+    console.error("❌ Errore nel fetch Webflow:", err);
   }
-
-  console.log("🎉 All JSON files updated!");
 }
 
-main().catch((err) => {
-  console.error("❌ Error:", err.message);
-  process.exit(1);
-});
+fetchData();
+
