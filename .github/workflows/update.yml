@@ -3,7 +3,10 @@ name: Update Welo Reviews
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *" # ogni ora (regola come vuoi)
+    - cron: "0 * * * *" # ogni ora
+
+permissions:
+  contents: write
 
 jobs:
   update:
