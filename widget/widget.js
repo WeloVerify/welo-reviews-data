@@ -75,12 +75,12 @@
       .welo-star-xr92 { height: 15px; width: auto; margin-left: 3px; position: relative; top: -0.5px; }
       .welo-divider-xr92 { color: #999; font-weight: 400; margin: 0 1px; }
       @media (max-width: 768px) {
-        .welo-badge-xr92 { font-size: 14px; padding: 8px 14px; gap: 4px; }
+        .welo-badge-xr92 { font-size: 14px; padding: 10px 14px; gap: 4px; }
         .welo-logo-xr92 { height: 15px; }
         .welo-star-xr92 { height: 13px; }
       }
       @media (max-width: 480px) {
-        .welo-badge-xr92 { font-size: 12.5px; padding: 8px 12px; }
+        .welo-badge-xr92 { font-size: 12.5px; padding: 10px 12px; }
       }
     `;
     document.head.appendChild(style);
