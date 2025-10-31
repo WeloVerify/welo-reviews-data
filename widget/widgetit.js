@@ -77,10 +77,10 @@
       @media (max-width: 768px) {
         .welo-badge-xr92 { font-size: 14px; padding: 8px 14px; gap: 4px; }
         .welo-logo-xr92 { height: 13px; }
-        .welo-star-xr92 { height: 13px; }
+        .welo-star-xr92 { height: 15px; }
       }
       @media (max-width: 480px) {
-        .welo-badge-xr92 { font-size: 12.5px; padding: 8px 12px; }
+        .welo-badge-xr92 { font-size: 12.5px; padding: 10px 12px; }
       }
     `;
     document.head.appendChild(style);
