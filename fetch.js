@@ -5,7 +5,8 @@ const token = process.env.WEBFLOW_TOKEN;
 const collectionId = process.env.COLLECTION_ID;
 
 async function main() {
-  console.log("Fetching Webflow CMS data...");
+  console.log("📡 Fetching Webflow CMS data...");
+
   const res = await axios.get(`https://api.webflow.com/v2/collections/${collectionId}/items`, {
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -14,10 +15,13 @@ async function main() {
   await fs.ensureDir("data");
 
   for (const item of items) {
+    // 🔹 Campi dal CMS
     const name = item.fieldData["nome-azienda"] || "unknown";
+    const reviews = item.fieldData["numero-review"] || 0;
+    const rating = item.fieldData["recensioni-ovreview-numero"] || 0;
+
+    // 🔹 Slug leggibile per il nome file
     const company = name.toLowerCase().replace(/\s+/g, "-");
-    const reviews = item.fieldData["numero-review"];
-    const rating = item.fieldData["recensioni-ovreview-numero"];
 
     const data = {
       company,
@@ -27,9 +31,13 @@ async function main() {
     };
 
     await fs.writeJson(`data/${company}.json`, data, { spaces: 2 });
+    console.log(`✅ Updated ${company}.json`);
   }
 
-  console.log("✅ JSON files updated!");
+  console.log("🎉 All JSON files updated!");
 }
 
-main().catch(err => console.error("❌ Error:", err));
+main().catch((err) => {
+  console.error("❌ Error:", err.message);
+  process.exit(1);
+});
