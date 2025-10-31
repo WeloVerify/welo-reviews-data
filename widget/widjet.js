@@ -3,17 +3,12 @@
     const scriptTag = document.currentScript;
     const companySlug = scriptTag?.getAttribute("data-welo") || "welo";
 
-    /* --- CREA IL CONTAINER DOVE SI TROVA LO SCRIPT --- */
-    const container = document.createElement("div");
-    container.id = "welo-widget-xr92";
+    /* --- CREA UN SEGNAPOSTO INVISIBILE NELLA POSIZIONE ORIGINALE --- */
+    const placeholder = document.createElement("div");
+    placeholder.setAttribute("data-welo-placeholder", companySlug);
+    scriptTag.parentNode.insertBefore(placeholder, scriptTag);
 
-    if (scriptTag && scriptTag.parentNode) {
-      scriptTag.parentNode.insertBefore(container, scriptTag);
-    } else {
-      document.body.appendChild(container);
-    }
-
-    /* --- URL DATI AZIENDA (JSON, NO CACHE OGNI VOLTA) --- */
+    /* --- URL DATI AZIENDA (JSON, AGGIORNATO IN REAL-TIME) --- */
     const dataUrl = `https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data/data/${companySlug}.json`;
 
     /* --- IMMAGINI --- */
@@ -25,7 +20,7 @@
     /* --- LINK ALLA PAGINA WELO --- */
     const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
 
-    /* --- FORMATTAZIONE NUMERI --- */
+    /* --- FORMATTAZIONE NUMERI (1.5K, 2.3M ecc.) --- */
     function formatReviews(num) {
       if (num < 10000) return num.toLocaleString("it-IT");
       if (num < 1000000) {
@@ -36,7 +31,7 @@
       return m.endsWith(".0") ? `${parseInt(m)}M` : `${m}M`;
     }
 
-    /* --- RECUPERA I DATI (NO CACHE GRAZIE A ?t=timestamp) --- */
+    /* --- RECUPERA I DATI (NO CACHE, SEMPRE AGGIORNATO) --- */
     let data;
     try {
       const res = await fetch(`${dataUrl}?t=${Date.now()}`, { cache: "no-store" });
@@ -65,8 +60,8 @@
       <img src="${starUrl}" alt="Rating star" class="welo-star-xr92" />
     `;
 
-    container.innerHTML = "";
-    container.appendChild(badge);
+    /* --- INSERISCE IL BADGE IN PAGINA, NEL PUNTO ORIGINALE --- */
+    placeholder.replaceWith(badge);
 
     /* --- STILI --- */
     const style = document.createElement("style");
