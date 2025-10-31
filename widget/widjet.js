@@ -3,36 +3,17 @@
     const scriptTag = document.currentScript;
     const companySlug = scriptTag?.getAttribute("data-welo") || "welo";
 
-    /* --- TROVA IL COMMENTO MARKER PER LA POSIZIONE ORIGINALE --- */
-    let container;
-    const commentWalker = document.createTreeWalker(
-      document,
-      NodeFilter.SHOW_COMMENT,
-      null,
-      false
-    );
-
-    let slotComment = null;
-    while (commentWalker.nextNode()) {
-      if (commentWalker.currentNode.nodeValue.trim() === "welo-slot") {
-        slotComment = commentWalker.currentNode;
-        break;
-      }
-    }
-
-    /* --- CREA IL CONTAINER DEL WIDGET --- */
-    container = document.createElement("div");
+    /* --- CREA IL CONTAINER DOVE SI TROVA LO SCRIPT --- */
+    const container = document.createElement("div");
     container.id = "welo-widget-xr92";
 
-    if (slotComment && slotComment.parentNode) {
-      slotComment.parentNode.insertBefore(container, slotComment.nextSibling);
-    } else if (scriptTag && scriptTag.parentNode) {
+    if (scriptTag && scriptTag.parentNode) {
       scriptTag.parentNode.insertBefore(container, scriptTag);
     } else {
       document.body.appendChild(container);
     }
 
-    /* --- URL DATI AZIENDA (JSON SU GITHUB, NO CACHE) --- */
+    /* --- URL DATI AZIENDA (JSON, NO CACHE AUTOMATICO) --- */
     const dataUrl = `https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data/data/${companySlug}.json`;
 
     /* --- IMMAGINI --- */
@@ -55,7 +36,7 @@
       return m.endsWith(".0") ? `${parseInt(m)}M` : `${m}M`;
     }
 
-    /* --- RECUPERA I DATI (NO CACHE SEMPRE AGGIORNATI) --- */
+    /* --- RECUPERA I DATI (NO CACHE OGNI VOLTA) --- */
     let data;
     try {
       const res = await fetch(`${dataUrl}?t=${Date.now()}`, { cache: "no-store" });
@@ -129,3 +110,4 @@
     document.head.appendChild(style);
   });
 })();
+
