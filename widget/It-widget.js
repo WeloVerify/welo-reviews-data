@@ -36,12 +36,12 @@
     badge.target = "_blank";
     badge.className = "welo-badge";
     badge.innerHTML = `
-      <strong>1.495</strong>
+      <strong>1,495</strong>
       <span>Recensioni verificate da</span>
       <img src="https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png" alt="Welo">
       <strong>Welo</strong>
       <span>|</span>
-      <strong>4.6 ★</strong>
+      <strong>4.6 &#9733;</strong>
     `;
 
     el.appendChild(badge);
