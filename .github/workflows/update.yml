@@ -2,12 +2,14 @@ name: Update Welo Reviews
 
 on:
   schedule:
-    - cron: '0 0 * * *' # ogni giorno alle 00:00 UTC
+    - cron: '0 0 * * *' # ogni giorno a mezzanotte UTC
   workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
