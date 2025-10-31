@@ -1,30 +1,26 @@
 (() => {
   document.addEventListener("DOMContentLoaded", async function () {
-    // Trova o crea il container
-    let container = document.getElementById("welo-widget-xr92");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "welo-widget-xr92";
-      document.body.appendChild(container);
-    }
-
     const scriptTag = document.currentScript;
     const companySlug = scriptTag?.getAttribute("data-welo") || "welo";
 
-    // URL del file JSON su GitHub
+    // --- CREA IL CONTAINER DOVE SI TROVA LO SCRIPT ---
+    const container = document.createElement("div");
+    container.id = "welo-widget-xr92";
+    scriptTag.parentNode.insertBefore(container, scriptTag); // 👈 posizione precisa
+
+    // --- URL DATI AZIENDA (JSON SU GITHUB) ---
     const dataUrl = `https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data/data/${companySlug}.json`;
 
-    // Logo e stella
+    // --- IMMAGINI ---
     const logoUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png";
     const starUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/6821f39414601e1d161f5d08_Image%20(1).png";
 
+    // --- LINK ALLA PAGINA WELO ---
     const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
 
-    // ----------------------------
-    // Funzione formattazione numeri
-    // ----------------------------
+    // --- FORMATTAZIONE NUMERI ---
     function formatReviews(num) {
       if (num < 10000) return num.toLocaleString("it-IT");
       if (num < 1000000) {
@@ -35,9 +31,7 @@
       return m.endsWith(".0") ? `${parseInt(m)}M` : `${m}M`;
     }
 
-    // ----------------------------
-    // Recupera dati dinamici
-    // ----------------------------
+    // --- RECUPERA I DATI ---
     let data;
     try {
       const res = await fetch(dataUrl, { cache: "no-store" });
@@ -50,15 +44,12 @@
 
     const formattedReviews = formatReviews(data.reviews || 0);
 
-    // ----------------------------
-    // Crea badge
-    // ----------------------------
+    // --- CREA IL BADGE ---
     const badge = document.createElement("a");
     badge.className = "welo-badge-xr92";
     badge.href = weloPageUrl;
     badge.target = "_blank";
     badge.rel = "noopener noreferrer";
-
     badge.innerHTML = `
       <strong>${formattedReviews}</strong>
       <span>Recensioni verificate da</span>
@@ -72,9 +63,7 @@
     container.innerHTML = "";
     container.appendChild(badge);
 
-    // ----------------------------
-    // Stili iniettati dinamicamente
-    // ----------------------------
+    // --- STILI INIETTATI DINAMICAMENTE ---
     const style = document.createElement("style");
     style.textContent = `
       .welo-badge-xr92 {
@@ -95,62 +84,22 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
         transition: all 0.25s ease;
       }
-
       .welo-badge-xr92:hover {
         transform: translateY(-1px);
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
       }
-
-      .welo-badge-xr92 strong {
-        font-weight: 700;
-      }
-
-      .welo-badge-xr92 img {
-        display: inline-block;
-        vertical-align: middle;
-      }
-
-      .welo-logo-xr92 {
-        height: 17px;
-        width: auto;
-        margin: 0 2px;
-        position: relative;
-        top: -0.5px;
-      }
-
-      .welo-star-xr92 {
-        height: 15px;
-        width: auto;
-        margin-left: 3px;
-        position: relative;
-        top: -0.5px;
-      }
-
-      .welo-divider-xr92 {
-        color: #999;
-        font-weight: 400;
-        margin: 0 1px;
-      }
-
+      .welo-badge-xr92 strong { font-weight: 700; }
+      .welo-badge-xr92 img { display: inline-block; vertical-align: middle; }
+      .welo-logo-xr92 { height: 17px; width: auto; margin: 0 2px; position: relative; top: -0.5px; }
+      .welo-star-xr92 { height: 15px; width: auto; margin-left: 3px; position: relative; top: -0.5px; }
+      .welo-divider-xr92 { color: #999; font-weight: 400; margin: 0 1px; }
       @media (max-width: 768px) {
-        .welo-badge-xr92 {
-          font-size: 14px;
-          padding: 8px 14px;
-          gap: 4px;
-        }
-        .welo-logo-xr92 {
-          height: 15px;
-        }
-        .welo-star-xr92 {
-          height: 13px;
-        }
+        .welo-badge-xr92 { font-size: 14px; padding: 8px 14px; gap: 4px; }
+        .welo-logo-xr92 { height: 15px; }
+        .welo-star-xr92 { height: 13px; }
       }
-
       @media (max-width: 480px) {
-        .welo-badge-xr92 {
-          font-size: 12.5px;
-          padding: 8px 12px;
-        }
+        .welo-badge-xr92 { font-size: 12.5px; padding: 8px 12px; }
       }
     `;
     document.head.appendChild(style);
