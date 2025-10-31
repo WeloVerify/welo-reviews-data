@@ -3,7 +3,7 @@
     const scriptTag = document.currentScript;
     const companySlug = scriptTag?.getAttribute("data-welo") || "welo";
 
-    /* --- CREA IL CONTAINER DOVE SI TROVA LO SCRIPT --- */
+    /* --- CREA IL CONTAINER DOVE SI TROVA LO SCRIPTTT --- */
     const container = document.createElement("div");
     container.id = "welo-widget-xr92";
 
