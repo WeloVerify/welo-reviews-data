@@ -3,11 +3,20 @@ import fetch from "node-fetch";
 
 const WEBFLOW_TOKEN = process.env.WEBFLOW_TOKEN;
 const COLLECTION_ID = process.env.COLLECTION_ID;
-const URL = `https://api.webflow.com/collections/${COLLECTION_ID}/items?limit=100`;
+const BASE_URL = `https://api.webflow.com/collections/${COLLECTION_ID}/items`;
 
-async function fetchData() {
-  try {
-    const response = await fetch(URL, {
+// Funzione per fetch con paginazione automatica
+async function fetchAllItems() {
+  let allItems = [];
+  let offset = 0;
+  const limit = 100;
+
+  console.log("🔄 Inizio fetch di tutti gli items da Webflow...");
+
+  while (true) {
+    const url = `${BASE_URL}?offset=${offset}&limit=${limit}`;
+
+    const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${WEBFLOW_TOKEN}`,
         "accept-version": "1.0.0",
@@ -17,6 +26,28 @@ async function fetchData() {
     const data = await response.json();
 
     if (!data.items || data.items.length === 0) {
+      break;
+    }
+
+    allItems = [...allItems, ...data.items];
+    offset += limit;
+
+    console.log(`✅ Recuperati ${data.items.length} items (totale: ${allItems.length})`);
+
+    // Se meno di 100 risultati → fine
+    if (data.items.length < limit) break;
+  }
+
+  console.log(`🎉 Totale finale: ${allItems.length} aziende trovate.`);
+  return allItems;
+}
+
+// Funzione principale
+async function main() {
+  try {
+    const items = await fetchAllItems();
+
+    if (items.length === 0) {
       console.log("❌ Nessun elemento trovato nella collection Webflow.");
       return;
     }
@@ -26,10 +57,10 @@ async function fetchData() {
       fs.mkdirSync("./data");
     }
 
-    for (const item of data.items) {
-      const fields = item.fieldData || {}; // <- qui leggiamo i dati corretti
+    for (const item of items) {
+      const fields = item.fieldData || {};
 
-      const companyName = fields["name"] || "unknown";
+      const companyName = fields["name"]?.trim() || "unknown";
       const reviews = Number(fields["numero-review"]) || 0;
       const rating = Number(fields["recensioni-ovreview-numero-4-6-5"]) || 0;
 
@@ -40,17 +71,16 @@ async function fetchData() {
         updated: new Date().toISOString(),
       };
 
-      // Nome file pulito
       const fileName = companyName.toLowerCase().replace(/\s+/g, "-");
-      fs.writeFileSync(`./data/${fileName}.json`, JSON.stringify(output, null, 2));
 
-      console.log(`✅ File aggiornato: data/${fileName}.json`);
+      fs.writeFileSync(`./data/${fileName}.json`, JSON.stringify(output, null, 2));
+      console.log(`💾 File aggiornato: data/${fileName}.json`);
     }
 
-    console.log("🎉 Tutti i file sono stati aggiornati correttamente!");
+    console.log("✅ Tutti i file JSON sono stati creati e aggiornati con successo!");
   } catch (err) {
-    console.error("❌ Errore nel fetch Webflow:", err);
+    console.error("❌ Errore durante il fetch Webflow:", err.message);
   }
 }
 
-fetchData();
+main();
