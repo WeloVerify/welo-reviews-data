@@ -1,48 +1,51 @@
 import fs from "fs";
 import fetch from "node-fetch";
 
-const token = process.env.WEBFLOW_TOKEN;
-const siteId = "672c7e4b5413fe846587b57a";
-const collectionId = "675debb8228efbec9bc62c0d"; // Tutte le recensioni
-
-const url = `https://api.webflow.com/collections/${collectionId}/items`;
+const token = process.env.WEBFLOW_TOKEN; // preso dal secret GitHub
+const collectionId = "674d7153240404723fc12f5a"; // ✅ ID della collection "Welo Pages"
+const url = `https://api.webflow.com/v2/collections/${collectionId}/items`;
 
 async function main() {
-  console.log("🔍 Fetching data from Webflow...");
+  console.log("🔍 Fetching data from Webflow (API v2)...");
 
   const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
-      "accept-version": "1.0.0",
+      "Content-Type": "application/json",
     },
   });
 
+  const text = await response.text();
+  console.log("🧾 Raw Response:", text);
+
   if (!response.ok) {
-    console.error("❌ Error:", response.status, await response.text());
+    console.error(`❌ HTTP Error ${response.status}:`, text);
     process.exit(1);
   }
 
-  const data = await response.json();
-
-  console.log("✅ Response received from Webflow:");
-  console.log(JSON.stringify(data, null, 2)); // Mostra tutto
+  const data = JSON.parse(text);
 
   if (!data.items || data.items.length === 0) {
     console.error("⚠️ Nessun item trovato nella collection");
     process.exit(0);
   }
 
+  // 🧠 Prendiamo il primo item della collezione
   const firstItem = data.items[0];
 
+  // 🔢 Trova i campi giusti del CMS (es. numero_review, rating, ecc.)
   const result = {
     company: firstItem.name || "unknown",
-    reviews: firstItem.reviews || 0,
+    reviews: firstItem["numero-review"] || 0, // usa il campo CMS esatto
     rating: firstItem.rating || 0,
     updated: new Date().toISOString(),
   };
 
+  // 📁 Salva il file JSON dentro /data
   fs.writeFileSync("./data/unknown.json", JSON.stringify(result, null, 2));
-  console.log("💾 File aggiornato con successo!");
+
+  console.log("✅ File aggiornato con successo!");
+  console.log(result);
 }
 
 main();
