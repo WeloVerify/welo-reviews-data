@@ -1,16 +1,13 @@
 name: Update Welo Reviews
 
 on:
-  schedule:
-    - cron: '0 0 * * *' # ogni giorno a mezzanotte UTC
   workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *" # ogni ora (regola come vuoi)
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,21 +15,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
       - name: Install dependencies
-        run: npm install node-fetch@3
+        run: npm ci || npm i
 
       - name: Fetch Webflow CMS data
-        run: node fetch.js
         env:
           WEBFLOW_TOKEN: ${{ secrets.WEBFLOW_TOKEN }}
-          COLLECTION_ID: "674d7153240404723fc12f5a"
+          WEBFLOW_COLLECTION_ID: 674d7153240404723fc12f5a
+          WEBFLOW_ITEM_SLUG: welo
+        run: node fetch.js
 
       - name: Commit and push data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
-          git commit -m "Daily update $(date)" || echo "No changes"
-          git push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Daily update"
+          file_pattern: data/*.json
