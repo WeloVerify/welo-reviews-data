@@ -3,7 +3,7 @@
     const scriptTag = document.currentScript;
     const companySlug = scriptTag?.getAttribute("data-welo") || "welo";
 
-    /* --- CREA IL CONTAINER DOVE SI TROVA LO SCRIPTTT --- */
+    /* --- CREA IL CONTAINER DOVE SI TROVA LO SCRIPT --- */
     const container = document.createElement("div");
     container.id = "welo-widget-xr92";
 
@@ -13,7 +13,7 @@
       document.body.appendChild(container);
     }
 
-    /* --- URL DATI AZIENDA (JSON, NO CACHE AUTOMATICO) --- */
+    /* --- URL DATI AZIENDA (JSON, NO CACHE OGNI VOLTA) --- */
     const dataUrl = `https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data/data/${companySlug}.json`;
 
     /* --- IMMAGINI --- */
@@ -22,7 +22,7 @@
     const starUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/6821f39414601e1d161f5d08_Image%20(1).png";
 
-    /* --- LINK ALLA PAGINA WELOOO --- */
+    /* --- LINK ALLA PAGINA WELO --- */
     const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
 
     /* --- FORMATTAZIONE NUMERI --- */
@@ -36,7 +36,7 @@
       return m.endsWith(".0") ? `${parseInt(m)}M` : `${m}M`;
     }
 
-    /* --- RECUPERA I DATI (NO CACHE OGNI VOLTA) --- */
+    /* --- RECUPERA I DATI (NO CACHE GRAZIE A ?t=timestamp) --- */
     let data;
     try {
       const res = await fetch(`${dataUrl}?t=${Date.now()}`, { cache: "no-store" });
