@@ -13,7 +13,7 @@
     const starUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/6821f39414601e1d161f5d08_Image%20(1).png";
 
-    const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
+    const weloPageUrl = `https://www.welobadge.com/en/welo-page/${companySlug}`;
 
     function formatReviews(num) {
       if (num < 10000) return num.toLocaleString("it-IT");
@@ -36,7 +36,7 @@
     widgetDiv.innerHTML = `
       <a class="welo-badge-xr92" href="${weloPageUrl}" target="_blank" rel="noopener noreferrer">
         <strong>${formattedReviews}</strong>
-        <span>Recensioni verificate da</span>
+        <span>Reviews verified by</span>
         <img src="${logoUrl}" alt="Welo" class="welo-logo-xr92" />
         <strong>Welo</strong>
         <span class="welo-divider-xr92">|</span>
