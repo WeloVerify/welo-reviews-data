@@ -21,32 +21,36 @@ async function fetchData() {
       return;
     }
 
-    // prendiamo il primo item
-    const item = data.items[0];
-    const fields = item.fieldData;
+    // Assicuriamoci che la cartella data esista
+    if (!fs.existsSync("./data")) {
+      fs.mkdirSync("./data");
+    }
 
-    // leggi i campi esatti
-    const companyName = fields["name"] || "unknown";
-    const reviews = parseInt(fields["numero-review"]) || 0;
-    const rating = parseFloat(fields["recensioni-ovreview-numero-4-6-5"]) || 0;
+    for (const item of data.items) {
+      const fields = item.fieldData;
 
-    const output = {
-      company: companyName,
-      reviews: reviews,
-      rating: rating,
-      updated: new Date().toISOString(),
-    };
+      const companyName = fields["name"] || "unknown";
+      const reviews = parseInt(fields["numero-review"]) || 0;
+      const rating = parseFloat(fields["recensioni-ovreview-numero-4-6-5"]) || 0;
 
-    // crea file leggibile per ogni azienda
-    const fileName = `./data/${companyName.toLowerCase()}.json`;
-    fs.writeFileSync(fileName, JSON.stringify(output, null, 2));
-    console.log(`✅ File salvato: ${fileName}`, output);
+      const output = {
+        company: companyName,
+        reviews: reviews,
+        rating: rating,
+        updated: new Date().toISOString(),
+      };
 
+      // Sanitize nome file (tutto minuscolo, no spazi)
+      const fileName = companyName.toLowerCase().replace(/\s+/g, "-");
+
+      fs.writeFileSync(`./data/${fileName}.json`, JSON.stringify(output, null, 2));
+      console.log(`✅ File creato: data/${fileName}.json`);
+    }
+
+    console.log("🎉 Tutti i file sono stati aggiornati con successo!");
   } catch (err) {
     console.error("❌ Errore nel fetch Webflow:", err);
   }
 }
 
 fetchData();
-
-
