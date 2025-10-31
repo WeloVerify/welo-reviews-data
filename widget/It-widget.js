@@ -1,69 +1,51 @@
 (() => {
   document.addEventListener("DOMContentLoaded", async function () {
-    const scriptTag = document.currentScript;
-    const companySlug = scriptTag?.getAttribute("data-welo") || "welo";
+    const widgetDiv = document.querySelector(".welo-widget[data-welo]");
+    if (!widgetDiv) return;
 
-    // --- CREA IL CONTAINER DOVE SI TROVA LO SCRIPTTT ---
-    const container = document.createElement("div");
-    container.id = "welo-widget-xr92";
-    scriptTag.parentNode.insertBefore(container, scriptTag); // 👈 posizione precisa
+    const companySlug = widgetDiv.getAttribute("data-welo") || "welo";
 
-    // --- URL DATI AZIENDA (JSON SU GITHUB) ---
-    const dataUrl = `https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data/data/${companySlug}.json`;
+    /* --- URL JSON (RAW GITHUB, ZERO CACHE) --- */
+    const dataUrl = `https://raw.githubusercontent.com/WeloVerify/welo-reviews-data/main/data/${companySlug}.json?ts=${Date.now()}`;
 
-    // --- IMMAGINI ---
+    /* --- IMMAGINI --- */
     const logoUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png";
     const starUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/6821f39414601e1d161f5d08_Image%20(1).png";
 
-    // --- LINK ALLA PAGINA WELO ---
     const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
 
-    // --- FORMATTAZIONE NUMERI ---
     function formatReviews(num) {
       if (num < 10000) return num.toLocaleString("it-IT");
-      if (num < 1000000) {
-        const k = (num / 1000).toFixed(1);
-        return k.endsWith(".0") ? `${parseInt(k)}K` : `${k}K`;
-      }
-      const m = (num / 1000000).toFixed(1);
-      return m.endsWith(".0") ? `${parseInt(m)}M` : `${m}M`;
+      if (num < 1000000) return `${(num / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+      return `${(num / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
     }
 
-    // --- RECUPERA I DATI ---
     let data;
     try {
       const res = await fetch(dataUrl, { cache: "no-store" });
-      if (!res.ok) throw new Error("Errore caricamento dati");
+      if (!res.ok) throw new Error("Errore caricamento JSON");
       data = await res.json();
     } catch (err) {
-      console.warn("Welo Widget: errore nel caricamento dati. Uso fallback locale.", err);
-      data = { company: "Welo", reviews: 1495, rating: 4.6 };
+      console.warn("Welo Widget: errore caricamento JSON, fallback attivo", err);
+      data = { reviews: 0, rating: 0 };
     }
 
     const formattedReviews = formatReviews(data.reviews || 0);
 
-    // --- CREA IL BADGE ---
-    const badge = document.createElement("a");
-    badge.className = "welo-badge-xr92";
-    badge.href = weloPageUrl;
-    badge.target = "_blank";
-    badge.rel = "noopener noreferrer";
-    badge.innerHTML = `
-      <strong>${formattedReviews}</strong>
-      <span>Recensioni verificate da</span>
-      <img src="${logoUrl}" alt="Welo" class="welo-logo-xr92" />
-      <strong>Welo</strong>
-      <span class="welo-divider-xr92">|</span>
-      <strong>${(data.rating || 0).toFixed(1)}</strong>
-      <img src="${starUrl}" alt="Rating star" class="welo-star-xr92" />
+    widgetDiv.innerHTML = `
+      <a class="welo-badge-xr92" href="${weloPageUrl}" target="_blank" rel="noopener noreferrer">
+        <strong>${formattedReviews}</strong>
+        <span>Recensioni verificate da</span>
+        <img src="${logoUrl}" alt="Welo" class="welo-logo-xr92" />
+        <strong>Welo</strong>
+        <span class="welo-divider-xr92">|</span>
+        <strong>${(data.rating || 0).toFixed(1)}</strong>
+        <img src="${starUrl}" alt="Rating star" class="welo-star-xr92" />
+      </a>
     `;
 
-    container.innerHTML = "";
-    container.appendChild(badge);
-
-    // --- STILI INIETTATI DINAMICAMENTE ---
     const style = document.createElement("style");
     style.textContent = `
       .welo-badge-xr92 {
@@ -105,5 +87,3 @@
     document.head.appendChild(style);
   });
 })();
-
-
