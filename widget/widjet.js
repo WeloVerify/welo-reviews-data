@@ -5,8 +5,8 @@
 
     const companySlug = widgetDiv.getAttribute("data-welo") || "welo";
 
-    /* --- URL DATI JSON (sempre live, no cache) --- */
-    const dataUrl = `https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data/data/${companySlug}.json?t=${Date.now()}`;
+    /* --- URL JSON (RAW GITHUB, ZERO CACHE) --- */
+    const dataUrl = `https://raw.githubusercontent.com/WeloVerify/welo-reviews-data/main/data/${companySlug}.json?ts=${Date.now()}`;
 
     /* --- IMMAGINI --- */
     const logoUrl =
@@ -14,31 +14,26 @@
     const starUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/6821f39414601e1d161f5d08_Image%20(1).png";
 
-    /* --- LINK ALLA PAGINA WELO --- */
     const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
 
-    /* --- FORMATTATORE NUMERI (1.2K, 3.4M ecc.) --- */
-    const formatReviews = (num) =>
-      num < 10000
-        ? num.toLocaleString("it-IT")
-        : num < 1000000
-        ? `${(num / 1000).toFixed(1).replace(/\.0$/, "")}K`
-        : `${(num / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+    function formatReviews(num) {
+      if (num < 10000) return num.toLocaleString("it-IT");
+      if (num < 1000000) return `${(num / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+      return `${(num / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+    }
 
-    /* --- RECUPERA DATI JSON --- */
     let data;
     try {
       const res = await fetch(dataUrl, { cache: "no-store" });
       if (!res.ok) throw new Error("Errore caricamento JSON");
       data = await res.json();
     } catch (err) {
-      console.warn("Welo Widget: errore caricamento dati, fallback attivo", err);
-      data = { reviews: 1495, rating: 4.6 };
+      console.warn("Welo Widget: errore caricamento JSON, fallback attivo", err);
+      data = { reviews: 0, rating: 0 };
     }
 
     const formattedReviews = formatReviews(data.reviews || 0);
 
-    /* --- CREA BADGE HTML --- */
     widgetDiv.innerHTML = `
       <a class="welo-badge-xr92" href="${weloPageUrl}" target="_blank" rel="noopener noreferrer">
         <strong>${formattedReviews}</strong>
@@ -51,7 +46,6 @@
       </a>
     `;
 
-    /* --- STILI --- */
     const style = document.createElement("style");
     style.textContent = `
       .welo-badge-xr92 {
