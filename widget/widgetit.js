@@ -52,7 +52,7 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        background: white;
+        background: white !important;
         border: 1px solid #e6e6e6;
         border-radius: 40px;
         padding: 10px 18px;
