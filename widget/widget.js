@@ -72,7 +72,7 @@
       .welo-badge-xr92 strong { font-weight: 700; }
       .welo-badge-xr92 img { display: inline-block; vertical-align: middle; }
       .welo-logo-xr92 { height: 15px; width: auto; margin: 0 2px; position: relative; top: -0.5px; }
-      .welo-star-xr92 { height: 16px; width: auto; margin-left: 3px; position: relative; top: -0.5px; }
+      .welo-star-xr92 { height: 17px; width: auto; margin-left: 3px; position: relative; top: -0.5px; }
       .welo-divider-xr92 { color: #999; font-weight: 400; margin: 0 1px; }
       @media (max-width: 768px) {
         .welo-badge-xr92 { font-size: 14px; padding: 10px 14px; gap: 4px; }
