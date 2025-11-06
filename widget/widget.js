@@ -15,10 +15,15 @@
 
     const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
 
+    /* ✅ NUOVA FORMATTAZIONE NUMERI */
     function formatReviews(num) {
-      if (num < 10000) return num.toLocaleString("it-IT");
-      if (num < 1000000) return `${(num / 1000).toFixed(1).replace(/\.0$/, "")}K`;
-      return `${(num / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+      if (num < 10000) {
+        return num.toLocaleString("it-IT"); // es: 1.500
+      }
+      if (num < 1000000) {
+        return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1)}K`.replace(".0", "");
+      }
+      return `${(num / 1000000).toFixed(1)}M`.replace(".0", "");
     }
 
     let data;
@@ -72,12 +77,12 @@
       .welo-badge-xr92 strong { font-weight: 700; }
       .welo-badge-xr92 img { display: inline-block; vertical-align: middle; }
       .welo-logo-xr92 { height: 15px; width: auto; margin: 0 2px; position: relative; top: -0.5px; }
-      .welo-star-xr92 { height: 15px; width: auto; margin-left: 2px; position: relative; top: -0.5px; }
+      .welo-star-xr92 { height: 17px; width: auto; margin-left: 3px; position: relative; top: -0.5px; }
       .welo-divider-xr92 { color: #999; font-weight: 400; margin: 0 1px; }
       @media (max-width: 768px) {
-        .welo-badge-xr92 { font-size: 14px; padding: 10px 14px; gap: 4px; }
+        .welo-badge-xr92 { font-size: 14px; padding: 8px 14px; gap: 4px; }
         .welo-logo-xr92 { height: 13px; }
-        .welo-star-xr92 { height: 13px; }
+        .welo-star-xr92 { height: 15px; }
       }
       @media (max-width: 480px) {
         .welo-badge-xr92 { font-size: 12.5px; padding: 10px 12px; }
