@@ -15,10 +15,15 @@
 
     const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
 
+    /* ✅ NUOVA FORMATTAZIONE NUMERI */
     function formatReviews(num) {
-      if (num < 10000) return num.toLocaleString("it-IT");
-      if (num < 1000000) return `${(num / 1000).toFixed(1).replace(/\.0$/, "")}K`;
-      return `${(num / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+      if (num < 10000) {
+        return num.toLocaleString("it-IT"); // es: 1.500
+      }
+      if (num < 1000000) {
+        return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1)}K`.replace(".0", "");
+      }
+      return `${(num / 1000000).toFixed(1)}M`.replace(".0", "");
     }
 
     let data;
