@@ -13,7 +13,7 @@
     const starUrl =
       "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/6821f39414601e1d161f5d08_Image%20(1).png";
 
-    const weloPageUrl = `https://www.welobadge.com/welo-page/${companySlug}`;
+    const weloPageUrl = `https://www.welobadge.com/en/welo-page/${companySlug}`;
 
     /* ✅ FORMATTAZIONE UNIVERSALE (funziona su mobile e desktop) */
     function formatReviews(num) {
