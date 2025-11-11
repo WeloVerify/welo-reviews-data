@@ -4,6 +4,14 @@
 
   const targetURL = thisScript.getAttribute("data-url") || "https://www.welobadge.com";
   const align = (thisScript.getAttribute("data-align") || "center").toLowerCase();
+  const langAttr = (thisScript.getAttribute("data-lang") || "").toUpperCase();
+
+  // ✅ Fallback lingua automatica dal browser
+  const browserLang = navigator.language?.toLowerCase().includes("en") ? "US" : "IT";
+  const lang = langAttr === "US" || langAttr === "IT" ? langAttr : browserLang;
+
+  // ✅ Testo in base alla lingua
+  const textByLang = lang === "US" ? "Results verified by" : "Risultati verificati da";
 
   // ✅ crea container univoco e stabile
   const container = document.createElement("div");
@@ -32,7 +40,7 @@
   widget.className = "tagwelo-widget";
   widget.innerHTML = `
     <div class="tagwelo-dot"></div>
-    <span class="tagwelo-text">Risultati verificati da</span>
+    <span class="tagwelo-text">${textByLang}</span>
     <img 
       src="https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png"
       alt="Welo Badge"
