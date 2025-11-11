@@ -24,15 +24,14 @@
     width: "100%",
     margin: "18px 0",
     position: "relative",
-    overflow: "visible", // 🔥 evita taglio
+    overflow: "visible",
     transform: "translateZ(0)",
-    zIndex: "10" // 🔥 più basso, così non copre navbar o modali
+    zIndex: "10"
   });
 
-  // Inserisci prima dello script per evitare collisioni
   thisScript.parentNode.insertBefore(container, thisScript);
 
-  // ✅ crea il widget
+  // ✅ crea il widget (usa già la lingua corretta)
   const widget = document.createElement("a");
   widget.href = targetURL;
   widget.target = "_blank";
