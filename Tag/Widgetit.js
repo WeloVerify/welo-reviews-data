@@ -5,35 +5,44 @@
   const targetURL = thisScript.getAttribute("data-url") || "https://www.welobadge.com";
   const align = (thisScript.getAttribute("data-align") || "center").toLowerCase();
 
-  // ✅ crea container univoco (prima dello script per evitare conflitti)
+  // ✅ crea container univoco e stabile
   const container = document.createElement("div");
   container.className = "tagwelo-container";
-  container.style.display = "flex";
-  container.style.justifyContent =
-    align === "left" ? "flex-start" :
-    align === "right" ? "flex-end" : "center";
-  container.style.width = "100%";
-  container.style.margin = "20px 0";
-  container.style.position = "relative";
-  container.style.zIndex = "99999";
+  Object.assign(container.style, {
+    display: "flex",
+    justifyContent:
+      align === "left" ? "flex-start" :
+      align === "right" ? "flex-end" : "center",
+    width: "100%",
+    margin: "18px 0",
+    position: "relative",
+    overflow: "visible", // 🔥 evita taglio
+    transform: "translateZ(0)",
+    zIndex: "10" // 🔥 più basso, così non copre navbar o modali
+  });
 
+  // Inserisci prima dello script per evitare collisioni
   thisScript.parentNode.insertBefore(container, thisScript);
 
-  // ✅ crea contenuto widget
-  container.innerHTML = `
-    <a href="${targetURL}" target="_blank" rel="noopener" class="tagwelo-widget">
-      <div class="tagwelo-dot"></div>
-      <span class="tagwelo-text">Risultati verificati da</span>
-      <img 
-        src="https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png"
-        alt="Welo Badge"
-        class="tagwelo-logo"
-      />
-      <span class="tagwelo-badge">Welo</span>
-    </a>
+  // ✅ crea il widget
+  const widget = document.createElement("a");
+  widget.href = targetURL;
+  widget.target = "_blank";
+  widget.rel = "noopener";
+  widget.className = "tagwelo-widget";
+  widget.innerHTML = `
+    <div class="tagwelo-dot"></div>
+    <span class="tagwelo-text">Risultati verificati da</span>
+    <img 
+      src="https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png"
+      alt="Welo Badge"
+      class="tagwelo-logo"
+    />
+    <span class="tagwelo-badge">Welo</span>
   `;
+  container.appendChild(widget);
 
-  // ✅ stili isolati con prefisso (no conflitti)
+  // ✅ stili isolati e puliti
   const style = document.createElement("style");
   style.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
@@ -41,6 +50,7 @@
     .tagwelo-widget {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       background: #fff;
       border: 1px solid #DBDBDB;
       border-radius: 99px;
@@ -53,6 +63,10 @@
       letter-spacing: -0.01em;
       text-decoration: none;
       transition: all 0.25s ease;
+      line-height: 1;
+      position: relative;
+      overflow: visible;
+      white-space: nowrap;
     }
 
     .tagwelo-widget:hover {
@@ -67,14 +81,15 @@
       border-radius: 50%;
       margin-right: 8px;
       position: relative;
-      box-shadow: 0 0 0 rgba(165,185,0, 0.4);
+      box-shadow: 0 0 0 rgba(165,185,0,0.4);
       animation: tagwelo-pulse 1.6s infinite ease-out;
+      flex-shrink: 0;
     }
 
     @keyframes tagwelo-pulse {
-      0% { box-shadow: 0 0 0 0 rgba(165,185,0, 0.4); }
-      70% { box-shadow: 0 0 0 8px rgba(165,185,0, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(165,185,0, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(165,185,0,0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(165,185,0,0); }
+      100% { box-shadow: 0 0 0 0 rgba(165,185,0,0); }
     }
 
     .tagwelo-logo {
@@ -104,7 +119,7 @@
   `;
   document.head.appendChild(style);
 
-  // ✅ rileva tema scuro
+  // ✅ tema automatico
   const getLuminance = (rgb) => {
     const [r, g, b] = rgb.match(/\d+/g).map(Number);
     const [R, G, B] = [r, g, b].map(v => {
@@ -116,7 +131,5 @@
 
   const bg = window.getComputedStyle(document.body).backgroundColor;
   const luminance = getLuminance(bg);
-  if (luminance < 0.5) {
-    container.querySelector('.tagwelo-widget').classList.add('tagwelo-dark');
-  }
+  if (luminance < 0.5) widget.classList.add("tagwelo-dark");
 })();
