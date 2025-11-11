@@ -11,7 +11,7 @@
   const lang = langAttr === "US" || langAttr === "IT" ? langAttr : browserLang;
 
   // ✅ Testo in base alla lingua
-  const textByLang = lang === "US" ? "Results verified by" : "Risultati verificati da";
+  const textByLang = lang === "US" ? "Partners verified by" : "Partner verificati da";
 
   // ✅ crea container univoco e stabile
   const container = document.createElement("div");
