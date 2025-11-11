@@ -105,14 +105,15 @@
     </style>
   `;
 
+  // 🧩 Append corretti
   wrapper.appendChild(shadowHost);
   thisScript.parentNode.insertBefore(wrapper, thisScript);
 
-  // 🎨 Rileva il colore di sfondo del body e adatta il tema
+  // 🎨 Rileva colore sfondo e applica tema
   const bg = window.getComputedStyle(document.body).backgroundColor;
-  const getLuminance = rgb => {
+  const getLuminance = (rgb) => {
     const [r, g, b] = rgb.match(/\d+/g).map(Number);
-    const [R, G, B] = [r, g, b].map(v => {
+    const [R, G, B] = [r, g, b].map((v) => {
       v /= 255;
       return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
