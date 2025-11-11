@@ -1,43 +1,54 @@
 (() => {
-  document.addEventListener("DOMContentLoaded", () => {
-    // ✅ Identifica solo questo script specifico
-    const thisScript = document.currentScript;
+  const thisScript = document.currentScript;
+  if (!thisScript) return;
 
-    const targetURL = thisScript?.getAttribute("data-url") || "https://www.welobadge.com";
-    const align = (thisScript?.getAttribute("data-align") || "center").toLowerCase();
+  const targetURL = thisScript.getAttribute("data-url") || "https://www.welobadge.com";
+  const align = (thisScript.getAttribute("data-align") || "center").toLowerCase();
 
-    // ✅ Crea il wrapper
-    const wrapper = document.createElement("div");
-    Object.assign(wrapper.style, {
-      display: "flex",
-      justifyContent:
-        align === "left" ? "flex-start" :
-        align === "right" ? "flex-end" : "center",
-      width: "100%",
-      position: "relative",
-      zIndex: "99999",
-      margin: "20px 0"
-    });
+  // ✅ crea un container separato (id univoco)
+  const container = document.createElement("div");
+  const uniqueId = "tagwelo-" + Math.random().toString(36).substring(2, 9);
+  container.id = uniqueId;
+  container.style.display = "flex";
+  container.style.justifyContent =
+    align === "left" ? "flex-start" :
+    align === "right" ? "flex-end" : "center";
+  container.style.width = "100%";
+  container.style.margin = "20px 0";
+  container.style.position = "relative";
+  container.style.zIndex = "99999";
 
-    // ✅ Crea lo Shadow DOM
-    const shadowHost = document.createElement("div");
-    const shadowRoot = shadowHost.attachShadow({ mode: "open" });
+  // ✅ inserisci subito nel DOM (prima che l’altro widget intervenga)
+  thisScript.insertAdjacentElement("afterend", container);
 
-    shadowRoot.innerHTML = `
-      <a href="${targetURL}" target="_blank" rel="noopener" class="tagwelo-widget">
-        <div class="tagwelo-dot"></div>
-        <span class="tagwelo-text">Risultati verificati da</span>
-        <img 
-          src="https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png" 
-          alt="Welo Badge" 
-          class="tagwelo-logo"
-        />
-        <span class="tagwelo-badge">Welo</span>
-      </a>
+  // ✅ crea un iframe sandboxato — isolamento totale
+  const iframe = document.createElement("iframe");
+  Object.assign(iframe.style, {
+    all: "unset",
+    width: "200px",
+    height: "40px",
+    border: "none",
+    overflow: "hidden"
+  });
+  iframe.setAttribute("scrolling", "no");
+  iframe.setAttribute("title", "Welo Tag");
+  container.appendChild(iframe);
 
+  // ✅ contenuto HTML interno dell’iframe
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html lang="it">
+    <head>
+      <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
-
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: transparent;
+        }
         .tagwelo-widget {
           display: inline-flex;
           align-items: center;
@@ -54,12 +65,10 @@
           text-decoration: none;
           transition: all 0.25s ease;
         }
-
         .tagwelo-widget:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 14px rgba(0,0,0,0.12);
         }
-
         .tagwelo-dot {
           width: 9px;
           height: 9px;
@@ -67,63 +76,37 @@
           border-radius: 50%;
           margin-right: 8px;
           position: relative;
-          box-shadow: 0 0 0 rgba(165,185,0, 0.4);
+          box-shadow: 0 0 0 rgba(165,185,0,0.4);
           animation: tagwelo-pulse 1.6s infinite ease-out;
         }
-
         @keyframes tagwelo-pulse {
-          0% { box-shadow: 0 0 0 0 rgba(165,185,0, 0.4); }
-          70% { box-shadow: 0 0 0 8px rgba(165,185,0, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(165,185,0, 0); }
+          0% { box-shadow: 0 0 0 0 rgba(165,185,0,.4); }
+          70% { box-shadow: 0 0 0 8px rgba(165,185,0,0); }
+          100% { box-shadow: 0 0 0 0 rgba(165,185,0,0); }
         }
-
         .tagwelo-logo {
           height: 14px;
           margin: 0 6px 0 5px;
           transition: transform 0.25s ease, filter 0.3s ease;
         }
-
         .tagwelo-widget:hover .tagwelo-logo {
           transform: scale(1.08);
         }
-
-        .tagwelo-dark {
-          background: #151515 !important;
-          border: 1px solid #2A2A2A !important;
-          color: #fff !important;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
-        }
-
-        .tagwelo-dark .tagwelo-logo {
-          filter: invert(1) brightness(1.3);
-        }
-
-        .tagwelo-dark:hover {
-          box-shadow: 0 4px 14px rgba(255,255,255,0.1) !important;
-        }
       </style>
-    `;
-
-    wrapper.appendChild(shadowHost);
-
-    // ✅ Inserisce dopo lo script stesso (non lo confonde con altri)
-    thisScript.insertAdjacentElement("afterend", wrapper);
-
-    // 🎨 Tema automatico
-    const bg = window.getComputedStyle(document.body).backgroundColor;
-    const getLuminance = (rgb) => {
-      const [r, g, b] = rgb.match(/\d+/g).map(Number);
-      const [R, G, B] = [r, g, b].map((v) => {
-        v /= 255;
-        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-      });
-      return 0.2126 * R + 0.7152 * G + 0.0722 * B;
-    };
-
-    const luminance = getLuminance(bg);
-    const isDark = luminance < 0.5;
-    const widget = shadowRoot.querySelector(".tagwelo-widget");
-
-    if (isDark) widget.classList.add("tagwelo-dark");
-  });
+    </head>
+    <body>
+      <a href="${targetURL}" target="_blank" rel="noopener" class="tagwelo-widget">
+        <div class="tagwelo-dot"></div>
+        <span>Risultati verificati da</span>
+        <img 
+          src="https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png" 
+          alt="Welo Badge"
+          class="tagwelo-logo"
+        />
+        <span>Welo</span>
+      </a>
+    </body>
+    </html>
+  `);
+  doc.close();
 })();
