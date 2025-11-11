@@ -1,27 +1,28 @@
 (() => {
   document.addEventListener("DOMContentLoaded", () => {
-    const scripts = document.querySelectorAll("script[data-url]");
-    const thisScript = scripts[scripts.length - 1];
+    // ✅ Identifica solo questo script specifico
+    const thisScript = document.currentScript;
 
     const targetURL = thisScript?.getAttribute("data-url") || "https://www.welobadge.com";
     const align = (thisScript?.getAttribute("data-align") || "center").toLowerCase();
 
-    // ✅ Crea il wrapper visibile
+    // ✅ Crea il wrapper
     const wrapper = document.createElement("div");
-    wrapper.style.display = "flex";
-    wrapper.style.justifyContent =
-      align === "left" ? "flex-start" :
-      align === "right" ? "flex-end" : "center";
-    wrapper.style.width = "100%";
-    wrapper.style.position = "relative";
-    wrapper.style.zIndex = "99999";
-    wrapper.style.margin = "20px 0"; // margine visivo
+    Object.assign(wrapper.style, {
+      display: "flex",
+      justifyContent:
+        align === "left" ? "flex-start" :
+        align === "right" ? "flex-end" : "center",
+      width: "100%",
+      position: "relative",
+      zIndex: "99999",
+      margin: "20px 0"
+    });
 
-    // ✅ Crea il contenitore Shadow DOM
+    // ✅ Crea lo Shadow DOM
     const shadowHost = document.createElement("div");
     const shadowRoot = shadowHost.attachShadow({ mode: "open" });
 
-    // ✅ Inserisci HTML del widget
     shadowRoot.innerHTML = `
       <a href="${targetURL}" target="_blank" rel="noopener" class="tagwelo-widget">
         <div class="tagwelo-dot"></div>
@@ -36,10 +37,6 @@
 
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
-
-        :host {
-          all: initial;
-        }
 
         .tagwelo-widget {
           display: inline-flex;
@@ -56,7 +53,6 @@
           letter-spacing: -0.01em;
           text-decoration: none;
           transition: all 0.25s ease;
-          line-height: 1;
         }
 
         .tagwelo-widget:hover {
@@ -108,11 +104,12 @@
       </style>
     `;
 
-    // ✅ Append al DOM
     wrapper.appendChild(shadowHost);
-    document.body.appendChild(wrapper);
 
-    // 🎨 Rileva colore sfondo e applica tema
+    // ✅ Inserisce dopo lo script stesso (non lo confonde con altri)
+    thisScript.insertAdjacentElement("afterend", wrapper);
+
+    // 🎨 Tema automatico
     const bg = window.getComputedStyle(document.body).backgroundColor;
     const getLuminance = (rgb) => {
       const [r, g, b] = rgb.match(/\d+/g).map(Number);
