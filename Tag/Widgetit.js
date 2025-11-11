@@ -1,25 +1,28 @@
-(function() {
-  const scripts = document.querySelectorAll('script[data-url]');
+(function () {
+  const scripts = document.querySelectorAll("script[data-url]");
   const thisScript = scripts[scripts.length - 1];
 
   const targetURL = thisScript?.getAttribute("data-url") || "https://www.welobadge.com";
   const align = (thisScript?.getAttribute("data-align") || "center").toLowerCase();
 
-  // Crea il container principale
+  // 🔒 Container principale completamente isolato
   const wrapper = document.createElement("div");
-  wrapper.style.display = "flex";
-  wrapper.style.justifyContent =
-    align === "left" ? "flex-start" :
-    align === "right" ? "flex-end" : "center";
-  wrapper.style.width = "100%";
-  wrapper.style.position = "relative";
-  wrapper.style.zIndex = "99999";
+  Object.assign(wrapper.style, {
+    all: "unset",
+    display: "flex",
+    justifyContent:
+      align === "left" ? "flex-start" :
+      align === "right" ? "flex-end" : "center",
+    width: "100%",
+    position: "relative",
+    zIndex: "99999"
+  });
 
-  // Crea lo Shadow DOM (isolamento completo)
+  // ✅ Shadow DOM per isolamento completo
   const shadowHost = document.createElement("div");
   const shadowRoot = shadowHost.attachShadow({ mode: "open" });
 
-  // HTML interno
+  // 🔹 HTML interno del widget
   shadowRoot.innerHTML = `
     <a href="${targetURL}" target="_blank" rel="noopener" class="tagwelo-widget">
       <div class="tagwelo-dot"></div>
@@ -50,6 +53,7 @@
         letter-spacing: -0.01em;
         text-decoration: none;
         transition: all 0.25s ease;
+        line-height: 1;
       }
 
       .tagwelo-widget:hover {
@@ -104,7 +108,7 @@
   wrapper.appendChild(shadowHost);
   thisScript.parentNode.insertBefore(wrapper, thisScript);
 
-  // Rileva colore sfondo e cambia tema (dentro lo shadow)
+  // 🎨 Rileva il colore di sfondo del body e adatta il tema
   const bg = window.getComputedStyle(document.body).backgroundColor;
   const getLuminance = rgb => {
     const [r, g, b] = rgb.match(/\d+/g).map(Number);
@@ -114,11 +118,10 @@
     });
     return 0.2126 * R + 0.7152 * G + 0.0722 * B;
   };
+
   const luminance = getLuminance(bg);
   const isDark = luminance < 0.5;
+  const widget = shadowRoot.querySelector(".tagwelo-widget");
 
-  if (isDark) {
-    const link = shadowRoot.querySelector(".tagwelo-widget");
-    link.classList.add("tagwelo-dark");
-  }
+  if (isDark) widget.classList.add("tagwelo-dark");
 })();
