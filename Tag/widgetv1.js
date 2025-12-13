@@ -8,12 +8,12 @@
 
   // ✅ Fallback lingua automatica dal browser
   const browserLang = navigator.language?.toLowerCase().includes("en") ? "US" : "IT";
-  const lang = langAttr === "US" || langAttr === "IT" ? langAttr : browserLang;
+  const lang = (langAttr === "US" || langAttr === "IT") ? langAttr : browserLang;
 
   // ✅ Testo in base alla lingua
   const textByLang = lang === "US" ? "Results verified by" : "Risultati verificati da";
 
-  // ✅ crea container univoco e stabile
+  // ✅ container
   const container = document.createElement("div");
   container.className = "tagwelo-container";
   Object.assign(container.style, {
@@ -31,7 +31,7 @@
 
   thisScript.parentNode.insertBefore(container, thisScript);
 
-  // ✅ crea il widget (usa già la lingua corretta)
+  // ✅ widget
   const widget = document.createElement("a");
   widget.href = targetURL;
   widget.target = "_blank";
@@ -40,7 +40,7 @@
   widget.innerHTML = `
     <div class="tagwelo-dot"></div>
     <span class="tagwelo-text">${textByLang}</span>
-    <img 
+    <img
       src="https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png"
       alt="Welo Badge"
       class="tagwelo-logo"
@@ -49,116 +49,165 @@
   `;
   container.appendChild(widget);
 
-  // ✅ stili isolati e puliti
-  const style = document.createElement("style");
-  style.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
+  // ✅ stili (con guard per non duplicare)
+  if (!document.getElementById("tagwelo-style")) {
+    const style = document.createElement("style");
+    style.id = "tagwelo-style";
+    style.textContent = `
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
 
-    .tagwelo-widget {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-      border: 1px solid #DBDBDB;
-      border-radius: 99px;
-      padding: 10px 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 14px;
-      color: #000;
-      letter-spacing: -0.01em;
-      text-decoration: none;
-      transition: all 0.25s ease;
-      line-height: 1;
-      position: relative;
-      overflow: visible;
-      white-space: nowrap;
-    }
+      .tagwelo-widget {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: 1px solid #DBDBDB;
+        border-radius: 99px;
+        padding: 10px 14px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        color: #000;
+        letter-spacing: -0.01em;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        line-height: 1;
+        position: relative;
+        overflow: visible;
+        white-space: nowrap;
+      }
 
-    .tagwelo-widget:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-    }
+      .tagwelo-widget:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      }
 
-    .tagwelo-dot {
-      width: 9px;
-      height: 9px;
-      background: #A5B900;
-      border-radius: 50%;
-      margin-right: 8px;
-      position: relative;
-      box-shadow: 0 0 0 rgba(165,185,0,0.4);
-      animation: tagwelo-pulse 1.6s infinite ease-out;
-      flex-shrink: 0;
-    }
+      .tagwelo-dot {
+        width: 9px;
+        height: 9px;
+        background: #A5B900;
+        border-radius: 50%;
+        margin-right: 8px;
+        position: relative;
+        box-shadow: 0 0 0 rgba(165,185,0,0.4);
+        animation: tagwelo-pulse 1.6s infinite ease-out;
+        flex-shrink: 0;
+      }
 
-    @keyframes tagwelo-pulse {
-      0% { box-shadow: 0 0 0 0 rgba(165,185,0,0.4); }
-      70% { box-shadow: 0 0 0 8px rgba(165,185,0,0); }
-      100% { box-shadow: 0 0 0 0 rgba(165,185,0,0); }
-    }
+      @keyframes tagwelo-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(165,185,0,0.4); }
+        70% { box-shadow: 0 0 0 8px rgba(165,185,0,0); }
+        100% { box-shadow: 0 0 0 0 rgba(165,185,0,0); }
+      }
 
-    .tagwelo-logo {
-      height: 14px;
-      margin: 0 6px 0 5px;
-      transition: transform 0.25s ease, filter 0.3s ease;
-    }
+      .tagwelo-logo {
+        height: 14px;
+        margin: 0 6px 0 5px;
+        transition: transform 0.25s ease, filter 0.3s ease;
+      }
 
-    .tagwelo-widget:hover .tagwelo-logo {
-      transform: scale(1.08);
-    }
+      .tagwelo-widget:hover .tagwelo-logo {
+        transform: scale(1.08);
+      }
 
-    .tagwelo-dark {
-      background: #151515 !important;
-      border: 1px solid #2A2A2A !important;
-      color: #fff !important;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
-    }
+      .tagwelo-dark {
+        background: #151515 !important;
+        border: 1px solid #2A2A2A !important;
+        color: #fff !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
+      }
 
-    .tagwelo-dark .tagwelo-logo {
-      filter: invert(1) brightness(1.3);
-    }
+      .tagwelo-dark .tagwelo-logo {
+        filter: invert(1) brightness(1.3);
+      }
 
-    .tagwelo-dark:hover {
-      box-shadow: 0 4px 14px rgba(255,255,255,0.1) !important;
-    }
-  `;
-  document.head.appendChild(style);
-
-// ✅ rileva colore reale dello sfondo (non solo body)
-const getEffectiveBackground = (el) => {
-  while (el && el !== document.documentElement) {
-    const bg = window.getComputedStyle(el).backgroundColor;
-    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
-      return bg;
-    }
-    el = el.parentElement;
+      .tagwelo-dark:hover {
+        box-shadow: 0 4px 14px rgba(255,255,255,0.1) !important;
+      }
+    `;
+    document.head.appendChild(style);
   }
-  return window.getComputedStyle(document.body).backgroundColor;
-};
 
-const getLuminance = (rgb) => {
-  const match = rgb.match(/\d+/g);
-  if (!match) return 1; // fallback chiaro
+  // ✅ utils
+  const getEffectiveBackground = (el) => {
+    while (el && el !== document.documentElement) {
+      const cs = window.getComputedStyle(el);
+      const bg = cs.backgroundColor;
+      const bgImg = cs.backgroundImage;
 
-  const [r, g, b] = match.map(Number).map(v => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
+      // se c'è un'immagine/gradiente, consideriamo "non trasparente"
+      if (bgImg && bgImg !== "none") return bg && bg !== "rgba(0, 0, 0, 0)" ? bg : "rgb(0,0,0)";
 
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-};
+      if (bg && bg !== "transparent" && bg !== "rgba(0, 0, 0, 0)") return bg;
+      el = el.parentElement;
+    }
+    return window.getComputedStyle(document.body).backgroundColor || "rgb(255,255,255)";
+  };
 
-// 🔍 usa il container reale del widget
-const bgColor = getEffectiveBackground(container);
-const luminance = getLuminance(bgColor);
+  const getLuminance = (rgb) => {
+    const m = (rgb || "").match(/[\d.]+/g);
+    if (!m || m.length < 3) return 1;
 
-// ⚖️ soglia ottimizzata
-if (luminance < 0.55) {
-  widget.classList.add("tagwelo-dark");
-} else {
-  widget.classList.remove("tagwelo-dark");
-}
+    const r8 = Math.max(0, Math.min(255, Number(m[0])));
+    const g8 = Math.max(0, Math.min(255, Number(m[1])));
+    const b8 = Math.max(0, Math.min(255, Number(m[2])));
+
+    const toLin = (v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+
+    const R = toLin(r8), G = toLin(g8), B = toLin(b8);
+    return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+  };
+
+  const applyTheme = () => {
+    // reset
+    widget.classList.remove("tagwelo-dark");
+
+    // aspetta paint/layout
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const rect = widget.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+
+        const x = Math.min(window.innerWidth - 1, Math.max(0, rect.left + rect.width / 2));
+        const y = Math.min(window.innerHeight - 1, Math.max(0, rect.top + rect.height / 2));
+
+        // rendi "trasparente" il widget per campionare sotto
+        const prevVis = widget.style.visibility;
+        const prevPE = container.style.pointerEvents;
+
+        container.style.pointerEvents = "none";
+        widget.style.visibility = "hidden";
+
+        const underEl = document.elementFromPoint(x, y);
+
+        widget.style.visibility = prevVis;
+        container.style.pointerEvents = prevPE;
+
+        const bg = getEffectiveBackground(underEl || container.parentElement || document.body);
+        const lum = getLuminance(bg);
+
+        // soglia: sotto = scuro → widget nero
+        if (lum < 0.55) widget.classList.add("tagwelo-dark");
+        else widget.classList.remove("tagwelo-dark");
+      }, 30);
+    });
+  };
+
+  // ✅ applica subito + dopo load (CSS/font)
+  applyTheme();
+  window.addEventListener("load", applyTheme, { once: true });
+
+  // ✅ se cambia layout/tema
+  window.addEventListener("resize", applyTheme);
+  window.addEventListener("scroll", applyTheme, { passive: true });
+
+  // ✅ se Webflow / theme toggle cambia classi/stili
+  const mo = new MutationObserver(() => applyTheme());
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style"] });
+})();
 
 
