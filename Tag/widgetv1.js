@@ -126,53 +126,39 @@
   `;
   document.head.appendChild(style);
 
-  // 🔄 reset iniziale (fondamentale)
-widget.classList.remove("tagwelo-dark");
-
-// ⏳ aspetta che il layout sia realmente pronto
-requestAnimationFrame(() => {
-  setTimeout(() => {
-
-    const getEffectiveBackground = (el) => {
-      while (el && el !== document.documentElement) {
-        const bg = window.getComputedStyle(el).backgroundColor;
-
-        if (
-          bg &&
-          bg !== "transparent" &&
-          bg !== "rgba(0, 0, 0, 0)"
-        ) {
-          return bg;
-        }
-        el = el.parentElement;
-      }
-      return window.getComputedStyle(document.body).backgroundColor;
-    };
-
-    const getLuminance = (rgb) => {
-      const match = rgb.match(/\d+/g);
-      if (!match) return 1;
-
-      const [r, g, b] = match.map(Number).map(v => {
-        v /= 255;
-        return v <= 0.03928
-          ? v / 12.92
-          : Math.pow((v + 0.055) / 1.055, 2.4);
-      });
-
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
-
-    const bgColor = getEffectiveBackground(widget.parentElement);
-    const luminance = getLuminance(bgColor);
-
-    // ⚖️ soglia
-    if (luminance < 0.55) {
-      widget.classList.add("tagwelo-dark");
-    } else {
-      widget.classList.remove("tagwelo-dark");
+// ✅ rileva colore reale dello sfondo (non solo body)
+const getEffectiveBackground = (el) => {
+  while (el && el !== document.documentElement) {
+    const bg = window.getComputedStyle(el).backgroundColor;
+    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
+      return bg;
     }
+    el = el.parentElement;
+  }
+  return window.getComputedStyle(document.body).backgroundColor;
+};
 
-  }, 30); // micro delay stabile
-});
+const getLuminance = (rgb) => {
+  const match = rgb.match(/\d+/g);
+  if (!match) return 1; // fallback chiaro
+
+  const [r, g, b] = match.map(Number).map(v => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+// 🔍 usa il container reale del widget
+const bgColor = getEffectiveBackground(container);
+const luminance = getLuminance(bgColor);
+
+// ⚖️ soglia ottimizzata
+if (luminance < 0.55) {
+  widget.classList.add("tagwelo-dark");
+} else {
+  widget.classList.remove("tagwelo-dark");
+}
+
 
