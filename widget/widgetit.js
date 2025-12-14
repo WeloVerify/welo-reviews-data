@@ -1,9 +1,24 @@
 (() => {
+  const thisScript = document.currentScript;
+
   document.addEventListener("DOMContentLoaded", async function () {
     const widgetDiv = document.querySelector(".welo-widget[data-welo]");
     if (!widgetDiv) return;
 
     const companySlug = widgetDiv.getAttribute("data-welo") || "welo";
+
+    /* ✅ data-align (div -> script) */
+    const align = String(
+      widgetDiv.getAttribute("data-align") ||
+        thisScript?.getAttribute("data-align") ||
+        ""
+    )
+      .toLowerCase()
+      .trim();
+
+    if (align === "left" || align === "start") widgetDiv.style.textAlign = "left";
+    if (align === "center" || align === "middle") widgetDiv.style.textAlign = "center";
+    if (align === "right" || align === "end") widgetDiv.style.textAlign = "right";
 
     /* --- URL JSON (RAW GITHUB, ZERO CACHE) --- */
     const dataUrl = `https://raw.githubusercontent.com/WeloVerify/welo-reviews-data/main/data/${companySlug}.json?ts=${Date.now()}`;
