@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v1.3.1
+ * Welo Reviews Widget — v1.3.2
  * Embed:
  *  <div
  *    data-welo-reviews
@@ -114,7 +114,7 @@
     document.head.appendChild(link);
   }
 
-  // IMPORTANT: overwrite existing styles if already present (avoid “old css stuck”)
+  // overwrite existing styles (avoid old css stuck)
   function injectStyles() {
     const existing = document.getElementById("welo-reviews-widget-styles");
     const style = existing || document.createElement("style");
@@ -133,10 +133,7 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* EXTRA HARD RESET to avoid host page alignment issues */
-.welo-reviews-widget { 
-  text-align: left !important;
-}
+.welo-reviews-widget { text-align: left !important; }
 
 /* HEADER */
 .welo-reviews-widget .welo-header {
@@ -144,7 +141,7 @@
   flex-direction: column;
   gap: 12px;
   margin-bottom: 22px;
-  padding-bottom: 15px; /* as you had */
+  padding-bottom: 15px;
 }
 .welo-reviews-widget .welo-header-title {
   font-size: 35px;
@@ -181,7 +178,7 @@
 /* CONTROLS (FORCE LEFT) */
 .welo-reviews-widget .reviews-controls {
   display: flex;
-  justify-content: flex-start !important; /* FORCE */
+  justify-content: flex-start !important;
   align-items: flex-start;
   width: 100%;
   flex-wrap: wrap;
@@ -190,12 +187,12 @@
 }
 .welo-reviews-widget .sort-pill-group {
   display: flex;
-  justify-content: flex-start !important; /* FORCE */
+  justify-content: flex-start !important;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin-left: 0 !important;  /* FORCE */
-  margin-right: auto !important; /* FORCE */
+  margin-left: 0 !important;
+  margin-right: auto !important;
 }
 .welo-reviews-widget .sort-pill {
   padding: 6px 14px;
@@ -324,6 +321,7 @@
   border-radius: 200px;
   text-decoration: none;
   transition: background-color 0.25s ease;
+  cursor: pointer;
 }
 .welo-reviews-widget .review-button:hover { background-color: #efefef; }
 .welo-reviews-widget .review-button img { width: 18px; height: 18px; }
@@ -541,7 +539,6 @@
       .replaceAll("'", "&#039;");
   }
 
-  // Browser language -> it/en (override with data-locale if you want)
   function detectLocaleFromElement(el) {
     const forced = (el.getAttribute("data-locale") || "auto").toLowerCase();
     if (forced === "it" || forced === "en") return forced;
@@ -626,7 +623,6 @@
     return country;
   }
 
-  // data-language="US" | "IT" -> preferred country name in Supabase
   function preferredCountriesFromElement(el, locale) {
     const raw =
       (el.getAttribute("data-language") || el.getAttribute("data-lenguage") || "")
@@ -1062,13 +1058,27 @@
       if (!data.length) {
         const emptyText = attachmentsOnly ? T.noMediaMatch : T.noReviews;
 
-        listEl.innerHTML = `
-          <div class="no-reviews-box">
-            <div class="no-reviews-text">${escapeHtml(emptyText)}</div>
+        // IMPORTANT CHANGE:
+        // When empty-state appears, the button must go to the Welo Page (data-welo-page).
+        // If missing, fallback to old behavior.
+        const buttonHtml = weloPageUrl
+          ? `
+            <a class="review-button" href="${escapeHtml(weloPageUrl)}" target="_blank" rel="noopener noreferrer">
+              <img src="${BUTTON_ICON}" alt="" />
+              ${escapeHtml(T.writeReview)}
+            </a>
+          `
+          : `
             <button class="review-button" type="button" data-action="write-review">
               <img src="${BUTTON_ICON}" alt="" />
               ${escapeHtml(T.writeReview)}
             </button>
+          `;
+
+        listEl.innerHTML = `
+          <div class="no-reviews-box">
+            <div class="no-reviews-text">${escapeHtml(emptyText)}</div>
+            ${buttonHtml}
           </div>
         `;
         return;
@@ -1235,6 +1245,7 @@
         return;
       }
 
+      // fallback only if we don't have a weloPageUrl (because now empty-state uses link)
       if (action === "write-review") {
         if (typeof window.openWeloReviewPopup === "function") {
           window.openWeloReviewPopup();
@@ -1273,7 +1284,7 @@
   /* ================= BOOT ================= */
   function boot() {
     injectInterFontOnce();
-    injectStyles(); // <-- overwrite old styles if present
+    injectStyles();
 
     const nodes = document.querySelectorAll("[data-welo-reviews]");
     nodes.forEach(mountWidget);
