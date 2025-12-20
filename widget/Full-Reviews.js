@@ -49,7 +49,7 @@
 
       newest: "Più recenti",
       oldest: "Più vecchie",
-      withMedia: "Solo recensioni con allegati",
+      withMedia: "Con allegati",
 
       noReviews: "Ancora nessuna recensione, scrivi tu la prima.",
       writeReview: "Scrivi una recensione",
@@ -78,7 +78,7 @@
 
       newest: "Newest",
       oldest: "Oldest",
-      withMedia: "Only reviews with attachments",
+      withMedia: "Only with media",
 
       noReviews: "No reviews yet, be the first to write one.",
       writeReview: "Write a review",
@@ -310,7 +310,7 @@
   max-width: 220px;
   width: 100%;
   margin: 0 auto;
-  min-height: 44px;
+  min-height: 20px;
   padding: 10px 20px;
   gap: 8px;
   font-size: 14px;
