@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v1.3
+ * Welo Reviews Widget — v1.3.1
  * Embed:
  *  <div
  *    data-welo-reviews
@@ -114,11 +114,12 @@
     document.head.appendChild(link);
   }
 
-  function injectStylesOnce() {
-    if (document.getElementById("welo-reviews-widget-styles")) return;
-
-    const style = document.createElement("style");
+  // IMPORTANT: overwrite existing styles if already present (avoid “old css stuck”)
+  function injectStyles() {
+    const existing = document.getElementById("welo-reviews-widget-styles");
+    const style = existing || document.createElement("style");
     style.id = "welo-reviews-widget-styles";
+
     style.textContent = `
 /* ===================== */
 /* WELO REVIEWS WIDGET */
@@ -132,13 +133,18 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* EXTRA HARD RESET to avoid host page alignment issues */
+.welo-reviews-widget { 
+  text-align: left !important;
+}
+
 /* HEADER */
 .welo-reviews-widget .welo-header {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 22px;
-  padding-bottom: 15px; /* requested space under button */
+  padding-bottom: 15px; /* as you had */
 }
 .welo-reviews-widget .welo-header-title {
   font-size: 35px;
@@ -172,18 +178,24 @@
   pointer-events: none;
 }
 
-/* CONTROLS (only right-side pills now) */
+/* CONTROLS (FORCE LEFT) */
 .welo-reviews-widget .reviews-controls {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-start !important; /* FORCE */
+  align-items: flex-start;
+  width: 100%;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
 }
 .welo-reviews-widget .sort-pill-group {
   display: flex;
+  justify-content: flex-start !important; /* FORCE */
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  margin-left: 0 !important;  /* FORCE */
+  margin-right: auto !important; /* FORCE */
 }
 .welo-reviews-widget .sort-pill {
   padding: 6px 14px;
@@ -516,7 +528,7 @@
 }
     `.trim();
 
-    document.head.appendChild(style);
+    if (!existing) document.head.appendChild(style);
   }
 
   /* ================= HELPERS ================= */
@@ -625,10 +637,8 @@
     if (raw === "IT") return ["Italy"];
     if (raw === "UK" || raw === "GB") return ["United Kingdom"];
 
-    // if they passed full country string, use it
     if (raw && raw.length > 2) return [raw];
 
-    // fallback: based on UI locale
     if (locale === "it") return ["Italy"];
     return ["United States of America", "United Kingdom"];
   }
@@ -721,7 +731,6 @@
     return data;
   }
 
-  // allowed stars from embed (data-stars)
   function parseAllowedStars(spec) {
     const raw = String(spec || "").trim().toLowerCase();
     const all = [5, 4, 3, 2, 1];
@@ -962,7 +971,7 @@
             class="welo-open-page-btn"
             href="${escapeHtml(weloPageUrl || "#")}"
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             aria-disabled="${weloPageUrl ? "false" : "true"}"
           >
             ${escapeHtml(T.openWeloPage)}
@@ -1019,7 +1028,6 @@
     }
 
     function recomputeAndRender() {
-      // base: filter by allowed stars (from embed)
       let base = ALL_REVIEWS.filter(function (r) {
         const s = Number(r["Da 1 a 5 stelle come lo valuti?"]) || 0;
         return allowedStarsSet.has(s);
@@ -1146,7 +1154,7 @@
               </div>
 
               <div class="review-actions">
-                <a class="review-report" href="${REPORT_URL}" target="_blank" rel="noopener">
+                <a class="review-report" href="${REPORT_URL}" target="_blank" rel="noopener noreferrer">
                   <img src="${FLAG_ICON}" alt="" />
                   <span>${escapeHtml(T.report)}</span>
                 </a>
@@ -1182,7 +1190,6 @@
 
       const action = btn.getAttribute("data-action");
 
-      // sort newest/oldest
       if (btn.classList.contains("sort-pill") && btn.hasAttribute("data-sort")) {
         widgetRoot
           .querySelectorAll('.sort-pill[data-sort]')
@@ -1193,7 +1200,6 @@
         return;
       }
 
-      // attachments toggle
       if (btn.classList.contains("sort-pill-attachments")) {
         attachmentsOnly = !attachmentsOnly;
         btn.classList.toggle("active", attachmentsOnly);
@@ -1201,14 +1207,12 @@
         return;
       }
 
-      // load more
       if (action === "load-more") {
         visibleCount += 4;
         renderReviews();
         return;
       }
 
-      // open media
       if (action === "open-media") {
         const encoded = btn.getAttribute("data-media");
         const index = Number(btn.getAttribute("data-index")) || 0;
@@ -1222,7 +1226,6 @@
         return;
       }
 
-      // share
       if (action === "share") {
         e.preventDefault();
         const stars = Number(btn.getAttribute("data-stars")) || 0;
@@ -1232,7 +1235,6 @@
         return;
       }
 
-      // write review
       if (action === "write-review") {
         if (typeof window.openWeloReviewPopup === "function") {
           window.openWeloReviewPopup();
@@ -1271,7 +1273,7 @@
   /* ================= BOOT ================= */
   function boot() {
     injectInterFontOnce();
-    injectStylesOnce();
+    injectStyles(); // <-- overwrite old styles if present
 
     const nodes = document.querySelectorAll("[data-welo-reviews]");
     nodes.forEach(mountWidget);
@@ -1283,3 +1285,4 @@
     boot();
   }
 })();
+
