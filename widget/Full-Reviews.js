@@ -1,7 +1,13 @@
 /*!
- * Welo Reviews Widget — v1.2
+ * Welo Reviews Widget — v1.3
  * Embed:
- *  <div data-welo-reviews data-company="Acme Inc" data-stars="4-5" data-welo-page="https://..."></div>
+ *  <div
+ *    data-welo-reviews
+ *    data-company="Acme Inc"
+ *    data-stars="4-5"
+ *    data-language="US"
+ *    data-welo-page="https://..."
+ *  ></div>
  *  <script src="https://.../Full-Reviews.js" defer></script>
  */
 
@@ -41,10 +47,10 @@
       headerTitle: "Guarda le nostre recensioni",
       openWeloPage: "Apri la Welo Page",
 
-      all: "Tutte",
       newest: "Più recenti",
       oldest: "Più vecchie",
       withMedia: "Solo recensioni con allegati",
+
       noReviews: "Ancora nessuna recensione, scrivi tu la prima.",
       writeReview: "Scrivi una recensione",
       verified: "Verificata da Welo",
@@ -70,10 +76,10 @@
       headerTitle: "See our reviews",
       openWeloPage: "Open the Welo Page",
 
-      all: "All",
       newest: "Newest",
       oldest: "Oldest",
-      withMedia: "Only with media",
+      withMedia: "Only reviews with attachments",
+
       noReviews: "No reviews yet, be the first to write one.",
       writeReview: "Write a review",
       verified: "Verified by Welo",
@@ -82,7 +88,7 @@
       shareCopied: "Link copied to clipboard",
       report: "Report",
       onlyMediaHint: "Showing only reviews with photos or videos.",
-      noMediaMatch: "No reviews with media match your filters.",
+      noMediaMatch: "No reviews with attachments match your filters.",
       copyLink: "Copy this link:",
       justNow: "Just now",
       today: "Today",
@@ -126,12 +132,13 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* HEADER (NEW) */
+/* HEADER */
 .welo-reviews-widget .welo-header {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 22px;
+  padding-bottom: 15px; /* requested space under button */
 }
 .welo-reviews-widget .welo-header-title {
   font-size: 35px;
@@ -141,9 +148,7 @@
   color: #1b1b1b;
 }
 @media (max-width: 767px) {
-  .welo-reviews-widget .welo-header-title {
-    font-size: 26px;
-  }
+  .welo-reviews-widget .welo-header-title { font-size: 26px; }
 }
 .welo-reviews-widget .welo-open-page-btn {
   display: inline-flex;
@@ -167,21 +172,19 @@
   pointer-events: none;
 }
 
-/* CONTROLS */
+/* CONTROLS (only right-side pills now) */
 .welo-reviews-widget .reviews-controls {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
 }
-.welo-reviews-widget .filter-pill-group,
 .welo-reviews-widget .sort-pill-group {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
-.welo-reviews-widget .filter-pill,
 .welo-reviews-widget .sort-pill {
   padding: 6px 14px;
   border-radius: 10px;
@@ -195,22 +198,15 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-width: 52px;
 }
-.welo-reviews-widget .filter-pill:hover,
 .welo-reviews-widget .sort-pill:hover { background: #f0f0f0; }
-.welo-reviews-widget .filter-pill.active,
 .welo-reviews-widget .sort-pill.active {
   background: #1b1b1b;
   color: #ffffff;
   border-color: #1b1b1b;
   font-weight: 500;
 }
-.welo-reviews-widget .filter-pill-star { width: 16px; height: 16px; flex-shrink: 0; }
-.welo-reviews-widget .filter-pill.active .filter-pill-star { filter: invert(1); }
-
 @media (max-width: 767px) {
-  .welo-reviews-widget .filter-pill-group,
   .welo-reviews-widget .sort-pill-group {
     overflow-x: auto;
     padding-bottom: 4px;
@@ -219,9 +215,7 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  .welo-reviews-widget .filter-pill-group::-webkit-scrollbar,
   .welo-reviews-widget .sort-pill-group::-webkit-scrollbar { display: none; }
-  .welo-reviews-widget .filter-pill,
   .welo-reviews-widget .sort-pill { white-space: nowrap; }
 }
 
@@ -406,7 +400,7 @@
 /* HINT */
 .welo-reviews-widget .reviews-active-hint { font-size: 13px; color: #6b7280; margin-bottom: 10px; }
 
-/* LIGHTBOX (global overlay) */
+/* LIGHTBOX */
 .welo-review-lightbox-overlay {
   position: fixed;
   inset: 0;
@@ -535,12 +529,11 @@
       .replaceAll("'", "&#039;");
   }
 
-  // NEW: browser language first (override with data-locale)
+  // Browser language -> it/en (override with data-locale if you want)
   function detectLocaleFromElement(el) {
     const forced = (el.getAttribute("data-locale") || "auto").toLowerCase();
     if (forced === "it" || forced === "en") return forced;
 
-    // browser language priority
     const langs = []
       .concat(navigator.languages || [])
       .concat([navigator.language || ""])
@@ -553,13 +546,9 @@
     if (hasItalian) return "it";
     if (hasEnglish) return "en";
 
-    // fallback: html lang / url path
     const htmlLang = (document.documentElement.lang || "").toLowerCase();
     if (htmlLang.startsWith("it")) return "it";
     if (htmlLang.startsWith("en")) return "en";
-
-    const path = (window.location.pathname || "").toLowerCase();
-    if (path.startsWith("/en")) return "en";
 
     return "it";
   }
@@ -621,26 +610,39 @@
       c === "united states"
     )
       return "United States of America";
-    if (c === "united kingdom" || c === "uk") return "United Kingdom";
+    if (c === "united kingdom" || c === "uk" || c === "gb") return "United Kingdom";
     return country;
   }
 
-  function sortReviewsByLocaleAndDate(reviews, locale, activeSort) {
+  // data-language="US" | "IT" -> preferred country name in Supabase
+  function preferredCountriesFromElement(el, locale) {
+    const raw =
+      (el.getAttribute("data-language") || el.getAttribute("data-lenguage") || "")
+        .trim()
+        .toUpperCase();
+
+    if (raw === "US") return ["United States of America"];
+    if (raw === "IT") return ["Italy"];
+    if (raw === "UK" || raw === "GB") return ["United Kingdom"];
+
+    // if they passed full country string, use it
+    if (raw && raw.length > 2) return [raw];
+
+    // fallback: based on UI locale
+    if (locale === "it") return ["Italy"];
+    return ["United States of America", "United Kingdom"];
+  }
+
+  function sortReviewsByPreferredCountryAndDate(reviews, preferredCountries, activeSort) {
     if (!Array.isArray(reviews)) return [];
 
+    const preferredSet = new Set((preferredCountries || []).map((c) => normalizeCountry(c)));
     const preferred = [];
     const other = [];
 
     reviews.forEach(function (review) {
       const country = normalizeCountry(getCountryFromRow(review));
-      if (locale === "it") {
-        (country === "Italy" ? preferred : other).push(review);
-      } else {
-        (country === "United States of America" || country === "United Kingdom"
-          ? preferred
-          : other
-        ).push(review);
-      }
+      (preferredSet.has(country) ? preferred : other).push(review);
     });
 
     function sortByDate(group, order) {
@@ -719,21 +721,19 @@
     return data;
   }
 
-  // NEW: allowed stars from embed (data-stars)
+  // allowed stars from embed (data-stars)
   function parseAllowedStars(spec) {
     const raw = String(spec || "").trim().toLowerCase();
     const all = [5, 4, 3, 2, 1];
 
     if (!raw || raw === "all") return all;
 
-    // "3+"
     const plus = raw.match(/^(\d)\s*\+$/);
     if (plus) {
       const n = Number(plus[1]);
       return all.filter((x) => x >= n);
     }
 
-    // "4-5"
     const range = raw.match(/^(\d)\s*-\s*(\d)$/);
     if (range) {
       const a = Number(range[1]);
@@ -743,7 +743,6 @@
       return all.filter((x) => x >= min && x <= max);
     }
 
-    // "5"
     const single = raw.match(/^(\d)$/);
     if (single) {
       const n = Number(single[1]);
@@ -753,7 +752,7 @@
     return all;
   }
 
-  /* ================= LIGHTBOX FACTORY ================= */
+  /* ================= LIGHTBOX ================= */
   function createLightbox(instanceId) {
     const overlay = document.createElement("div");
     overlay.className = "welo-review-lightbox-overlay";
@@ -917,7 +916,7 @@
     } catch (_) {}
   }
 
-  /* ================= MAIN WIDGET ================= */
+  /* ================= MAIN ================= */
   function mountWidget(placeholderEl) {
     const company = (placeholderEl.getAttribute("data-company") || "").trim();
     if (!company) {
@@ -934,45 +933,27 @@
         : "https://www.welobadge.com/contattaci";
 
     const writeReviewFallbackUrl =
-      locale === "en"
-        ? "https://www.welobadge.com/en"
-        : "https://www.welobadge.com";
+      locale === "en" ? "https://www.welobadge.com/en" : "https://www.welobadge.com";
 
-    // NEW: page link customizable
     const weloPageUrl =
       (placeholderEl.getAttribute("data-welo-page") || "").trim() ||
       (placeholderEl.getAttribute("data-welo-page-url") || "").trim();
 
-    // NEW: allowed stars
+    const preferredCountries = preferredCountriesFromElement(placeholderEl, locale);
+
     const allowedStars = parseAllowedStars(placeholderEl.getAttribute("data-stars"));
     const allowedStarsSet = new Set(allowedStars);
 
     const instanceId = "welo_" + Math.random().toString(36).slice(2, 10);
     const lightbox = createLightbox(instanceId);
 
-    // state
     let ALL_REVIEWS = [];
     let CURRENT_REVIEWS = [];
     let visibleCount = 4;
 
-    let activeStarFilter = "all";
     let activeSort = "newest";
     let attachmentsOnly = false;
 
-    // build star pills (based on allowedStars)
-    const starButtonsHtml =
-      allowedStars
-        .map((s) => {
-          return `
-            <button class="filter-pill" data-stars="${s}">
-              ${escapeHtml(String(s))}
-              <img class="filter-pill-star" src="${FULL_STAR}" alt="" />
-            </button>
-          `;
-        })
-        .join("");
-
-    // shell (NEW header)
     placeholderEl.innerHTML = `
       <div class="welo-reviews-widget" data-welo-instance="${instanceId}">
         <div class="welo-header">
@@ -989,11 +970,6 @@
         </div>
 
         <div class="reviews-controls">
-          <div class="filter-pill-group">
-            <button class="filter-pill active" data-stars="all">${escapeHtml(T.all)}</button>
-            ${starButtonsHtml}
-          </div>
-
           <div class="sort-pill-group">
             <button class="sort-pill active" data-sort="newest">${escapeHtml(T.newest)}</button>
             <button class="sort-pill" data-sort="oldest">${escapeHtml(T.oldest)}</button>
@@ -1010,7 +986,6 @@
     const widgetRoot = placeholderEl.querySelector(".welo-reviews-widget");
     const listEl = placeholderEl.querySelector(".reviews-list");
 
-    // disable header button if missing url
     const headerBtn = widgetRoot.querySelector(".welo-open-page-btn");
     if (!weloPageUrl && headerBtn) {
       headerBtn.addEventListener("click", function (e) {
@@ -1044,20 +1019,11 @@
     }
 
     function recomputeAndRender() {
-      // base: ALWAYS restricted by allowedStars
+      // base: filter by allowed stars (from embed)
       let base = ALL_REVIEWS.filter(function (r) {
         const s = Number(r["Da 1 a 5 stelle come lo valuti?"]) || 0;
         return allowedStarsSet.has(s);
       });
-
-      // extra filter by UI star pill
-      if (activeStarFilter !== "all") {
-        base = base.filter(function (r) {
-          return (
-            Number(r["Da 1 a 5 stelle come lo valuti?"]) === Number(activeStarFilter)
-          );
-        });
-      }
 
       if (attachmentsOnly) {
         base = base.filter(function (r) {
@@ -1065,7 +1031,12 @@
         });
       }
 
-      CURRENT_REVIEWS = sortReviewsByLocaleAndDate(base, locale, activeSort);
+      CURRENT_REVIEWS = sortReviewsByPreferredCountryAndDate(
+        base,
+        preferredCountries,
+        activeSort
+      );
+
       visibleCount = 4;
       renderReviews();
     }
@@ -1123,7 +1094,9 @@
                 const isMain = index === 0;
                 const classes =
                   "review-media-thumb " +
-                  (isMain ? "review-media-thumb--main" : "review-media-thumb--secondary");
+                  (isMain
+                    ? "review-media-thumb--main"
+                    : "review-media-thumb--secondary");
 
                 let inner = "";
                 if (item.type === "image") {
@@ -1209,14 +1182,7 @@
 
       const action = btn.getAttribute("data-action");
 
-      if (btn.classList.contains("filter-pill")) {
-        widgetRoot.querySelectorAll(".filter-pill").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        activeStarFilter = btn.getAttribute("data-stars") || "all";
-        recomputeAndRender();
-        return;
-      }
-
+      // sort newest/oldest
       if (btn.classList.contains("sort-pill") && btn.hasAttribute("data-sort")) {
         widgetRoot
           .querySelectorAll('.sort-pill[data-sort]')
@@ -1227,6 +1193,7 @@
         return;
       }
 
+      // attachments toggle
       if (btn.classList.contains("sort-pill-attachments")) {
         attachmentsOnly = !attachmentsOnly;
         btn.classList.toggle("active", attachmentsOnly);
@@ -1234,12 +1201,14 @@
         return;
       }
 
+      // load more
       if (action === "load-more") {
         visibleCount += 4;
         renderReviews();
         return;
       }
 
+      // open media
       if (action === "open-media") {
         const encoded = btn.getAttribute("data-media");
         const index = Number(btn.getAttribute("data-index")) || 0;
@@ -1253,6 +1222,7 @@
         return;
       }
 
+      // share
       if (action === "share") {
         e.preventDefault();
         const stars = Number(btn.getAttribute("data-stars")) || 0;
@@ -1262,6 +1232,7 @@
         return;
       }
 
+      // write review
       if (action === "write-review") {
         if (typeof window.openWeloReviewPopup === "function") {
           window.openWeloReviewPopup();
@@ -1278,16 +1249,13 @@
         const data = await fetchReviewsForCompany(company);
         ALL_REVIEWS = data;
 
-        activeStarFilter = "all";
         activeSort = "newest";
         attachmentsOnly = false;
 
-        widgetRoot.querySelectorAll(".filter-pill").forEach((b) => b.classList.remove("active"));
-        widgetRoot.querySelector('.filter-pill[data-stars="all"]')?.classList.add("active");
-
-        widgetRoot.querySelectorAll('.sort-pill[data-sort]').forEach((b) => b.classList.remove("active"));
+        widgetRoot
+          .querySelectorAll('.sort-pill[data-sort]')
+          .forEach((b) => b.classList.remove("active"));
         widgetRoot.querySelector('.sort-pill[data-sort="newest"]')?.classList.add("active");
-
         widgetRoot.querySelector(".sort-pill-attachments")?.classList.remove("active");
 
         recomputeAndRender();
