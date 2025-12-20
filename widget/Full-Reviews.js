@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v1.1
+ * Welo Reviews Widget — v1.2
  * Embed:
  *  <div data-welo-reviews data-company="Acme Inc" data-stars="4-5" data-welo-page="https://..."></div>
  *  <script src="https://.../Full-Reviews.js" defer></script>
