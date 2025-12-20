@@ -175,7 +175,7 @@
 /* CONTROLS (only right-side pills now) */
 .welo-reviews-widget .reviews-controls {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
