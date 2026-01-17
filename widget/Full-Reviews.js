@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v1.3.2
+ * Welo Reviews Widget — v1.3.3 (Tooltip Verified)
  * Embed:
  *  <div
  *    data-welo-reviews
@@ -54,6 +54,11 @@
       noReviews: "Ancora nessuna recensione, scrivi tu la prima.",
       writeReview: "Scrivi una recensione",
       verified: "Verificata da Welo",
+
+      verifiedTooltip:
+        "La recensione è stata verificata da Welo, Scopri il nostro processo di verifica:",
+      readMore: "Leggi di più",
+
       loadMore: "Carica di più",
       share: "Condividi",
       shareCopied: "Link copiato negli appunti",
@@ -83,6 +88,11 @@
       noReviews: "No reviews yet, be the first to write one.",
       writeReview: "Write a review",
       verified: "Verified by Welo",
+
+      verifiedTooltip:
+        "This review was verified by Welo, Learn about our verification process:",
+      readMore: "Read more",
+
       loadMore: "Load more",
       share: "Share",
       shareCopied: "Link copied to clipboard",
@@ -253,12 +263,69 @@
   display: flex;
   align-items: center;
   gap: 6px;
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .welo-reviews-widget .review-verified img { width: 18px; height: 18px; }
 .welo-reviews-widget .review-verified span { font-size: 15px; font-weight: 600; color: #1b1b1b; }
+.welo-reviews-widget .review-verified:focus { outline: none; }
 @media (max-width: 767px) {
   .welo-reviews-widget .review-verified img { width: 16px; height: 16px; }
   .welo-reviews-widget .review-verified span { font-size: 13px; }
+}
+
+/* VERIFIED TOOLTIP */
+.welo-reviews-widget .review-verified-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(360px, 82vw);
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 12px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #1b1b1b;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 20;
+}
+/* bridge per passare col mouse dal badge al tooltip */
+.welo-reviews-widget .review-verified-tooltip::before {
+  content: "";
+  position: absolute;
+  top: -16px;
+  left: 0;
+  right: 0;
+  height: 16px;
+}
+.welo-reviews-widget .review-verified-tooltip a {
+  color: #1b1b1b;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* DESKTOP ONLY: hover */
+@media (hover: hover) and (pointer: fine) {
+  .welo-reviews-widget .review-verified:hover .review-verified-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+/* MOBILE/TAP: open via class */
+.welo-reviews-widget .review-verified.is-tooltip-open .review-verified-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 /* TEXT */
@@ -310,7 +377,7 @@
   max-width: 220px;
   width: 100%;
   margin: 0 auto;
-  min-height: 20px;
+  min-height: 44px;
   padding: 10px 20px;
   gap: 8px;
   font-size: 14px;
@@ -527,6 +594,90 @@
     `.trim();
 
     if (!existing) document.head.appendChild(style);
+  }
+
+  /* ================= VERIFIED TOOLTIP: GLOBAL HANDLERS (ONCE) ================= */
+  function installVerifiedTooltipHandlersOnce() {
+    if (window.__weloReviewsTooltipHandlersInstalled) return;
+    window.__weloReviewsTooltipHandlersInstalled = true;
+
+    const mqTouch =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(hover: none), (pointer: coarse)")
+        : null;
+
+    function isTouchMode() {
+      if (mqTouch) return !!mqTouch.matches;
+      return window.innerWidth <= 767;
+    }
+
+    function closeAllVerifiedTooltips() {
+      document
+        .querySelectorAll(".welo-reviews-widget .review-verified.is-tooltip-open")
+        .forEach(function (el) {
+          el.classList.remove("is-tooltip-open");
+        });
+    }
+
+    // SOLO TOUCH: tap su badge apre/chiude, tap fuori chiude, link dentro tooltip funziona
+    document.addEventListener(
+      "pointerdown",
+      function (e) {
+        if (!isTouchMode()) return;
+
+        const tooltipLink = e.target.closest(
+          ".welo-reviews-widget .review-verified-tooltip a"
+        );
+        if (tooltipLink) return;
+
+        const ver = e.target.closest(".welo-reviews-widget .review-verified");
+        if (!ver) {
+          closeAllVerifiedTooltips();
+          return;
+        }
+
+        const wasOpen = ver.classList.contains("is-tooltip-open");
+        closeAllVerifiedTooltips();
+        if (!wasOpen) ver.classList.add("is-tooltip-open");
+
+        // evita tap highlight / ghost click iOS
+        e.preventDefault();
+      },
+      { passive: false }
+    );
+
+    // accessibilità: Enter/Space (solo touch)
+    document.addEventListener("keydown", function (e) {
+      if (!isTouchMode()) return;
+
+      const focused = document.activeElement;
+      if (
+        !focused ||
+        !focused.classList ||
+        !focused.classList.contains("review-verified") ||
+        !focused.closest(".welo-reviews-widget")
+      )
+        return;
+
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        const wasOpen = focused.classList.contains("is-tooltip-open");
+        closeAllVerifiedTooltips();
+        if (!wasOpen) focused.classList.add("is-tooltip-open");
+      }
+    });
+
+    window.addEventListener("resize", function () {
+      closeAllVerifiedTooltips();
+    });
+
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (isTouchMode()) closeAllVerifiedTooltips();
+      },
+      { passive: true }
+    );
   }
 
   /* ================= HELPERS ================= */
@@ -937,6 +1088,11 @@
         ? "https://www.welobadge.com/en/contact-us"
         : "https://www.welobadge.com/contattaci";
 
+    const VERIFIED_PROCESS_URL =
+      locale === "en"
+        ? "https://www.welobadge.com/en/verified-reviews"
+        : "https://www.welobadge.com/recensioni-verificate";
+
     const writeReviewFallbackUrl =
       locale === "en" ? "https://www.welobadge.com/en" : "https://www.welobadge.com";
 
@@ -1058,7 +1214,7 @@
       if (!data.length) {
         const emptyText = attachmentsOnly ? T.noMediaMatch : T.noReviews;
 
-        // IMPORTANT CHANGE:
+        // IMPORTANT:
         // When empty-state appears, the button must go to the Welo Page (data-welo-page).
         // If missing, fallback to old behavior.
         const buttonHtml = weloPageUrl
@@ -1144,11 +1300,27 @@
           const safeText = escapeHtml(r.Testo || "");
           const safeAuthor = escapeHtml(r["Nome e cognome"] || "");
 
+          const tooltipAria =
+            locale === "en"
+              ? "Verified by Welo, hover for details"
+              : "Verificata da Welo, passa il mouse per dettagli";
+
+          const tooltipHtml =
+            `<div class="review-verified-tooltip" role="tooltip">` +
+            `${escapeHtml(T.verifiedTooltip)} ` +
+            `<a href="${escapeHtml(VERIFIED_PROCESS_URL)}" target="_blank" rel="noopener noreferrer">` +
+            `${escapeHtml(T.readMore)}` +
+            `</a>` +
+            `</div>`;
+
           return `
             <div class="review-card">
-              <div class="review-verified">
+              <div class="review-verified" role="button" tabindex="0" aria-label="${escapeHtml(
+                tooltipAria
+              )}">
                 <img src="${VER_ICON}" alt="" />
                 <span>${escapeHtml(T.verified)}</span>
+                ${tooltipHtml}
               </div>
 
               <div class="review-stars">${starsHtml}</div>
@@ -1285,6 +1457,7 @@
   function boot() {
     injectInterFontOnce();
     injectStyles();
+    installVerifiedTooltipHandlersOnce();
 
     const nodes = document.querySelectorAll("[data-welo-reviews]");
     nodes.forEach(mountWidget);
