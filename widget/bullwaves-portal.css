@@ -15,17 +15,34 @@
 
 html,
 body {
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
   background: var(--bw-bg) !important;
-  background-image: none !important;
   color: var(--bw-text) !important;
-  color-scheme: light;
+  color-scheme: light !important;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-input,
 button,
+input,
 select,
-textarea {
+textarea,
+.form-control,
+.btn,
+.x-navigation,
+.page-container,
+.panel,
+.widget,
+.tile,
+table,
+th,
+td,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
 }
 
@@ -34,52 +51,54 @@ a {
 }
 
 p,
-span,
 label,
 small {
   color: var(--bw-text) !important;
 }
 
-.help-block {
-  color: var(--bw-muted) !important;
-}
-
+.help-block,
 .text-muted {
   color: var(--bw-muted) !important;
 }
 
-body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
-  .page-container,
-body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
-  .page-container
-  .page-content,
-body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
-  .page-container
-  .page-content
-  .page-content-wrap,
-body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
-  .page-container
-  .page-content
-  .page-content-wrap
-  > .row,
-body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
-  .page-container
-  .page-content
-  .page-content-wrap
-  > .content-frame,
-body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
-  .page-container
-  .page-content
-  .page-content-wrap
-  .content-frame-body {
-  background: var(--bw-bg) !important;
+.page-container,
+.page-container .page-content,
+.page-container .page-content-wrap,
+.page-container .page-content-wrap .row,
+.page-container .page-content-wrap .row > div,
+.page-container .page-content-wrap .content-frame,
+.page-container .page-content-wrap .content-frame-body,
+.page-container .page-content .content-frame,
+.page-container .page-content .content-frame-body,
+.page-container .page-content .page-content-wrap,
+.page-container .page-content .page-content-wrap .row,
+.page-container .page-content .page-content-wrap .row > div {
+  background-color: var(--bw-bg) !important;
   background-image: none !important;
 }
 
 .page-container .page-content {
+  padding: 22px 18px 40px !important;
+  background: var(--bw-bg) !important;
+}
+
+.x-navigation.x-navigation-horizontal {
   background: var(--bw-bg) !important;
   background-image: none !important;
-  padding: 22px 18px 40px !important;
+  box-shadow: none !important;
+}
+
+.x-navigation.x-navigation-horizontal > li > a {
+  color: var(--bw-text) !important;
+}
+
+.x-navigation.x-navigation-horizontal li.xn-logo img,
+.x-navigation.x-navigation-horizontal .xn-logo img,
+.x-navigation.x-navigation-horizontal .logo img,
+.x-navigation.x-navigation-horizontal .brand img {
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: brightness(0) saturate(100%) !important;
 }
 
 .header-background {
@@ -102,17 +121,7 @@ body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminde
 .header-background img {
   max-width: 150px !important;
   margin: 15px 9px !important;
-}
-
-.x-navigation.x-navigation-horizontal {
-  background: var(--bw-bg) !important;
-  background-image: none !important;
-  border-bottom: 1px solid var(--bw-border) !important;
-  box-shadow: none !important;
-}
-
-.x-navigation.x-navigation-horizontal > li > a {
-  color: var(--bw-text) !important;
+  opacity: 1 !important;
 }
 
 .login-container,
@@ -158,27 +167,6 @@ body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminde
   opacity: 0.18;
 }
 
-@media (max-width: 1199px) {
-  .login-container,
-  .registration-container {
-    padding-top: 70px;
-  }
-}
-
-@media (max-width: 767px) {
-  .header-background {
-    top: 12px;
-  }
-  .login-container,
-  .registration-container {
-    padding-top: 110px;
-  }
-  .login-container::after,
-  .registration-container::after {
-    max-width: 40%;
-  }
-}
-
 .login-container .login-box .login-body,
 .registration-container .registration-box .registration-body {
   border-radius: 20px !important;
@@ -215,21 +203,10 @@ body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminde
   box-shadow: 0 0 0 4px rgba(36, 83, 255, 0.12) !important;
 }
 
-.registration-box .registration-body .form-control option {
-  color: var(--bw-text) !important;
-}
-
-.wizard .actionBar .btn.pull-right {
-  width: 100%;
-  padding: 10px 16px;
-  border-radius: 12px !important;
-}
-
 .page-container .page-sidebar {
   background: var(--bw-bg) !important;
   border-right: 1px solid var(--bw-border) !important;
   padding: 14px 14px !important;
-  background-image: none !important;
 }
 
 .page-sidebar .x-navigation {
@@ -289,17 +266,6 @@ body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminde
   color: var(--bw-primary) !important;
 }
 
-.page-sidebar .x-navigation li.xn-openable > a:after {
-  color: var(--bw-muted) !important;
-}
-
-@media (max-width: 991px) {
-  .page-container .page-sidebar {
-    background: var(--bw-bg) !important;
-    background-image: none !important;
-  }
-}
-
 .page-container .widget,
 .page-container .tile,
 .page-container .panel {
@@ -312,7 +278,6 @@ body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminde
   box-shadow: var(--bw-shadow) !important;
   color: var(--bw-text) !important;
   padding: 16px 16px !important;
-  background-image: none !important;
 }
 
 .page-container .widget .widget-title {
@@ -338,11 +303,164 @@ body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminde
   text-transform: none !important;
 }
 
+.metatrader-color,
+.webtrader-color,
+.metatrader-color *,
+.webtrader-color * {
+  color: #fff !important;
+}
+
+.metatrader-color,
+.webtrader-color {
+  background: linear-gradient(145deg, #2453ff 0%, #5176ff 100%) !important;
+  border: 0 !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+.metatrader-color h1,
+.metatrader-color h2,
+.metatrader-color h3,
+.metatrader-color h4,
+.metatrader-color h5,
+.metatrader-color h6,
+.webtrader-color h1,
+.webtrader-color h2,
+.webtrader-color h3,
+.webtrader-color h4,
+.webtrader-color h5,
+.webtrader-color h6 {
+  color: #fff !important;
+}
+
+#balanceWidget .btn-deposit,
+#balanceWidget .btn.btn-success,
+#balanceWidget .btn-success,
+#balanceWidget button.btn-success,
+#balanceWidget a.btn-success {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+}
+
+#balanceWidget .btn-deposit:hover,
+#balanceWidget .btn.btn-success:hover,
+#balanceWidget .btn-success:hover {
+  filter: brightness(0.95);
+}
+
+.btn {
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+}
+
+.btn-default,
+.btn.btn-default {
+  background: #fff !important;
+  border: 1px solid var(--bw-border-strong) !important;
+  color: var(--bw-text) !important;
+}
+
+.btn-default:hover {
+  background: #efefef !important;
+}
+
+.btn-danger {
+  background: transparent !important;
+  border-color: var(--bw-border-strong) !important;
+  color: var(--bw-danger) !important;
+}
+
+.btn-success,
+.btn.btn-success {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+}
+
+.text-success {
+  color: var(--bw-primary) !important;
+}
+
+.progress-bar-success {
+  background-color: var(--bw-primary) !important;
+}
+
+.label-success,
+.badge-success {
+  background-color: var(--bw-primary) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+#accountStatusWidget .progress {
+  height: 7px !important;
+  width: 100% !important;
+  margin: 14px 0 !important;
+  background: #efefef !important;
+  border-radius: 999px !important;
+}
+
+#accountStatusWidget .progress-bar-success {
+  background-color: var(--bw-primary) !important;
+}
+
+#accountStatusWidget .widget-buttons a span,
+#accountStatusWidget .widget-buttons a i,
+#accountStatusWidget .widget-buttons a .fa,
+#accountStatusWidget .widget-buttons a .glyphicon {
+  color: var(--bw-text) !important;
+}
+
+#accountStatusWidget .widget-buttons a span.text-success,
+#accountStatusWidget .widget-buttons a i.text-success,
+#accountStatusWidget .widget-buttons a .fa.text-success,
+#accountStatusWidget .widget-buttons a .glyphicon.text-success {
+  color: var(--bw-primary) !important;
+}
+
+#accountStatusWidget
+  .widget-buttons
+  a
+  span[data-original-title='Documentation Not Verified'] {
+  color: var(--bw-danger) !important;
+}
+
+#equityWidget .widget-subtitle a,
+.widget .widget-subtitle a {
+  color: var(--bw-primary) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+#equityWidget .widget-subtitle a:hover,
+.widget .widget-subtitle a:hover {
+  text-decoration: underline !important;
+}
+
+#marginWidget .owl-theme .owl-controls .owl-page span {
+  margin: 4px !important;
+  opacity: 1 !important;
+  width: 6px !important;
+  height: 6px !important;
+  background: #d9d9d9 !important;
+}
+
+#marginWidget .owl-theme .owl-controls .owl-page.active span {
+  background: var(--bw-primary) !important;
+}
+
 .page-container .panel {
   background: var(--bw-bg) !important;
   border: 1px solid var(--bw-border) !important;
   box-shadow: var(--bw-shadow) !important;
-  background-image: none !important;
 }
 
 .panel-default .panel-heading {
@@ -394,47 +512,11 @@ body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminde
   border: none !important;
 }
 
-.label-success,
-.badge-success {
-  background-color: var(--bw-primary) !important;
-  color: #fff !important;
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-}
-
 #exposure_table td[colspan='6'] {
   text-align: center;
   font-size: 14px;
   padding: 20px;
   color: var(--bw-muted) !important;
-}
-
-.btn {
-  border-radius: 10px !important;
-  box-shadow: none !important;
-}
-
-.btn-primary {
-  background: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #fff !important;
-}
-
-.btn-default,
-.btn.btn-default {
-  background: #fff !important;
-  border: 1px solid var(--bw-border-strong) !important;
-  color: var(--bw-text) !important;
-}
-
-.btn-default:hover {
-  background: #efefef !important;
-}
-
-.btn-danger {
-  background: transparent !important;
-  border-color: var(--bw-border-strong) !important;
-  color: var(--bw-danger) !important;
 }
 
 a.refreshWidgets {
@@ -482,13 +564,33 @@ ul.panel-controls > li > a:hover {
   background-image: none !important;
 }
 
+body#email_confirmation .x-navigation.x-navigation-horizontal,
+body#login .x-navigation.x-navigation-horizontal,
+body#register .x-navigation.x-navigation-horizontal,
+body#password_reminder .x-navigation.x-navigation-horizontal,
+body#register_demo_account .x-navigation.x-navigation-horizontal,
+body#Login .x-navigation.x-navigation-horizontal,
+body#Register .x-navigation.x-navigation-horizontal,
+body#Password-Reminder .x-navigation.x-navigation-horizontal,
+body#Register-Demo-Account .x-navigation.x-navigation-horizontal {
+  background: var(--bw-bg) !important;
+  background-image: none !important;
+}
+
 body#password_reminder p {
   color: var(--bw-text) !important;
 }
 
+@media (max-width: 1199px) {
+  .login-container,
+  .registration-container {
+    padding-top: 70px;
+  }
+}
+
 @media (max-width: 1023px) {
   .profile-data {
-    display: none;
+    display: none !important;
   }
   .x-navigation.x-navigation-horizontal {
     overflow: visible !important;
@@ -499,9 +601,23 @@ body#password_reminder p {
   .login-container {
     padding-top: 140px;
   }
+  .page-container .page-sidebar {
+    background: var(--bw-bg) !important;
+  }
 }
 
 @media (max-width: 767px) {
+  .header-background {
+    top: 12px;
+  }
+  .login-container,
+  .registration-container {
+    padding-top: 110px;
+  }
+  .login-container::after,
+  .registration-container::after {
+    max-width: 40%;
+  }
   .page-container .page-content {
     padding: 18px 12px 30px !important;
   }
