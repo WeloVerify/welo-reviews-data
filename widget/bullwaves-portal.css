@@ -1,46 +1,36 @@
-/* ==========================================================================
-   BULLWAVES PORTAL — LIGHT THEME (Figma match)
-   Palette:
-   - Text: #1B1B1B
-   - Muted: #959595
-   - Primary: #2453FF
-   - Background: #FFFFFF / #FAFAFA
-   - Border: #EDEDED / #D9D9D9
-   - Danger: #F50100
-   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
   --bw-text: #1b1b1b;
   --bw-muted: #959595;
-
   --bw-primary: #2453ff;
-
   --bw-bg: #ffffff;
   --bw-bg-soft: #fafafa;
-
   --bw-border: #ededed;
   --bw-border-strong: #d9d9d9;
-
   --bw-danger: #f50100;
-
-  /* shadow uses #1B1B1B @ ~6% (soft) */
   --bw-shadow: 0 10px 30px rgba(27, 27, 27, 0.06);
-
   --bw-radius: 12px;
 }
 
-/* --------------------------
-   Global / Base
---------------------------- */
-
 html,
 body {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
   background: var(--bw-bg) !important;
+  background-image: none !important;
   color: var(--bw-text) !important;
+  color-scheme: light;
+}
+
+input,
+button,
+select,
+textarea {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 a {
-  color: var(--bw-primary);
+  color: var(--bw-primary) !important;
 }
 
 p,
@@ -58,29 +48,39 @@ small {
   color: var(--bw-muted) !important;
 }
 
-/* Normalize some portal defaults */
-.page-container,
-.page-content,
-.page-content-wrap,
-.row {
-  background: transparent !important;
+body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
+  .page-container,
+body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
+  .page-container
+  .page-content,
+body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
+  .page-container
+  .page-content
+  .page-content-wrap,
+body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
+  .page-container
+  .page-content
+  .page-content-wrap
+  > .row,
+body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
+  .page-container
+  .page-content
+  .page-content-wrap
+  > .content-frame,
+body:not(#login):not(#register):not(#Login):not(#Register):not(#password_reminder):not(#Password-Reminder):not(#register_demo_account):not(#Register-Demo-Account)
+  .page-container
+  .page-content
+  .page-content-wrap
+  .content-frame-body {
+  background: var(--bw-bg) !important;
+  background-image: none !important;
 }
 
-/* Main content area spacing (Figma feeling) */
 .page-container .page-content {
-  background: transparent !important;
+  background: var(--bw-bg) !important;
+  background-image: none !important;
   padding: 22px 18px 40px !important;
 }
-
-/* Avoid any legacy dark theme forcing */
-html,
-body {
-  color-scheme: light;
-}
-
-/* --------------------------
-   Header (top bar / logo area)
---------------------------- */
 
 .header-background {
   width: 95%;
@@ -90,12 +90,10 @@ body {
   right: 0;
   max-width: 1170px;
   margin: auto;
-
   background: var(--bw-bg) !important;
   border: 1px solid var(--bw-border) !important;
   border-radius: var(--bw-radius) !important;
   box-shadow: var(--bw-shadow) !important;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -106,20 +104,16 @@ body {
   margin: 15px 9px !important;
 }
 
-/* Top horizontal nav should stay light */
 .x-navigation.x-navigation-horizontal {
-  background: transparent !important;
+  background: var(--bw-bg) !important;
+  background-image: none !important;
+  border-bottom: 1px solid var(--bw-border) !important;
   box-shadow: none !important;
 }
 
-/* Top nav items */
 .x-navigation.x-navigation-horizontal > li > a {
   color: var(--bw-text) !important;
 }
-
-/* --------------------------
-   Login / Register pages (light)
---------------------------- */
 
 .login-container,
 .registration-container {
@@ -130,7 +124,6 @@ body {
   background: var(--bw-bg) !important;
 }
 
-/* Decorative corners, kept subtle */
 .login-container::before,
 .registration-container::before {
   content: '';
@@ -186,7 +179,6 @@ body {
   }
 }
 
-/* Login/Register boxes */
 .login-container .login-box .login-body,
 .registration-container .registration-box .registration-body {
   border-radius: 20px !important;
@@ -203,10 +195,7 @@ body {
 }
 
 .login-container .login-box .login-body .login-subtitle,
-.registration-container
-  .registration-box
-  .registration-body
-  .registration-subtitle {
+.registration-container .registration-box .registration-body .registration-subtitle {
   text-align: center;
   color: var(--bw-muted) !important;
 }
@@ -236,93 +225,80 @@ body {
   border-radius: 12px !important;
 }
 
-/* --------------------------
-   Sidebar (Figma: white, dark text, blue active)
---------------------------- */
-
 .page-container .page-sidebar {
   background: var(--bw-bg) !important;
   border-right: 1px solid var(--bw-border) !important;
   padding: 14px 14px !important;
+  background-image: none !important;
 }
 
-/* Sidebar nav container */
 .page-sidebar .x-navigation {
   background: transparent !important;
 }
 
-/* Nav links */
 .page-sidebar .x-navigation li > a {
   border: 0 !important;
   border-radius: 10px !important;
   padding: 12px 12px !important;
-
   color: var(--bw-text) !important;
   background: transparent !important;
-
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
-
   transition: 0.2s ease !important;
 }
 
-/* Force the TEXT (fix white text issue) */
 .page-sidebar .x-navigation li > a span,
 .page-sidebar .x-navigation li > a span.xn-text {
   color: var(--bw-text) !important;
   font-weight: 500 !important;
 }
 
-/* Icons default */
 .page-sidebar .x-navigation li > a .fa,
 .page-sidebar .x-navigation li > a .glyphicon {
   color: var(--bw-text) !important;
   opacity: 1 !important;
 }
 
-/* Hover */
 .page-sidebar .x-navigation li > a:hover {
   background: #efefef !important;
 }
+
 .page-sidebar .x-navigation li > a:hover span,
 .page-sidebar .x-navigation li > a:hover span.xn-text {
   color: var(--bw-primary) !important;
 }
+
 .page-sidebar .x-navigation li > a:hover .fa,
 .page-sidebar .x-navigation li > a:hover .glyphicon {
   color: var(--bw-primary) !important;
 }
 
-/* Active item */
 .page-sidebar .x-navigation li.active > a {
   background: #efefef !important;
 }
+
 .page-sidebar .x-navigation li.active > a span,
 .page-sidebar .x-navigation li.active > a span.xn-text {
   color: var(--bw-primary) !important;
   font-weight: 600 !important;
 }
+
 .page-sidebar .x-navigation li.active > a .fa,
 .page-sidebar .x-navigation li.active > a .glyphicon {
   color: var(--bw-primary) !important;
 }
 
-/* Dropdown arrow styling (if present) */
 .page-sidebar .x-navigation li.xn-openable > a:after {
   color: var(--bw-muted) !important;
 }
 
-/* Mobile sidebar */
 @media (max-width: 991px) {
   .page-container .page-sidebar {
     background: var(--bw-bg) !important;
+    background-image: none !important;
   }
 }
-
-/* --------------------------
-   Cards / Widgets (Figma: white cards + blue cards)
---------------------------- */
 
 .page-container .widget,
 .page-container .tile,
@@ -330,31 +306,30 @@ body {
   border-radius: var(--bw-radius) !important;
 }
 
-/* Default widget look (white) */
 .page-container .widget {
   background: var(--bw-bg) !important;
   border: 1px solid var(--bw-border) !important;
   box-shadow: var(--bw-shadow) !important;
   color: var(--bw-text) !important;
-
   padding: 16px 16px !important;
+  background-image: none !important;
 }
 
-/* Generic widget typography */
 .page-container .widget .widget-title {
   color: var(--bw-muted) !important;
   font-weight: 500 !important;
 }
+
 .page-container .widget .widget-subtitle {
   color: var(--bw-muted) !important;
 }
+
 .page-container .widget .widget-int,
 .page-container .widget .widget-big-int {
   color: var(--bw-text) !important;
   font-weight: 700 !important;
 }
 
-/* Make widget alignment closer to mock */
 .page-container .widget .widget-title,
 .page-container .widget .widget-subtitle,
 .page-container .widget .widget-int,
@@ -363,177 +338,11 @@ body {
   text-transform: none !important;
 }
 
-/* Ensure old dark style cannot override */
-.page-container .widget,
-.widget.widget-default.widget-item-icon,
-.page-container #exposureTableTitleBody,
-.panel-default .panel-heading,
-.panel-body.panel-body-table .table-responsive,
-.panel-body .table-responsive,
-.panel-body .table {
-  background-image: none !important;
-}
-
-/* Primary blue cards: Balance + Trading Platform tiles */
-#balanceWidget,
-.metatrader-color,
-.webtrader-color,
-.widget.widget-default.widget-item-icon#balanceWidget {
-  background: linear-gradient(145deg, #2453ff 0%, #5176ff 100%) !important;
-  border: 0 !important;
-  box-shadow: var(--bw-shadow) !important;
-  color: #fff !important;
-}
-
-#balanceWidget .widget-title,
-#balanceWidget .widget-subtitle,
-#balanceWidget .widget-int,
-#balanceWidget .widget-big-int,
-.metatrader-color *,
-.webtrader-color * {
-  color: #fff !important;
-}
-
-/* Balance widget internal layout */
-#balanceWidget .widget-buttons {
-  border-top: 0 !important;
-  text-align: left !important;
-  margin: 0 0 12px !important;
-  padding: 0 !important;
-}
-#balanceWidget .widget-buttons > div {
-  width: 100% !important;
-}
-#balanceWidget .widget-buttons .col-md-12 {
-  padding: 0 !important;
-}
-
-/* Deposit pill */
-#balanceWidget .btn-deposit,
-#balanceWidget .widget-buttons .btn,
-#balanceWidget .widget-buttons a {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-
-  background: rgba(255, 255, 255, 0.18) !important;
-  border: 1px solid rgba(255, 255, 255, 0.28) !important;
-  color: #fff !important;
-
-  padding: 7px 12px !important;
-  border-radius: 999px !important;
-  font-size: 13px !important;
-  box-shadow: none !important;
-  text-decoration: none !important;
-}
-
-#balanceWidget .btn-deposit:hover,
-#balanceWidget .widget-buttons .btn:hover,
-#balanceWidget .widget-buttons a:hover {
-  background: rgba(255, 255, 255, 0.26) !important;
-}
-
-/* Deposit icon prepend */
-#balanceWidget .btn-deposit::before {
-  content: url('data:image/svg+xml,<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg"><g opacity="0.9"><path d="M14.6674 1.83334L9.20068 7.30001" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.66675 4.61328V7.83328H11.8867" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M7.33325 1.83334H5.99992C2.66659 1.83334 1.33325 3.16668 1.33325 6.50001V10.5C1.33325 13.8333 2.66659 15.1667 5.99992 15.1667H9.99992C13.3333 15.1667 14.6666 13.8333 14.6666 10.5V9.16668" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-  display: inline-block;
-  vertical-align: -2px;
-  margin-right: 0;
-  transform: scale(0.95);
-}
-
-/* Webtrader tile: link styling */
-.webtrader-color a {
-  text-decoration: none !important;
-  color: #fff !important;
-  font-weight: 500 !important;
-  opacity: 0.95 !important;
-}
-.webtrader-color a:hover {
-  opacity: 1 !important;
-}
-
-/* “View Trading History” link */
-#equityWidget .widget-subtitle a,
-.widget .widget-subtitle a {
-  color: var(--bw-primary) !important;
-  font-weight: 600 !important;
-  text-decoration: none !important;
-}
-#equityWidget .widget-subtitle a:hover,
-.widget .widget-subtitle a:hover {
-  text-decoration: underline !important;
-}
-
-/* Margin widget dots */
-#marginWidget .widget-title {
-  color: var(--bw-muted) !important;
-}
-#marginWidget .owl-theme .owl-controls .owl-page span {
-  margin: 4px;
-  opacity: 1;
-  width: 6px;
-  height: 6px;
-  background: #d9d9d9 !important;
-}
-#marginWidget .owl-theme .owl-controls .owl-page.active span {
-  background: var(--bw-primary) !important;
-}
-
-/* Account status widget progress */
-#accountStatusWidget .widget-title {
-  color: var(--bw-text) !important;
-  font-weight: 600 !important;
-}
-#accountStatusWidget .progress {
-  height: 7px !important;
-  width: 100% !important;
-  margin: 14px 0 !important;
-  background: #efefef !important;
-  border-radius: 999px !important;
-}
-#accountStatusWidget .progress-bar-success {
-  background-color: var(--bw-primary) !important;
-}
-
-/* Account status action icons (grey circles) */
-#accountStatusWidget .widget-buttons {
-  margin-left: 0 !important;
-}
-#accountStatusWidget .widget-buttons a {
-  border-radius: 999px !important;
-  width: 40px !important;
-  height: 40px !important;
-  background: #efefef !important;
-  border: 1px solid var(--bw-border) !important;
-
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  box-shadow: none !important;
-  text-decoration: none !important;
-}
-#accountStatusWidget .widget-buttons a span {
-  color: var(--bw-text) !important;
-}
-
-/* Keep not verified red */
-#accountStatusWidget
-  .widget-buttons
-  a
-  span[data-original-title='Documentation Not Verified'] {
-  color: var(--bw-danger) !important;
-}
-
-/* --------------------------
-   Panels / Tables (Figma light)
---------------------------- */
-
 .page-container .panel {
   background: var(--bw-bg) !important;
   border: 1px solid var(--bw-border) !important;
   box-shadow: var(--bw-shadow) !important;
+  background-image: none !important;
 }
 
 .panel-default .panel-heading {
@@ -547,7 +356,6 @@ body {
   font-weight: 700 !important;
 }
 
-/* Table wrapper inside panels */
 .panel-body,
 .panel-body.panel-body-table .table-responsive,
 .panel-body .table-responsive {
@@ -557,7 +365,6 @@ body {
   border: 0 !important;
 }
 
-/* Table headers */
 .panel-body .table > thead > tr > th,
 .panel-body .table > thead > tr {
   background: #efefef !important;
@@ -565,7 +372,6 @@ body {
   border: 0 !important;
 }
 
-/* Table rows */
 .table-striped > tbody > tr:nth-of-type(odd),
 .table-striped > tbody > tr:nth-child(odd) > td,
 .table-striped > tbody > tr > td,
@@ -575,21 +381,19 @@ body {
   border: 0 !important;
 }
 
-/* Subtle rounding on header ends */
 .panel-body .table tr > th:first-child {
   border-radius: 10px 0 0 10px !important;
 }
+
 .panel-body .table tr > th:last-child {
   border-radius: 0 10px 10px 0 !important;
 }
 
-/* Remove borders */
 .table-bordered,
 .dataTable {
   border: none !important;
 }
 
-/* “Live” pill */
 .label-success,
 .badge-success {
   background-color: var(--bw-primary) !important;
@@ -598,17 +402,12 @@ body {
   font-weight: 600 !important;
 }
 
-/* Exposure empty state */
 #exposure_table td[colspan='6'] {
   text-align: center;
   font-size: 14px;
   padding: 20px;
   color: var(--bw-muted) !important;
 }
-
-/* --------------------------
-   Buttons (match mock)
---------------------------- */
 
 .btn {
   border-radius: 10px !important;
@@ -619,10 +418,6 @@ body {
   background: var(--bw-primary) !important;
   border-color: var(--bw-primary) !important;
   color: #fff !important;
-}
-
-.btn-primary:hover {
-  filter: brightness(0.95);
 }
 
 .btn-default,
@@ -642,20 +437,13 @@ body {
   color: var(--bw-danger) !important;
 }
 
-.btn.btn-rounded {
-  border-radius: 10px !important;
-}
-
-/* Refresh control */
 a.refreshWidgets {
   display: inline-flex !important;
   align-items: center !important;
   gap: 8px !important;
-
   background: #fff !important;
   border: 1px solid var(--bw-border-strong) !important;
   color: var(--bw-text) !important;
-
   padding: 7px 12px !important;
   border-radius: 10px !important;
   text-decoration: none !important;
@@ -669,18 +457,15 @@ a.refreshWidgets:hover {
   background: #efefef !important;
 }
 
-/* Remove old pseudo text */
 a.refreshWidgets::after {
   content: '' !important;
 }
 
-/* Panel controls */
 ul.panel-controls > li > a {
   display: inline-flex !important;
   justify-content: center;
   align-items: center;
   width: auto !important;
-
   border-radius: 10px !important;
   border: 1px solid var(--bw-border-strong) !important;
   padding: 6px 10px !important;
@@ -691,34 +476,15 @@ ul.panel-controls > li > a:hover {
   background: #efefef !important;
 }
 
-/* --------------------------
-   Footer / Disclaimer areas (keep light)
---------------------------- */
-
 .x-navigation.disclaimer-color,
 .x-navigation.footer-color {
   background: transparent !important;
-}
-
-body#email_confirmation .x-navigation.x-navigation-horizontal,
-body#login .x-navigation.x-navigation-horizontal,
-body#register .x-navigation.x-navigation-horizontal,
-body#password_reminder .x-navigation.x-navigation-horizontal,
-body#register_demo_account .x-navigation.x-navigation-horizontal,
-body#Login .x-navigation.x-navigation-horizontal,
-body#Register .x-navigation.x-navigation-horizontal,
-body#Password-Reminder .x-navigation.x-navigation-horizontal,
-body#Register-Demo-Account .x-navigation.x-navigation-horizontal {
-  background: transparent !important;
+  background-image: none !important;
 }
 
 body#password_reminder p {
   color: var(--bw-text) !important;
 }
-
-/* --------------------------
-   Responsive tweaks
---------------------------- */
 
 @media (max-width: 1023px) {
   .profile-data {
@@ -739,19 +505,16 @@ body#password_reminder p {
   .page-container .page-content {
     padding: 18px 12px 30px !important;
   }
-
   .x-navigation.x-navigation-horizontal li > ul.xn-drop-left {
     height: 300px;
   }
 }
 
-/* Dropdown scrollbar */
 .x-navigation.x-navigation-horizontal li > ul.xn-drop-left::-webkit-scrollbar {
   width: 6px;
 }
-.x-navigation.x-navigation-horizontal
-  li
-  > ul.xn-drop-left::-webkit-scrollbar-thumb {
+
+.x-navigation.x-navigation-horizontal li > ul.xn-drop-left::-webkit-scrollbar-thumb {
   background-color: var(--bw-primary);
   border-radius: 10px;
 }
