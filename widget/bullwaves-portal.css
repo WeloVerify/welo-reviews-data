@@ -1,13 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* =========================================================
-   BULLWAVES PORTAL — LIGHT THEME (Stable)
+   BULLWAVES PORTAL — LIGHT THEME (Stable.)
    - Inter everywhere
    - DO NOT override icon fonts (FontAwesome / Glyphicons)
-   - Fix: Account Status icons
-   - Fix: Deposit button visible + color #0437F4
-   - Fix (MOBILE): sidebar reaches bottom (scroll), balance widget smaller,
-     remove small white line on Balance section
    ========================================================= */
 
 :root {
@@ -347,6 +343,90 @@ body#email_confirmation {
   color: var(--bw-primary) !important;
 }
 
+/* =========================================================
+   FIX — Sidebar dropdowns (Account Settings / Requests)
+   - Remove the "white pill" empty blocks under items
+   - Dropdown must appear ONLY after click
+   - Arrow on the right must be BLACK and visible
+   - Do not change anything else
+========================================================= */
+
+/* 1) Remove any pseudo-elements / decorations that create empty rounded blocks */
+.page-sidebar .x-navigation li > a::before,
+.page-sidebar .x-navigation li > a::after {
+  content: none !important;
+}
+
+/* 2) Kill any extra elements used as "decorations" (common in templates) */
+.page-sidebar .x-navigation li > a .xn-text::before,
+.page-sidebar .x-navigation li > a .xn-text::after {
+  content: none !important;
+}
+
+/* 3) Ensure submenu is hidden by default and only shown when parent is active/open */
+.page-sidebar .x-navigation li > ul {
+  display: none !important;
+  height: auto !important;
+  overflow: hidden !important;
+  margin: 6px 0 0 0 !important;
+  padding: 8px 8px !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+/* show submenu only when open/active (covers common classnames) */
+.page-sidebar .x-navigation li.active > ul,
+.page-sidebar .x-navigation li.open > ul,
+.page-sidebar .x-navigation li.xn-openable.active > ul,
+.page-sidebar .x-navigation li.xn-openable.open > ul {
+  display: block !important;
+}
+
+/* submenu items style (keeps consistent and avoids "strange dark blocks") */
+.page-sidebar .x-navigation li > ul > li > a {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 10px 10px !important;
+  color: var(--bw-text) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.page-sidebar .x-navigation li > ul > li > a:hover {
+  background: #efefef !important;
+  color: var(--bw-primary) !important;
+}
+
+/* 4) Arrow on the right must be BLACK (usually .fa-angle-down / caret) */
+.page-sidebar .x-navigation li.xn-openable > a .fa-angle-down,
+.page-sidebar .x-navigation li.xn-openable > a .fa-angle-right,
+.page-sidebar .x-navigation li.xn-openable > a .fa-caret-down,
+.page-sidebar .x-navigation li.xn-openable > a .fa-caret-right,
+.page-sidebar .x-navigation li.xn-openable > a i[class*="angle"],
+.page-sidebar .x-navigation li.xn-openable > a i[class*="caret"],
+.page-sidebar .x-navigation li.xn-openable > a .xn-openable-icon,
+.page-sidebar .x-navigation li.xn-openable > a .xn-openable-indicator {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* Some templates use a span/caret element floated right */
+.page-sidebar .x-navigation li.xn-openable > a span.pull-right,
+.page-sidebar .x-navigation li.xn-openable > a .pull-right {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* Also ensure svg chevrons (if present) are black */
+.page-sidebar .x-navigation li.xn-openable > a svg {
+  fill: #000 !important;
+  stroke: #000 !important;
+  opacity: 1 !important;
+}
+
 /* --------------------------
    Widgets / Cards
 --------------------------- */
@@ -458,29 +538,6 @@ body#email_confirmation {
   border-color: transparent !important;
 }
 
-/* Deposit button MUST be blue */
-#balanceWidget .btn,
-#balanceWidget button,
-#balanceWidget a.btn,
-#balanceWidget .btn-success,
-#balanceWidget .btn.btn-success,
-#balanceWidget .btn-deposit,
-#balanceWidget a.btn-success,
-#balanceWidget button.btn-success,
-#balanceWidget input[type="submit"] {
-  background: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #fff !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-#balanceWidget .btn:hover,
-#balanceWidget .btn-success:hover,
-#balanceWidget .btn-deposit:hover {
-  filter: brightness(0.95);
-}
-
 /* Global: kill any remaining "success green" */
 .btn-success,
 .btn.btn-success,
@@ -507,9 +564,9 @@ body#email_confirmation {
   background-color: var(--bw-primary) !important;
 }
 
-/* =========================================================
-   FIX #2 — ACCOUNT STATUS ICONS (currently look wrong)
-========================================================= */
+/* --------------------------
+   Account Status icons
+--------------------------- */
 
 #accountStatusWidget .widget-buttons a,
 #accountStatusWidget .widget-buttons button,
@@ -756,9 +813,7 @@ ul.panel-controls > li > a:hover {
   border-radius: 10px;
 }
 
-/* =========================================================
-   FIX: Deposit button visible + color #0437F4 (only)
-========================================================= */
+/* Deposit button visible + color #0437F4 */
 #balanceWidget .btn-deposit,
 #balanceWidget .btn.btn-success,
 #balanceWidget .btn-success,
@@ -784,88 +839,148 @@ ul.panel-controls > li > a:hover {
 }
 
 /* =========================================================
-   MOBILE FIX #1: Sidebar must reach the bottom + scroll
-   - fixes menu that "stops" and leaves cut area
+   ✅ NEW FIXES — ONLY requested changes (DO NOT touch rest)
+   1) Sidebar font 15px + remove underline stroke on hover (sidebar only)
+   2) Mobile sidebar full height + scroll
+   3) Mobile "Your Balance" compact + not huge + remove white line
+   4) Logout popup always white (SweetAlert / Message-box / Modal)
 ========================================================= */
-@media (max-width: 991px) {
-  /* ensure full height for layout */
-  html,
-  body,
-  .page-container {
-    height: 100% !important;
-  }
 
-  /* sidebar takes full viewport height and scrolls */
+/* 1) SIDEBAR: font size 15px (main + submenu) */
+.page-sidebar .x-navigation li > a,
+.page-sidebar .x-navigation li > a span,
+.page-sidebar .x-navigation li > a span.xn-text,
+.page-sidebar .x-navigation li > ul > li > a,
+.page-sidebar .x-navigation li > ul > li > a span,
+.page-sidebar .x-navigation li > ul > li > a span.xn-text {
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+}
+
+/* 1b) SIDEBAR: remove underline/stroke ONLY on menu hover/focus/active */
+.page-sidebar .x-navigation li > a,
+.page-sidebar .x-navigation li > a:hover,
+.page-sidebar .x-navigation li > a:focus,
+.page-sidebar .x-navigation li > a:active {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.page-sidebar .x-navigation li > a:hover *,
+.page-sidebar .x-navigation li > a:focus *,
+.page-sidebar .x-navigation li > a:active * {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* 2) MOBILE SIDEBAR: must reach bottom + scroll (no stop) */
+@media (max-width: 991px) {
   .page-container .page-sidebar {
     height: 100vh !important;
     max-height: 100vh !important;
     overflow-y: auto !important;
-    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 24px !important; /* space for last item */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
   }
-
-  /* navigation list scrolls cleanly inside */
   .page-sidebar .x-navigation {
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
+    min-height: 100% !important;
   }
 }
 
-/* =========================================================
-   MOBILE FIX #2: Balance widget too big on mobile
-   - makes it more compact without changing desktop
-========================================================= */
+/* 3) MOBILE "Your Balance": compact + no huge empty area + remove small white line */
 @media (max-width: 767px) {
-  #balanceWidget,
-  #equityWidget,
-  #marginWidget,
-  #freeMarginWidget,
-  #creditWidget,
-  #accountStatusWidget {
-    min-height: 120px !important;
-  }
-
-  /* tighten paddings inside top widgets */
-  .page-container .widget {
+  /* Remove forced height so it doesn't create the giant empty block */
+  #balanceWidget {
+    min-height: unset !important;
+    height: auto !important;
     padding: 14px 14px !important;
+    margin-bottom: 12px !important;
+    overflow: hidden !important; /* helps kill any stray line/pseudo separators */
   }
 
-  /* smaller numbers/titles on very small screens */
+  /* Keep title + value tighter */
+  #balanceWidget .widget-title {
+    margin: 0 0 8px 0 !important;
+    line-height: 1.1 !important;
+  }
   #balanceWidget .widget-int,
-  #balanceWidget .widget-big-int,
-  #equityWidget .widget-int,
-  #equityWidget .widget-big-int {
-    font-size: 28px !important;
+  #balanceWidget .widget-big-int {
+    font-size: 30px !important;
+    margin-top: 6px !important;
+  }
+  #balanceWidget .widget-subtitle {
+    margin-top: 8px !important;
   }
 
-  #balanceWidget .widget-title,
-  #equityWidget .widget-title {
-    font-size: 13px !important;
+  /* Kill any pseudo separators/lines (the “small white line”) */
+  #balanceWidget::before,
+  #balanceWidget::after,
+  #balanceWidget .widget-controls::before,
+  #balanceWidget .widget-buttons::before,
+  #balanceWidget .widget-controls::after,
+  #balanceWidget .widget-buttons::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* If there is an hr/divider inside, force it hidden */
+  #balanceWidget hr,
+  #balanceWidget .divider,
+  #balanceWidget .widget-divider,
+  #balanceWidget .widget-separator {
+    display: none !important;
+    border: 0 !important;
+    height: 0 !important;
   }
 }
 
-/* =========================================================
-   MOBILE FIX #3: Remove the small white line on Balance section
-   - kills any pseudo elements / borders that appear as a thin line
-========================================================= */
-#balanceWidget::before,
-#balanceWidget::after,
-#balanceWidget .widget-content::before,
-#balanceWidget .widget-content::after,
-#balanceWidget .widget-title::after,
-#balanceWidget .widget-title::before {
-  content: none !important;
-  display: none !important;
+/* 4) LOGOUT POPUP: always white (covers common templates) */
+
+/* SweetAlert2 */
+.swal2-popup {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+.swal2-title,
+.swal2-html-container,
+.swal2-content,
+.swal2-popup * {
+  color: #111111 !important;
 }
 
-#balanceWidget,
-#balanceWidget * {
-  border-top-color: transparent !important;
+/* Many admin templates use "message-box" */
+.message-box,
+.message-box .mb-container,
+.message-box .mb-container .mb-middle,
+.message-box .mb-container .mb-middle .mb-title,
+.message-box .mb-container .mb-middle .mb-content,
+.message-box .mb-container .mb-middle .mb-footer {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+.message-box * {
+  color: #111111 !important;
 }
 
-/* if theme adds a separator line via background-image */
-#balanceWidget {
-  background-image: none !important;
+/* Bootstrap-like modal fallbacks */
+.modal .modal-content,
+.modal-dialog .modal-content,
+#logoutModal .modal-content {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+.modal .modal-content *,
+.modal-dialog .modal-content *,
+#logoutModal .modal-content * {
+  color: #111111 !important;
+}
+
+/* Overlay/backdrop should darken page, NOT the popup itself */
+.swal2-container,
+.modal-backdrop,
+.message-box.open {
+  background: rgba(0, 0, 0, 0.55) !important;
 }
