@@ -23,14 +23,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body,
 button,
 input,
 select,
 textarea,
 .form-control,
 .btn,
-.x-navigation,
 .page-container,
+.page-content,
+.page-sidebar,
 .panel,
 .widget,
 .tile,
@@ -42,8 +44,27 @@ h2,
 h3,
 h4,
 h5,
-h6 {
+h6,
+p,
+span,
+label,
+small,
+div,
+ul,
+ol,
+li,
+strong,
+em {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.fa,
+.fas,
+.far,
+.fal,
+.fab,
+.glyphicon {
+  font-family: inherit;
 }
 
 a {
@@ -52,7 +73,8 @@ a {
 
 p,
 label,
-small {
+small,
+span {
   color: var(--bw-text) !important;
 }
 
@@ -95,112 +117,17 @@ small {
 .x-navigation.x-navigation-horizontal li.xn-logo img,
 .x-navigation.x-navigation-horizontal .xn-logo img,
 .x-navigation.x-navigation-horizontal .logo img,
-.x-navigation.x-navigation-horizontal .brand img {
+.x-navigation.x-navigation-horizontal .brand img,
+.page-sidebar .x-navigation .xn-logo img,
+.page-sidebar .x-navigation li.xn-logo img {
   opacity: 1 !important;
   visibility: visible !important;
   filter: brightness(0) saturate(100%) !important;
 }
 
-.header-background {
-  width: 95%;
-  position: absolute;
-  left: 0;
-  top: 25px;
-  right: 0;
-  max-width: 1170px;
-  margin: auto;
-  background: var(--bw-bg) !important;
-  border: 1px solid var(--bw-border) !important;
-  border-radius: var(--bw-radius) !important;
-  box-shadow: var(--bw-shadow) !important;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .header-background img {
-  max-width: 150px !important;
-  margin: 15px 9px !important;
   opacity: 1 !important;
-}
-
-.login-container,
-.registration-container {
-  padding-top: 115px;
-  padding-bottom: 50px;
-  position: relative;
-  z-index: 1;
-  background: var(--bw-bg) !important;
-}
-
-.login-container::before,
-.registration-container::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: auto;
-  aspect-ratio: 1;
-  width: 100%;
-  max-width: 50%;
-  background: url(https://s3.eu-west-1.amazonaws.com/skaleapps.io/Client+CDN/bullwaves/banner-absolute1.png)
-    no-repeat;
-  background-size: 100% 100%;
-  z-index: -1;
-  opacity: 0.18;
-}
-
-.login-container::after,
-.registration-container::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  height: auto;
-  aspect-ratio: 1;
-  width: 100%;
-  max-width: 50%;
-  background: url(https://s3.eu-west-1.amazonaws.com/skaleapps.io/Client+CDN/bullwaves/banner-absolute2.png)
-    no-repeat;
-  background-size: 100% 100%;
-  z-index: -1;
-  opacity: 0.18;
-}
-
-.login-container .login-box .login-body,
-.registration-container .registration-box .registration-body {
-  border-radius: 20px !important;
-  background: var(--bw-bg) !important;
-  border: 1px solid var(--bw-border) !important;
-  box-shadow: var(--bw-shadow) !important;
-}
-
-.login-container .login-box .login-body .login-title,
-.registration-container .registration-box .registration-body .registration-title {
-  text-align: center;
-  font-size: 30px;
-  color: var(--bw-text) !important;
-}
-
-.login-container .login-box .login-body .login-subtitle,
-.registration-container .registration-box .registration-body .registration-subtitle {
-  text-align: center;
-  color: var(--bw-muted) !important;
-}
-
-.login-container .login-box .login-body .form-control,
-.registration-container .registration-box .registration-body .form-control {
-  border: 1px solid var(--bw-border-strong) !important;
-  background: var(--bw-bg) !important;
-  color: var(--bw-text) !important;
-  padding: 10px 14px !important;
-  border-radius: 10px !important;
-}
-
-.login-container .login-box .login-body .form-control:focus,
-.registration-container .registration-box .registration-body .form-control:focus {
-  border-color: rgba(36, 83, 255, 0.6) !important;
-  box-shadow: 0 0 0 4px rgba(36, 83, 255, 0.12) !important;
+  visibility: visible !important;
 }
 
 .page-container .page-sidebar {
@@ -283,69 +210,73 @@ small {
 .page-container .widget .widget-title {
   color: var(--bw-muted) !important;
   font-weight: 500 !important;
-}
-
-.page-container .widget .widget-subtitle {
-  color: var(--bw-muted) !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
 }
 
 .page-container .widget .widget-int,
 .page-container .widget .widget-big-int {
   color: var(--bw-text) !important;
   font-weight: 700 !important;
+  font-size: 34px !important;
+  line-height: 1.1 !important;
+  margin: 8px 0 0 0 !important;
 }
 
-.page-container .widget .widget-title,
-.page-container .widget .widget-subtitle,
-.page-container .widget .widget-int,
-.page-container .widget .widget-big-int {
-  text-align: left !important;
-  text-transform: none !important;
+.page-container .widget .widget-subtitle {
+  color: var(--bw-muted) !important;
+  font-size: 13px !important;
+  margin: 8px 0 0 0 !important;
 }
 
-.metatrader-color,
-.webtrader-color,
-.metatrader-color *,
-.webtrader-color * {
-  color: #fff !important;
+#balanceWidget,
+#equityWidget,
+#marginWidget,
+#freeMarginWidget,
+#creditWidget,
+#accountStatusWidget {
+  min-height: 150px !important;
 }
 
-.metatrader-color,
-.webtrader-color {
-  background: linear-gradient(145deg, #2453ff 0%, #5176ff 100%) !important;
+#balanceWidget hr,
+#balanceWidget .hr,
+#balanceWidget .divider,
+#balanceWidget .widget-divider,
+#balanceWidget .widget-separator,
+#balanceWidget .widget-buttons:before,
+#balanceWidget .widget-controls:before {
+  display: none !important;
   border: 0 !important;
-  box-shadow: var(--bw-shadow) !important;
+  height: 0 !important;
 }
 
-.metatrader-color h1,
-.metatrader-color h2,
-.metatrader-color h3,
-.metatrader-color h4,
-.metatrader-color h5,
-.metatrader-color h6,
-.webtrader-color h1,
-.webtrader-color h2,
-.webtrader-color h3,
-.webtrader-color h4,
-.webtrader-color h5,
-.webtrader-color h6 {
-  color: #fff !important;
+#balanceWidget .widget-buttons,
+#balanceWidget .widget-controls,
+#balanceWidget .widget-buttons > div,
+#balanceWidget .widget-controls > div {
+  border-top: 0 !important;
+  box-shadow: none !important;
 }
 
-#balanceWidget .btn-deposit,
-#balanceWidget .btn.btn-success,
+#balanceWidget .btn,
+#balanceWidget button,
+#balanceWidget a.btn,
 #balanceWidget .btn-success,
-#balanceWidget button.btn-success,
-#balanceWidget a.btn-success {
+#balanceWidget .btn.btn-success,
+#balanceWidget .btn-deposit,
+#balanceWidget a.btn-success,
+#balanceWidget button.btn-success {
   background: var(--bw-primary) !important;
   border-color: var(--bw-primary) !important;
   color: #fff !important;
   border-radius: 999px !important;
+  box-shadow: none !important;
 }
 
-#balanceWidget .btn-deposit:hover,
-#balanceWidget .btn.btn-success:hover,
-#balanceWidget .btn-success:hover {
+#balanceWidget .btn:hover,
+#balanceWidget .btn-success:hover,
+#balanceWidget .btn-deposit:hover {
   filter: brightness(0.95);
 }
 
@@ -388,7 +319,8 @@ small {
   color: var(--bw-primary) !important;
 }
 
-.progress-bar-success {
+.progress-bar-success,
+.progress-bar.progress-bar-success {
   background-color: var(--bw-primary) !important;
 }
 
@@ -398,6 +330,52 @@ small {
   color: #fff !important;
   border-radius: 8px !important;
   font-weight: 600 !important;
+}
+
+.metatrader-color,
+.webtrader-color {
+  background: linear-gradient(145deg, #2453ff 0%, #5176ff 100%) !important;
+  border: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  outline: none !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+.metatrader-color *,
+.webtrader-color * {
+  color: #fff !important;
+}
+
+.metatrader-color :focus,
+.webtrader-color :focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.metatrader-color,
+.webtrader-color,
+.metatrader-color .widget,
+.webtrader-color .widget,
+.metatrader-color .tile,
+.webtrader-color .tile,
+.metatrader-color .panel,
+.webtrader-color .panel {
+  border-color: transparent !important;
+}
+
+#marginWidget .owl-theme .owl-controls .owl-page span {
+  margin: 4px !important;
+  opacity: 1 !important;
+  width: 6px !important;
+  height: 6px !important;
+  background: #d9d9d9 !important;
+}
+
+#marginWidget .owl-theme .owl-controls .owl-page.active span {
+  background: var(--bw-primary) !important;
 }
 
 #accountStatusWidget .progress {
@@ -416,14 +394,14 @@ small {
 #accountStatusWidget .widget-buttons a i,
 #accountStatusWidget .widget-buttons a .fa,
 #accountStatusWidget .widget-buttons a .glyphicon {
-  color: var(--bw-text) !important;
+  color: var(--bw-primary) !important;
 }
 
-#accountStatusWidget .widget-buttons a span.text-success,
-#accountStatusWidget .widget-buttons a i.text-success,
-#accountStatusWidget .widget-buttons a .fa.text-success,
-#accountStatusWidget .widget-buttons a .glyphicon.text-success {
-  color: var(--bw-primary) !important;
+#accountStatusWidget .widget-buttons a span.text-danger,
+#accountStatusWidget .widget-buttons a i.text-danger,
+#accountStatusWidget .widget-buttons a .fa.text-danger,
+#accountStatusWidget .widget-buttons a .glyphicon.text-danger {
+  color: var(--bw-danger) !important;
 }
 
 #accountStatusWidget
@@ -443,18 +421,6 @@ small {
 #equityWidget .widget-subtitle a:hover,
 .widget .widget-subtitle a:hover {
   text-decoration: underline !important;
-}
-
-#marginWidget .owl-theme .owl-controls .owl-page span {
-  margin: 4px !important;
-  opacity: 1 !important;
-  width: 6px !important;
-  height: 6px !important;
-  background: #d9d9d9 !important;
-}
-
-#marginWidget .owl-theme .owl-controls .owl-page.active span {
-  background: var(--bw-primary) !important;
 }
 
 .page-container .panel {
@@ -497,14 +463,6 @@ small {
   background: transparent !important;
   color: var(--bw-text) !important;
   border: 0 !important;
-}
-
-.panel-body .table tr > th:first-child {
-  border-radius: 10px 0 0 10px !important;
-}
-
-.panel-body .table tr > th:last-child {
-  border-radius: 0 10px 10px 0 !important;
 }
 
 .table-bordered,
@@ -559,9 +517,17 @@ ul.panel-controls > li > a:hover {
 }
 
 .x-navigation.disclaimer-color,
-.x-navigation.footer-color {
+.x-navigation.footer-color,
+.x-navigation.disclaimer-color *,
+.x-navigation.footer-color * {
   background: transparent !important;
   background-image: none !important;
+  color: var(--bw-text) !important;
+}
+
+.x-navigation.disclaimer-color a,
+.x-navigation.footer-color a {
+  color: var(--bw-text) !important;
 }
 
 body#email_confirmation .x-navigation.x-navigation-horizontal,
@@ -577,17 +543,6 @@ body#Register-Demo-Account .x-navigation.x-navigation-horizontal {
   background-image: none !important;
 }
 
-body#password_reminder p {
-  color: var(--bw-text) !important;
-}
-
-@media (max-width: 1199px) {
-  .login-container,
-  .registration-container {
-    padding-top: 70px;
-  }
-}
-
 @media (max-width: 1023px) {
   .profile-data {
     display: none !important;
@@ -598,31 +553,8 @@ body#password_reminder p {
 }
 
 @media (max-width: 991px) {
-  .login-container {
-    padding-top: 140px;
-  }
   .page-container .page-sidebar {
     background: var(--bw-bg) !important;
-  }
-}
-
-@media (max-width: 767px) {
-  .header-background {
-    top: 12px;
-  }
-  .login-container,
-  .registration-container {
-    padding-top: 110px;
-  }
-  .login-container::after,
-  .registration-container::after {
-    max-width: 40%;
-  }
-  .page-container .page-content {
-    padding: 18px 12px 30px !important;
-  }
-  .x-navigation.x-navigation-horizontal li > ul.xn-drop-left {
-    height: 300px;
   }
 }
 
