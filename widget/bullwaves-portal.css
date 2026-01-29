@@ -17,6 +17,10 @@
   --bw-danger: #f50100;
   --bw-shadow: 0 10px 30px rgba(27, 27, 27, 0.06);
   --bw-radius: 12px;
+
+  /* ✅ Top widgets unified size */
+  --bw-top-widget-h: 150px;
+  --bw-top-widget-px: 16px;
 }
 
 /* --------------------------
@@ -286,16 +290,40 @@ body#email_confirmation {
   align-items: center !important;
   gap: 10px !important;
   transition: 0.2s ease !important;
+
+  /* ✅ requested: bigger menu text */
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+
+  /* ✅ requested: no underline stroke */
+  text-decoration: none !important;
 }
 
 .page-sidebar .x-navigation li > a span,
 .page-sidebar .x-navigation li > a span.xn-text {
   color: var(--bw-text) !important;
   font-weight: 500 !important;
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
 }
 
-.page-sidebar .x-navigation li > a:hover {
+/* remove underline on hover (sidebar only) */
+.page-sidebar .x-navigation li > a:hover,
+.page-sidebar .x-navigation li > a:focus,
+.page-sidebar .x-navigation li > a:active {
   background: #efefef !important;
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.page-sidebar .x-navigation li > a:hover *,
+.page-sidebar .x-navigation li > a:focus *,
+.page-sidebar .x-navigation li > a:active * {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
 .page-sidebar .x-navigation li > a:hover span,
@@ -306,7 +334,6 @@ body#email_confirmation {
 .page-sidebar .x-navigation li.active > a {
   background: #efefef !important;
 }
-
 .page-sidebar .x-navigation li.active > a span,
 .page-sidebar .x-navigation li.active > a span.xn-text {
   color: var(--bw-primary) !important;
@@ -348,7 +375,6 @@ body#email_confirmation {
    - Remove the "white pill" empty blocks under items
    - Dropdown must appear ONLY after click
    - Arrow on the right must be BLACK and visible
-   - Do not change anything else
 ========================================================= */
 
 /* 1) Remove any pseudo-elements / decorations that create empty rounded blocks */
@@ -357,7 +383,7 @@ body#email_confirmation {
   content: none !important;
 }
 
-/* 2) Kill any extra elements used as "decorations" (common in templates) */
+/* 2) Kill any extra elements used as "decorations" */
 .page-sidebar .x-navigation li > a .xn-text::before,
 .page-sidebar .x-navigation li > a .xn-text::after {
   content: none !important;
@@ -376,7 +402,7 @@ body#email_confirmation {
   box-shadow: var(--bw-shadow) !important;
 }
 
-/* show submenu only when open/active (covers common classnames) */
+/* show submenu only when open/active */
 .page-sidebar .x-navigation li.active > ul,
 .page-sidebar .x-navigation li.open > ul,
 .page-sidebar .x-navigation li.xn-openable.active > ul,
@@ -384,7 +410,7 @@ body#email_confirmation {
   display: block !important;
 }
 
-/* submenu items style (keeps consistent and avoids "strange dark blocks") */
+/* submenu items style */
 .page-sidebar .x-navigation li > ul > li > a {
   background: transparent !important;
   border: 0 !important;
@@ -394,13 +420,21 @@ body#email_confirmation {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
+
+  /* ✅ match font size */
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+
+  /* ✅ no underline */
+  text-decoration: none !important;
 }
 .page-sidebar .x-navigation li > ul > li > a:hover {
   background: #efefef !important;
   color: var(--bw-primary) !important;
+  text-decoration: none !important;
 }
 
-/* 4) Arrow on the right must be BLACK (usually .fa-angle-down / caret) */
+/* 4) Arrow on the right must be BLACK */
 .page-sidebar .x-navigation li.xn-openable > a .fa-angle-down,
 .page-sidebar .x-navigation li.xn-openable > a .fa-angle-right,
 .page-sidebar .x-navigation li.xn-openable > a .fa-caret-down,
@@ -469,31 +503,181 @@ body#email_confirmation {
   margin: 8px 0 0 0 !important;
 }
 
-/* Make the top summary cards consistent */
+/* =========================================================
+   ✅ TOP SUMMARY CARDS — ALL IDENTICAL SIZE + ALIGNMENT
+   (Your Balance / Your Equity / Margin Level / Account Status etc.)
+========================================================= */
+
 #balanceWidget,
 #equityWidget,
 #marginWidget,
 #freeMarginWidget,
 #creditWidget,
 #accountStatusWidget {
-  min-height: 150px !important;
+  /* force identical outer size */
+  height: var(--bw-top-widget-h) !important;
+  min-height: var(--bw-top-widget-h) !important;
+  max-height: var(--bw-top-widget-h) !important;
+
+  /* identical padding */
+  padding: var(--bw-top-widget-px) var(--bw-top-widget-px) !important;
+
+  /* identical layout */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
-/* Remove the unwanted divider line in balance */
+/* keep internal spacing consistent across all top widgets */
+#balanceWidget .widget-title,
+#equityWidget .widget-title,
+#marginWidget .widget-title,
+#freeMarginWidget .widget-title,
+#creditWidget .widget-title,
+#accountStatusWidget .widget-title {
+  margin: 0 0 10px 0 !important;
+}
+
+#balanceWidget .widget-int,
+#balanceWidget .widget-big-int,
+#equityWidget .widget-int,
+#equityWidget .widget-big-int,
+#marginWidget .widget-int,
+#marginWidget .widget-big-int,
+#freeMarginWidget .widget-int,
+#freeMarginWidget .widget-big-int,
+#creditWidget .widget-int,
+#creditWidget .widget-big-int {
+  margin: 0 !important;
+}
+
+/* subtitle/link spacing aligned */
+#equityWidget .widget-subtitle,
+#marginWidget .widget-subtitle,
+#creditWidget .widget-subtitle,
+#freeMarginWidget .widget-subtitle {
+  margin-top: 10px !important;
+}
+
+/* Account Status: keep progress + icons fitting same height */
+#accountStatusWidget .progress {
+  height: 7px !important;
+  width: 78% !important;
+  margin: 8px auto 10px auto !important;
+  background: #efefef !important;
+  border-radius: 999px !important;
+}
+#accountStatusWidget .progress-bar-success {
+  background-color: var(--bw-primary) !important;
+}
+
+#accountStatusWidget .widget-buttons {
+  margin-top: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 28px !important;
+}
+
+/* Margin widget dots: reduce vertical footprint */
+#marginWidget .owl-theme .owl-controls {
+  margin-top: 10px !important;
+}
+
+/* --------------------------
+   ✅ REMOVE GREY LINE in Your Balance (definitive)
+   That line is usually a border-top / border-bottom / pseudo separator
+------------------------------------------------- */
+
+/* Hide common separator nodes */
 #balanceWidget hr,
 #balanceWidget .hr,
 #balanceWidget .divider,
 #balanceWidget .widget-divider,
 #balanceWidget .widget-separator,
-#balanceWidget .widget-buttons:before,
-#balanceWidget .widget-controls:before,
+#balanceWidget .widget-controls,
 #balanceWidget .widget-buttons,
-#balanceWidget .widget-controls {
+#balanceWidget .separator,
+#balanceWidget .line {
   border: 0 !important;
   box-shadow: none !important;
 }
 
-/* BLUE TILES */
+/* If the line is a pseudo-element on ANY child inside balance, kill it */
+#balanceWidget *::before,
+#balanceWidget *::after {
+  box-shadow: none !important;
+}
+
+/* Kill borders that often draw the line (but keep the button border intact) */
+#balanceWidget *:not(.btn):not(.btn-deposit):not(a.btn):not(button.btn):not(input.btn) {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  outline: 0 !important;
+}
+
+/* Also remove borders on the value area (very common) */
+#balanceWidget .widget-int,
+#balanceWidget .widget-big-int,
+#balanceWidget .widget-int::before,
+#balanceWidget .widget-int::after,
+#balanceWidget .widget-big-int::before,
+#balanceWidget .widget-big-int::after {
+  border: 0 !important;
+  content: none !important;
+}
+
+/* --------------------------
+   Deposit button: bigger + full width inside the card
+--------------------------- */
+
+#balanceWidget .btn-deposit,
+#balanceWidget .btn,
+#balanceWidget .btn.btn-success,
+#balanceWidget .btn-success,
+#balanceWidget button,
+#balanceWidget a.btn,
+#balanceWidget a.btn-success,
+#balanceWidget button.btn-success,
+#balanceWidget input.btn-success,
+#balanceWidget input[type="submit"] {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+
+  background: #0437F4 !important;
+  border-color: #0437F4 !important;
+  color: #fff !important;
+
+  min-height: 46px !important;
+  padding: 12px 18px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+
+  margin: 12px 0 0 0 !important; /* uses widget padding for lateral spacing */
+  text-decoration: none !important;
+}
+
+/* safety: never underline buttons */
+#balanceWidget .btn:hover,
+#balanceWidget .btn:focus,
+#balanceWidget .btn:active {
+  text-decoration: none !important;
+}
+
+/* --------------------------
+   BLUE TILES
+--------------------------- */
+
 .metatrader-color,
 .webtrader-color,
 #balanceWidget.metatrader-color,
@@ -510,7 +694,6 @@ body#email_confirmation {
   color: #fff !important;
 }
 
-/* If those titles were black, force them white */
 .metatrader-color .widget-title,
 .webtrader-color .widget-title,
 .metatrader-color .widget-int,
@@ -550,18 +733,6 @@ body#email_confirmation {
 }
 .text-success {
   color: var(--bw-primary) !important;
-}
-
-/* Account status progress */
-#accountStatusWidget .progress {
-  height: 7px !important;
-  width: 100% !important;
-  margin: 14px 0 !important;
-  background: #efefef !important;
-  border-radius: 999px !important;
-}
-#accountStatusWidget .progress-bar-success {
-  background-color: var(--bw-primary) !important;
 }
 
 /* --------------------------
@@ -609,13 +780,6 @@ body#email_confirmation {
 #accountStatusWidget .widget-buttons span.text-danger,
 #accountStatusWidget .widget-buttons .fa.text-danger,
 #accountStatusWidget .widget-buttons .glyphicon.text-danger {
-  color: var(--bw-danger) !important;
-}
-
-#accountStatusWidget
-  .widget-buttons
-  a
-  span[data-original-title='Documentation Not Verified'] {
   color: var(--bw-danger) !important;
 }
 
@@ -783,11 +947,20 @@ ul.panel-controls > li > a:hover {
 }
 
 @media (max-width: 991px) {
+  /* ✅ mobile sidebar full height + scroll */
   .page-container .page-sidebar {
-    background: var(--bw-bg) !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+  }
+  .page-sidebar .x-navigation {
+    min-height: 100% !important;
   }
 }
 
+/* Mobile: allow top widgets to grow naturally (avoid layout breaks) */
 @media (max-width: 767px) {
   .login-container,
   .registration-container {
@@ -803,8 +976,21 @@ ul.panel-controls > li > a:hover {
   .x-navigation.x-navigation-horizontal li > ul.xn-drop-left {
     height: 300px;
   }
+
+  /* On mobile: cards can be auto height (still consistent width) */
+  #balanceWidget,
+  #equityWidget,
+  #marginWidget,
+  #freeMarginWidget,
+  #creditWidget,
+  #accountStatusWidget {
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+  }
 }
 
+/* Horizontal dropdown scrollbar */
 .x-navigation.x-navigation-horizontal li > ul.xn-drop-left::-webkit-scrollbar {
   width: 6px;
 }
@@ -813,131 +999,9 @@ ul.panel-controls > li > a:hover {
   border-radius: 10px;
 }
 
-/* Deposit button visible + color #0437F4 */
-#balanceWidget .btn-deposit,
-#balanceWidget .btn.btn-success,
-#balanceWidget .btn-success,
-#balanceWidget button.btn-success,
-#balanceWidget a.btn-success,
-#balanceWidget input.btn-success,
-#balanceWidget input[type="submit"] {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-
-  background: #0437F4 !important;
-  border-color: #0437F4 !important;
-  color: #fff !important;
-
-  min-height: 38px !important;
-  padding: 8px 18px !important;
-  border-radius: 999px !important;
-}
-
-/* =========================================================
-   ✅ NEW FIXES — ONLY requested changes (DO NOT touch rest)
-   1) Sidebar font 15px + remove underline stroke on hover (sidebar only)
-   2) Mobile sidebar full height + scroll
-   3) Mobile "Your Balance" compact + not huge + remove white line
-   4) Logout popup always white (SweetAlert / Message-box / Modal)
-========================================================= */
-
-/* 1) SIDEBAR: font size 15px (main + submenu) */
-.page-sidebar .x-navigation li > a,
-.page-sidebar .x-navigation li > a span,
-.page-sidebar .x-navigation li > a span.xn-text,
-.page-sidebar .x-navigation li > ul > li > a,
-.page-sidebar .x-navigation li > ul > li > a span,
-.page-sidebar .x-navigation li > ul > li > a span.xn-text {
-  font-size: 15px !important;
-  line-height: 1.2 !important;
-}
-
-/* 1b) SIDEBAR: remove underline/stroke ONLY on menu hover/focus/active */
-.page-sidebar .x-navigation li > a,
-.page-sidebar .x-navigation li > a:hover,
-.page-sidebar .x-navigation li > a:focus,
-.page-sidebar .x-navigation li > a:active {
-  text-decoration: none !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-.page-sidebar .x-navigation li > a:hover *,
-.page-sidebar .x-navigation li > a:focus *,
-.page-sidebar .x-navigation li > a:active * {
-  text-decoration: none !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
-}
-
-/* 2) MOBILE SIDEBAR: must reach bottom + scroll (no stop) */
-@media (max-width: 991px) {
-  .page-container .page-sidebar {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
-  }
-  .page-sidebar .x-navigation {
-    min-height: 100% !important;
-  }
-}
-
-/* 3) MOBILE "Your Balance": compact + no huge empty area + remove small white line */
-@media (max-width: 767px) {
-  /* Remove forced height so it doesn't create the giant empty block */
-  #balanceWidget {
-    min-height: unset !important;
-    height: auto !important;
-    padding: 14px 14px !important;
-    margin-bottom: 12px !important;
-    overflow: hidden !important; /* helps kill any stray line/pseudo separators */
-  }
-
-  /* Keep title + value tighter */
-  #balanceWidget .widget-title {
-    margin: 0 0 8px 0 !important;
-    line-height: 1.1 !important;
-  }
-  #balanceWidget .widget-int,
-  #balanceWidget .widget-big-int {
-    font-size: 30px !important;
-    margin-top: 6px !important;
-  }
-  #balanceWidget .widget-subtitle {
-    margin-top: 8px !important;
-  }
-
-  /* Kill any pseudo separators/lines (the “small white line”) */
-  #balanceWidget::before,
-  #balanceWidget::after,
-  #balanceWidget .widget-controls::before,
-  #balanceWidget .widget-buttons::before,
-  #balanceWidget .widget-controls::after,
-  #balanceWidget .widget-buttons::after {
-    content: none !important;
-    display: none !important;
-  }
-
-  /* If there is an hr/divider inside, force it hidden */
-  #balanceWidget hr,
-  #balanceWidget .divider,
-  #balanceWidget .widget-divider,
-  #balanceWidget .widget-separator {
-    display: none !important;
-    border: 0 !important;
-    height: 0 !important;
-  }
-}
-
-/* 4) LOGOUT POPUP: always white (covers common templates) */
+/* --------------------------
+   LOGOUT POPUP: always white (SweetAlert / Message-box / Modal)
+--------------------------- */
 
 /* SweetAlert2 */
 .swal2-popup {
@@ -951,7 +1015,7 @@ ul.panel-controls > li > a:hover {
   color: #111111 !important;
 }
 
-/* Many admin templates use "message-box" */
+/* message-box template */
 .message-box,
 .message-box .mb-container,
 .message-box .mb-container .mb-middle,
