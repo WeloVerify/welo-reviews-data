@@ -4,7 +4,7 @@
    BULLWAVES PORTAL — LIGHT THEME (Stable)
    - Inter everywhere
    - DO NOT override icon fonts (FontAwesome / Glyphicons)
-   - Fix: icons, login, footer text, deposit button, balance divider
+   - Fix: top-left logo (white) + Account Status icons
    ========================================================= */
 
 :root {
@@ -84,27 +84,6 @@ a {
   font-family: "Glyphicons Halflings" !important;
 }
 
-/* Some portals use these for iconography */
-.x-navigation li > a > i,
-.x-navigation li > a > .fa,
-.x-navigation li > a > .glyphicon {
-  font-family: inherit;
-}
-
-/* Restore icons inside navigation explicitly */
-.page-sidebar .x-navigation li > a i.fa,
-.page-sidebar .x-navigation li > a i.fas,
-.page-sidebar .x-navigation li > a i.far,
-.page-sidebar .x-navigation li > a i.fal,
-.page-sidebar .x-navigation li > a i.fab {
-  font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
-  font-weight: 900 !important;
-}
-.page-sidebar .x-navigation li > a span.glyphicon,
-.page-sidebar .x-navigation li > a i.glyphicon {
-  font-family: "Glyphicons Halflings" !important;
-}
-
 a {
   color: var(--bw-primary) !important;
   text-decoration: none !important;
@@ -167,20 +146,34 @@ span {
   color: var(--bw-text) !important;
 }
 
-/* Make sure logo is visible (not transparent / inverted wrongly) */
+/* =========================================================
+   FIX #1 — TOP-LEFT LOGO IS WHITE
+   Keep logo rendering exactly as original asset (no filters/blend)
+========================================================= */
 .x-navigation.x-navigation-horizontal li.xn-logo img,
 .x-navigation.x-navigation-horizontal .xn-logo img,
 .x-navigation.x-navigation-horizontal .logo img,
 .x-navigation.x-navigation-horizontal .brand img,
 .page-sidebar .x-navigation .xn-logo img,
-.page-sidebar .x-navigation li.xn-logo img {
+.page-sidebar .x-navigation li.xn-logo img,
+.x-navigation.x-navigation-horizontal a img {
   opacity: 1 !important;
   visibility: visible !important;
   filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal !important;
+  background: transparent !important;
 }
 
-/* If the logo is dark-on-transparent and disappears on dark bg,
-   keep filter none and let the original asset render. */
+/* Some templates apply masks or invert via parent */
+.x-navigation.x-navigation-horizontal li.xn-logo,
+.x-navigation.x-navigation-horizontal .xn-logo,
+.x-navigation.x-navigation-horizontal .logo,
+.x-navigation.x-navigation-horizontal .brand {
+  filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal !important;
+}
 
 /* --------------------------
    Login / Register pages
@@ -463,7 +456,7 @@ body#email_confirmation {
   color: #fff !important;
 }
 
-/* If those titles were black (your issue), force them white */
+/* If those titles were black, force them white */
 .metatrader-color .widget-title,
 .webtrader-color .widget-title,
 .metatrader-color .widget-int,
@@ -479,7 +472,7 @@ body#email_confirmation {
   color: #fff !important;
 }
 
-/* Remove weird colored borders (green/orange strokes) */
+/* Remove weird colored borders */
 .metatrader-color,
 .webtrader-color,
 .metatrader-color .widget,
@@ -491,7 +484,7 @@ body#email_confirmation {
   border-color: transparent !important;
 }
 
-/* Deposit button MUST be blue (not green) */
+/* Deposit button MUST be blue */
 #balanceWidget .btn,
 #balanceWidget button,
 #balanceWidget a.btn,
@@ -517,7 +510,6 @@ body#email_confirmation {
 /* Global: kill any remaining "success green" */
 .btn-success,
 .btn.btn-success,
-.text-success,
 .label-success,
 .badge-success,
 .progress-bar-success {
@@ -541,32 +533,68 @@ body#email_confirmation {
   background-color: var(--bw-primary) !important;
 }
 
-/* Account status action icons: no green */
-#accountStatusWidget .widget-buttons a span,
-#accountStatusWidget .widget-buttons a i,
-#accountStatusWidget .widget-buttons a .fa,
-#accountStatusWidget .widget-buttons a .glyphicon {
+/* =========================================================
+   FIX #2 — ACCOUNT STATUS ICONS (currently look wrong)
+   - Ensure icons use proper icon fonts
+   - Remove square blocks / weird backgrounds
+   - Keep colors: Blue primary, Red danger when needed
+========================================================= */
+
+/* Remove any square blocks created by spans/buttons inside widget-buttons */
+#accountStatusWidget .widget-buttons a,
+#accountStatusWidget .widget-buttons button,
+#accountStatusWidget .widget-buttons span,
+#accountStatusWidget .widget-buttons i {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+/* Ensure FontAwesome icons render correctly here */
+#accountStatusWidget .widget-buttons i.fa,
+#accountStatusWidget .widget-buttons i.fas,
+#accountStatusWidget .widget-buttons i.far,
+#accountStatusWidget .widget-buttons i.fal,
+#accountStatusWidget .widget-buttons i.fab {
+  font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+  font-weight: 900 !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
   color: var(--bw-primary) !important;
 }
 
-/* Keep danger red */
+/* Ensure Glyphicons render correctly here */
+#accountStatusWidget .widget-buttons .glyphicon,
+#accountStatusWidget .widget-buttons i.glyphicon,
+#accountStatusWidget .widget-buttons span.glyphicon {
+  font-family: "Glyphicons Halflings" !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  color: var(--bw-primary) !important;
+}
+
+/* If there are SVG icons inside links */
+#accountStatusWidget .widget-buttons svg {
+  width: 18px !important;
+  height: 18px !important;
+  fill: var(--bw-primary) !important;
+}
+
+/* Keep danger red when system flags it */
+#accountStatusWidget .widget-buttons .text-danger,
+#accountStatusWidget .widget-buttons i.text-danger,
+#accountStatusWidget .widget-buttons span.text-danger,
+#accountStatusWidget .widget-buttons .fa.text-danger,
+#accountStatusWidget .widget-buttons .glyphicon.text-danger {
+  color: var(--bw-danger) !important;
+}
+
+/* Your previous special case */
 #accountStatusWidget
   .widget-buttons
   a
   span[data-original-title='Documentation Not Verified'] {
   color: var(--bw-danger) !important;
-}
-
-/* Margin widget dots */
-#marginWidget .owl-theme .owl-controls .owl-page span {
-  margin: 4px !important;
-  opacity: 1 !important;
-  width: 6px !important;
-  height: 6px !important;
-  background: #d9d9d9 !important;
-}
-#marginWidget .owl-theme .owl-controls .owl-page.active span {
-  background: var(--bw-primary) !important;
 }
 
 /* Links inside widget subtitle */
@@ -579,6 +607,18 @@ body#email_confirmation {
 #equityWidget .widget-subtitle a:hover,
 .widget .widget-subtitle a:hover {
   text-decoration: underline !important;
+}
+
+/* Margin widget dots */
+#marginWidget .owl-theme .owl-controls .owl-page span {
+  margin: 4px !important;
+  opacity: 1 !important;
+  width: 6px !important;
+  height: 6px !important;
+  background: #d9d9d9 !important;
+}
+#marginWidget .owl-theme .owl-controls .owl-page.active span {
+  background: var(--bw-primary) !important;
 }
 
 /* --------------------------
@@ -688,7 +728,6 @@ ul.panel-controls > li > a:hover {
   background-image: none !important;
 }
 
-/* Force footer text to dark */
 .x-navigation.disclaimer-color *,
 .x-navigation.footer-color *,
 .x-navigation.disclaimer-color a,
