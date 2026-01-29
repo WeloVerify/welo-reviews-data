@@ -1,16 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* =========================================================
-   BULLWAVES PORTAL — LIGHT THEME (Stable.)
+   BULLWAVES PORTAL — LIGHT THEME (Stable..)
    - Inter everywhere
-   - DO NOT override icon fonts incorrectly
-   - Deposit button color: #0437F4 (and visible)
+   - Do NOT break icon fonts
+   - Fix: Logout modal (white bg, black text)
+   - Fix: Deposit button still not visible (force visibility + common selectors)
    ========================================================= */
 
 :root {
   --bw-text: #1b1b1b;
   --bw-muted: #959595;
+
+  /* Keep your primary system color as-is */
   --bw-primary: #2453ff;
+
+  /* Deposit specific (requested) */
+  --bw-deposit: #0437F4;
+
   --bw-bg: #ffffff;
   --bw-bg-soft: #fafafa;
   --bw-border: #ededed;
@@ -157,10 +164,7 @@ span {
   color: var(--bw-text) !important;
 }
 
-/* =========================================================
-   TOP-LEFT LOGO
-   (DO NOT CHANGE — keep as you already fixed it)
-========================================================= */
+/* TOP-LEFT LOGO — do not change (you said you fixed it) */
 .x-navigation.x-navigation-horizontal li.xn-logo img,
 .x-navigation.x-navigation-horizontal .xn-logo img,
 .x-navigation.x-navigation-horizontal .logo img,
@@ -468,71 +472,10 @@ body#email_confirmation {
   color: #fff !important;
 }
 
-.metatrader-color .widget-title,
-.webtrader-color .widget-title,
-.metatrader-color .widget-int,
-.webtrader-color .widget-int,
-.metatrader-color .widget-subtitle,
-.webtrader-color .widget-subtitle,
-.metatrader-color h1,
-.metatrader-color h2,
-.metatrader-color h3,
-.webtrader-color h1,
-.webtrader-color h2,
-.webtrader-color h3 {
-  color: #fff !important;
-}
+/* --------------------------
+   Account status widgets
+--------------------------- */
 
-/* Remove weird colored borders */
-.metatrader-color,
-.webtrader-color,
-.metatrader-color .widget,
-.webtrader-color .widget,
-.metatrader-color .tile,
-.webtrader-color .tile,
-.metatrader-color .panel,
-.webtrader-color .panel {
-  border-color: transparent !important;
-}
-
-/* Deposit button base (keeps it blue & visible) */
-#balanceWidget .btn,
-#balanceWidget button,
-#balanceWidget a.btn,
-#balanceWidget .btn-success,
-#balanceWidget .btn.btn-success,
-#balanceWidget .btn-deposit,
-#balanceWidget a.btn-success,
-#balanceWidget button.btn-success,
-#balanceWidget input[type="submit"] {
-  background: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #fff !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-#balanceWidget .btn:hover,
-#balanceWidget .btn-success:hover,
-#balanceWidget .btn-deposit:hover {
-  filter: brightness(0.95);
-}
-
-/* Global: kill any remaining "success green" */
-.btn-success,
-.btn.btn-success,
-.label-success,
-.badge-success,
-.progress-bar-success {
-  background-color: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #fff !important;
-}
-.text-success {
-  color: var(--bw-primary) !important;
-}
-
-/* Account status progress */
 #accountStatusWidget .progress {
   height: 7px !important;
   width: 100% !important;
@@ -554,38 +497,31 @@ body#email_confirmation {
   border: 0 !important;
 }
 
-/* Ensure FontAwesome icons render correctly here */
+/* Ensure icons render correctly here */
 #accountStatusWidget .widget-buttons i.fa,
 #accountStatusWidget .widget-buttons i.fas,
 #accountStatusWidget .widget-buttons i.far,
 #accountStatusWidget .widget-buttons i.fal,
-#accountStatusWidget .widget-buttons i.fab,
-#accountStatusWidget .widget-buttons i.fa-solid,
-#accountStatusWidget .widget-buttons i.fa-regular,
-#accountStatusWidget .widget-buttons i.fa-brands {
+#accountStatusWidget .widget-buttons i.fab {
   font-size: 18px !important;
   line-height: 1 !important;
   color: var(--bw-primary) !important;
 }
 
-/* Ensure Glyphicons render correctly here */
 #accountStatusWidget .widget-buttons .glyphicon,
 #accountStatusWidget .widget-buttons i.glyphicon,
 #accountStatusWidget .widget-buttons span.glyphicon {
-  font-family: "Glyphicons Halflings" !important;
   font-size: 18px !important;
   line-height: 1 !important;
   color: var(--bw-primary) !important;
 }
 
-/* If there are SVG icons inside links */
 #accountStatusWidget .widget-buttons svg {
   width: 18px !important;
   height: 18px !important;
   fill: var(--bw-primary) !important;
 }
 
-/* Keep danger red when system flags it */
 #accountStatusWidget .widget-buttons .text-danger,
 #accountStatusWidget .widget-buttons i.text-danger,
 #accountStatusWidget .widget-buttons span.text-danger,
@@ -594,7 +530,6 @@ body#email_confirmation {
   color: var(--bw-danger) !important;
 }
 
-/* Special case */
 #accountStatusWidget
   .widget-buttons
   a
@@ -602,28 +537,101 @@ body#email_confirmation {
   color: var(--bw-danger) !important;
 }
 
-/* Links inside widget subtitle */
-#equityWidget .widget-subtitle a,
-.widget .widget-subtitle a {
-  color: var(--bw-primary) !important;
-  font-weight: 600 !important;
-  text-decoration: none !important;
-}
-#equityWidget .widget-subtitle a:hover,
-.widget .widget-subtitle a:hover {
-  text-decoration: underline !important;
+/* --------------------------
+   Deposit button (FORCE visible)
+   - The platform sometimes hides it via:
+     display:none / visibility:hidden / opacity:0 / height:0 / overflow hidden
+   - We hit the most common DOM patterns *without* needing HTML changes.
+--------------------------- */
+
+/* 1) Make sure the container cannot hide it */
+#balanceWidget,
+#balanceWidget .widget-content,
+#balanceWidget .widget-buttons,
+#balanceWidget .widget-controls,
+#balanceWidget .widget-int {
+  overflow: visible !important;
 }
 
-/* Margin widget dots */
-#marginWidget .owl-theme .owl-controls .owl-page span {
-  margin: 4px !important;
+/* 2) Force the actual button/link/input visible no matter what */
+#balanceWidget .btn,
+#balanceWidget .btn-deposit,
+#balanceWidget .btn-success,
+#balanceWidget a.btn,
+#balanceWidget a.btn-success,
+#balanceWidget button,
+#balanceWidget button.btn,
+#balanceWidget button.btn-success,
+#balanceWidget input[type="submit"],
+#balanceWidget input.btn,
+#balanceWidget input.btn-success {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
   opacity: 1 !important;
-  width: 6px !important;
-  height: 6px !important;
-  background: #d9d9d9 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+
+  height: auto !important;
+  max-height: none !important;
+  min-height: 38px !important;
+
+  width: auto !important;
+  max-width: none !important;
+
+  margin-top: 10px !important;
+
+  background: var(--bw-deposit) !important;
+  border-color: var(--bw-deposit) !important;
+  color: #fff !important;
+
+  border-radius: 999px !important;
+  padding: 8px 18px !important;
+
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
-#marginWidget .owl-theme .owl-controls .owl-page.active span {
-  background: var(--bw-primary) !important;
+
+/* 3) If some theme sets it to position:absolute off-screen */
+#balanceWidget .btn,
+#balanceWidget .btn-deposit,
+#balanceWidget .btn-success,
+#balanceWidget a.btn,
+#balanceWidget a.btn-success,
+#balanceWidget button.btn,
+#balanceWidget button.btn-success {
+  position: static !important;
+  transform: none !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+}
+
+/* 4) Hover */
+#balanceWidget .btn:hover,
+#balanceWidget .btn-deposit:hover,
+#balanceWidget .btn-success:hover,
+#balanceWidget a.btn:hover,
+#balanceWidget a.btn-success:hover,
+#balanceWidget button.btn:hover,
+#balanceWidget button.btn-success:hover {
+  filter: brightness(0.95);
+}
+
+/* Global: kill any remaining "success green" */
+.btn-success,
+.btn.btn-success,
+.label-success,
+.badge-success,
+.progress-bar-success {
+  background-color: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+}
+.text-success {
+  color: var(--bw-primary) !important;
 }
 
 /* --------------------------
@@ -745,6 +753,116 @@ ul.panel-controls > li > a:hover {
   opacity: 1 !important;
 }
 
+/* =========================================================
+   LOGOUT MODAL FIX (white bg, black text)
+   The screenshot looks like a SweetAlert (swal2) or similar.
+   We cover: SweetAlert2, Bootstrap modals, and generic "modal" blocks.
+========================================================= */
+
+/* Overlay stays dark */
+.swal2-container,
+.sweet-alert,
+.bootbox.modal,
+.modal-backdrop,
+#swal2-content {
+  color-scheme: light !important;
+}
+
+/* SweetAlert2 */
+.swal2-popup {
+  background: #fff !important;
+  color: var(--bw-text) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25) !important;
+}
+.swal2-title,
+.swal2-html-container,
+.swal2-content {
+  color: var(--bw-text) !important;
+}
+.swal2-icon {
+  filter: none !important;
+}
+.swal2-actions .swal2-confirm {
+  background: var(--bw-primary) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+.swal2-actions .swal2-cancel {
+  background: #fff !important;
+  color: var(--bw-text) !important;
+  border: 1px solid var(--bw-border-strong) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+/* SweetAlert (older) */
+.sweet-alert {
+  background: #fff !important;
+  color: var(--bw-text) !important;
+  border-radius: 16px !important;
+}
+.sweet-alert h2,
+.sweet-alert p {
+  color: var(--bw-text) !important;
+}
+.sweet-alert .sa-button-container .confirm {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+}
+.sweet-alert .sa-button-container .cancel {
+  background: #fff !important;
+  border: 1px solid var(--bw-border-strong) !important;
+  color: var(--bw-text) !important;
+  border-radius: 10px !important;
+}
+
+/* Bootstrap modal */
+.modal-content {
+  background: #fff !important;
+  color: var(--bw-text) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--bw-border) !important;
+}
+.modal-header,
+.modal-body,
+.modal-footer {
+  background: #fff !important;
+  color: var(--bw-text) !important;
+}
+.modal-title,
+.modal-body p,
+.modal-body span,
+.modal-body div {
+  color: var(--bw-text) !important;
+}
+
+/* Buttons inside modal (Yes/No) */
+.modal .btn-primary,
+.modal .btn-success,
+.modal .btn-confirm,
+.modal .confirm {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+.modal .btn-default,
+.modal .btn-secondary,
+.modal .btn-cancel,
+.modal .cancel {
+  background: #fff !important;
+  border: 1px solid var(--bw-border-strong) !important;
+  color: var(--bw-text) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
 /* --------------------------
    Responsive
 --------------------------- */
@@ -794,32 +912,4 @@ ul.panel-controls > li > a:hover {
 .x-navigation.x-navigation-horizontal li > ul.xn-drop-left::-webkit-scrollbar-thumb {
   background-color: var(--bw-primary);
   border-radius: 10px;
-}
-
-/* =========================================================
-   FIX: Deposit button visible + color #0437F4
-   (kept as requested)
-========================================================= */
-#balanceWidget .btn-deposit,
-#balanceWidget .btn.btn-success,
-#balanceWidget .btn-success,
-#balanceWidget button.btn-success,
-#balanceWidget a.btn-success,
-#balanceWidget input.btn-success,
-#balanceWidget input[type="submit"] {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-
-  background: #0437F4 !important;
-  border-color: #0437F4 !important;
-  color: #fff !important;
-
-  min-height: 38px !important;
-  padding: 8px 18px !important;
-  border-radius: 999px !important;
 }
