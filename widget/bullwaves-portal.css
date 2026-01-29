@@ -145,31 +145,6 @@ span {
   color: var(--bw-text) !important;
 }
 
-/* (Logo rules unchanged) */
-.x-navigation.x-navigation-horizontal li.xn-logo img,
-.x-navigation.x-navigation-horizontal .xn-logo img,
-.x-navigation.x-navigation-horizontal .logo img,
-.x-navigation.x-navigation-horizontal .brand img,
-.page-sidebar .x-navigation .xn-logo img,
-.page-sidebar .x-navigation li.xn-logo img,
-.x-navigation.x-navigation-horizontal a img {
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: none !important;
-  -webkit-filter: none !important;
-  mix-blend-mode: normal !important;
-  background: transparent !important;
-}
-
-.x-navigation.x-navigation-horizontal li.xn-logo,
-.x-navigation.x-navigation-horizontal .xn-logo,
-.x-navigation.x-navigation-horizontal .logo,
-.x-navigation.x-navigation-horizontal .brand {
-  filter: none !important;
-  -webkit-filter: none !important;
-  mix-blend-mode: normal !important;
-}
-
 /* --------------------------
    Login / Register pages
 --------------------------- */
@@ -368,6 +343,90 @@ body#email_confirmation {
   color: var(--bw-primary) !important;
 }
 
+/* =========================================================
+   FIX — Sidebar dropdowns (Account Settings / Requests)
+   - Remove the "white pill" empty blocks under items
+   - Dropdown must appear ONLY after click
+   - Arrow on the right must be BLACK and visible
+   - Do not change anything else
+========================================================= */
+
+/* 1) Remove any pseudo-elements / decorations that create empty rounded blocks */
+.page-sidebar .x-navigation li > a::before,
+.page-sidebar .x-navigation li > a::after {
+  content: none !important;
+}
+
+/* 2) Kill any extra elements used as "decorations" (common in templates) */
+.page-sidebar .x-navigation li > a .xn-text::before,
+.page-sidebar .x-navigation li > a .xn-text::after {
+  content: none !important;
+}
+
+/* 3) Ensure submenu is hidden by default and only shown when parent is active/open */
+.page-sidebar .x-navigation li > ul {
+  display: none !important;
+  height: auto !important;
+  overflow: hidden !important;
+  margin: 6px 0 0 0 !important;
+  padding: 8px 8px !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+/* show submenu only when open/active (covers common classnames) */
+.page-sidebar .x-navigation li.active > ul,
+.page-sidebar .x-navigation li.open > ul,
+.page-sidebar .x-navigation li.xn-openable.active > ul,
+.page-sidebar .x-navigation li.xn-openable.open > ul {
+  display: block !important;
+}
+
+/* submenu items style (keeps consistent and avoids "strange dark blocks") */
+.page-sidebar .x-navigation li > ul > li > a {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 10px 10px !important;
+  color: var(--bw-text) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.page-sidebar .x-navigation li > ul > li > a:hover {
+  background: #efefef !important;
+  color: var(--bw-primary) !important;
+}
+
+/* 4) Arrow on the right must be BLACK (usually .fa-angle-down / caret) */
+.page-sidebar .x-navigation li.xn-openable > a .fa-angle-down,
+.page-sidebar .x-navigation li.xn-openable > a .fa-angle-right,
+.page-sidebar .x-navigation li.xn-openable > a .fa-caret-down,
+.page-sidebar .x-navigation li.xn-openable > a .fa-caret-right,
+.page-sidebar .x-navigation li.xn-openable > a i[class*="angle"],
+.page-sidebar .x-navigation li.xn-openable > a i[class*="caret"],
+.page-sidebar .x-navigation li.xn-openable > a .xn-openable-icon,
+.page-sidebar .x-navigation li.xn-openable > a .xn-openable-indicator {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* Some templates use a span/caret element floated right */
+.page-sidebar .x-navigation li.xn-openable > a span.pull-right,
+.page-sidebar .x-navigation li.xn-openable > a .pull-right {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* Also ensure svg chevrons (if present) are black */
+.page-sidebar .x-navigation li.xn-openable > a svg {
+  fill: #000 !important;
+  stroke: #000 !important;
+  opacity: 1 !important;
+}
+
 /* --------------------------
    Widgets / Cards
 --------------------------- */
@@ -477,29 +536,6 @@ body#email_confirmation {
 .metatrader-color .panel,
 .webtrader-color .panel {
   border-color: transparent !important;
-}
-
-/* Deposit button MUST be blue */
-#balanceWidget .btn,
-#balanceWidget button,
-#balanceWidget a.btn,
-#balanceWidget .btn-success,
-#balanceWidget .btn.btn-success,
-#balanceWidget .btn-deposit,
-#balanceWidget a.btn-success,
-#balanceWidget button.btn-success,
-#balanceWidget input[type="submit"] {
-  background: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #fff !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-#balanceWidget .btn:hover,
-#balanceWidget .btn-success:hover,
-#balanceWidget .btn-deposit:hover {
-  filter: brightness(0.95);
 }
 
 /* Global: kill any remaining "success green" */
@@ -777,7 +813,7 @@ ul.panel-controls > li > a:hover {
   border-radius: 10px;
 }
 
-/* FIX: Deposit button visible + color #0437F4 (only this change) */
+/* Deposit button visible + color #0437F4 */
 #balanceWidget .btn-deposit,
 #balanceWidget .btn.btn-success,
 #balanceWidget .btn-success,
@@ -800,153 +836,4 @@ ul.panel-controls > li > a:hover {
   min-height: 38px !important;
   padding: 8px 18px !important;
   border-radius: 999px !important;
-}
-
-/* =========================================================
-   FIX #A — SIDEBAR DROPDOWNS (Account Settings / Requests)
-   - background must be WHITE
-   - text readable
-   - caret/arrow must be visible (not white)
-========================================================= */
-
-.page-sidebar .x-navigation li > ul {
-  background: #ffffff !important;
-  background-image: none !important;
-  border: 1px solid var(--bw-border) !important;
-  border-radius: 12px !important;
-  box-shadow: var(--bw-shadow) !important;
-  padding: 8px !important;
-  margin: 6px 0 10px 0 !important;
-}
-
-.page-sidebar .x-navigation li > ul li > a {
-  background: transparent !important;
-  color: var(--bw-text) !important;
-  border-radius: 10px !important;
-  padding: 10px 12px !important;
-}
-
-.page-sidebar .x-navigation li > ul li > a span,
-.page-sidebar .x-navigation li > ul li > a span.xn-text {
-  color: var(--bw-text) !important;
-}
-
-.page-sidebar .x-navigation li > ul li > a:hover {
-  background: #efefef !important;
-}
-.page-sidebar .x-navigation li > ul li > a:hover span,
-.page-sidebar .x-navigation li > ul li > a:hover span.xn-text {
-  color: var(--bw-primary) !important;
-}
-
-/* Caret / arrow on the right (covers both pseudo + icon cases) */
-.page-sidebar .x-navigation li.xn-openable > a:after,
-.page-sidebar .x-navigation li.xn-openable > a:before {
-  color: rgba(27, 27, 27, 0.55) !important;
-  opacity: 1 !important;
-}
-
-.page-sidebar .x-navigation li.xn-openable.active > a:after,
-.page-sidebar .x-navigation li.xn-openable.active > a:before {
-  color: var(--bw-primary) !important;
-}
-
-.page-sidebar .x-navigation li.xn-openable > a .fa-angle-down,
-.page-sidebar .x-navigation li.xn-openable > a .fa-angle-up,
-.page-sidebar .x-navigation li.xn-openable > a .fa-chevron-down,
-.page-sidebar .x-navigation li.xn-openable > a .fa-chevron-up,
-.page-sidebar .x-navigation li.xn-openable > a i.fa-angle-down,
-.page-sidebar .x-navigation li.xn-openable > a i.fa-angle-up,
-.page-sidebar .x-navigation li.xn-openable > a i.fa-chevron-down,
-.page-sidebar .x-navigation li.xn-openable > a i.fa-chevron-up,
-.page-sidebar .x-navigation li.xn-openable > a .glyphicon-chevron-down,
-.page-sidebar .x-navigation li.xn-openable > a .glyphicon-chevron-up {
-  color: rgba(27, 27, 27, 0.55) !important;
-}
-
-/* =========================================================
-   FIX #B — LOGOUT POPUP
-   - white box, black text
-   - remove the weird huge white bar
-========================================================= */
-
-.message-box {
-  background: rgba(0, 0, 0, 0.55) !important;
-}
-
-.message-box .mb-container {
-  padding: 18px !important;
-  background: transparent !important;
-}
-
-.message-box .mb-container .mb-middle {
-  background: #ffffff !important;
-  color: var(--bw-text) !important;
-  border: 1px solid var(--bw-border) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.20) !important;
-
-  width: 680px !important;
-  max-width: calc(100vw - 36px) !important;
-
-  padding: 22px 24px !important;
-  height: auto !important;
-  min-height: 0 !important;
-
-  position: relative !important;
-  overflow: hidden !important;
-}
-
-/* Kill any decorative/pseudo elements that create that “blank bar” */
-.message-box .mb-container .mb-middle:before,
-.message-box .mb-container .mb-middle:after {
-  content: none !important;
-  display: none !important;
-}
-
-.message-box .mb-title {
-  color: var(--bw-text) !important;
-  font-weight: 700 !important;
-}
-
-.message-box .mb-title span,
-.message-box .mb-title i,
-.message-box .mb-title .fa,
-.message-box .mb-title .fas,
-.message-box .mb-title .far,
-.message-box .mb-title .fal,
-.message-box .mb-title .fab,
-.message-box .mb-title .glyphicon {
-  color: var(--bw-text) !important;
-}
-
-.message-box .mb-content,
-.message-box .mb-content p,
-.message-box .mb-content span,
-.message-box .mb-content small {
-  color: var(--bw-text) !important;
-}
-
-.message-box .mb-footer .btn,
-.message-box .mb-footer a.btn,
-.message-box .mb-footer button.btn {
-  border-radius: 12px !important;
-}
-
-/* NO button */
-.message-box .mb-footer .btn.btn-default,
-.message-box .mb-footer .btn-default {
-  background: #ffffff !important;
-  border: 1px solid var(--bw-border-strong) !important;
-  color: var(--bw-text) !important;
-}
-
-/* YES button */
-.message-box .mb-footer .btn.btn-primary,
-.message-box .mb-footer .btn-primary,
-.message-box .mb-footer .btn.btn-success,
-.message-box .mb-footer .btn-success {
-  background: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #ffffff !important;
 }
