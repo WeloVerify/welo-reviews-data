@@ -1,10 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* =========================================================
-   BULLWAVES PORTAL — LIGHT THEME (Stable...)
+   BULLWAVES PORTAL — LIGHT THEME (Stable.)
    - Inter everywhere
    - DO NOT override icon fonts (FontAwesome / Glyphicons)
-   - Fix: top-left logo (white) + Account Status icons
    ========================================================= */
 
 :root {
@@ -146,10 +145,7 @@ span {
   color: var(--bw-text) !important;
 }
 
-/* =========================================================
-   FIX #1 — TOP-LEFT LOGO IS WHITE
-   Keep logo rendering exactly as original asset (no filters/blend)
-========================================================= */
+/* (Logo rules unchanged) */
 .x-navigation.x-navigation-horizontal li.xn-logo img,
 .x-navigation.x-navigation-horizontal .xn-logo img,
 .x-navigation.x-navigation-horizontal .logo img,
@@ -165,7 +161,6 @@ span {
   background: transparent !important;
 }
 
-/* Some templates apply masks or invert via parent */
 .x-navigation.x-navigation-horizontal li.xn-logo,
 .x-navigation.x-navigation-horizontal .xn-logo,
 .x-navigation.x-navigation-horizontal .logo,
@@ -533,14 +528,10 @@ body#email_confirmation {
   background-color: var(--bw-primary) !important;
 }
 
-/* =========================================================
-   FIX #2 — ACCOUNT STATUS ICONS (currently look wrong)
-   - Ensure icons use proper icon fonts
-   - Remove square blocks / weird backgrounds
-   - Keep colors: Blue primary, Red danger when needed
-========================================================= */
+/* --------------------------
+   Account Status icons
+--------------------------- */
 
-/* Remove any square blocks created by spans/buttons inside widget-buttons */
 #accountStatusWidget .widget-buttons a,
 #accountStatusWidget .widget-buttons button,
 #accountStatusWidget .widget-buttons span,
@@ -550,7 +541,6 @@ body#email_confirmation {
   border: 0 !important;
 }
 
-/* Ensure FontAwesome icons render correctly here */
 #accountStatusWidget .widget-buttons i.fa,
 #accountStatusWidget .widget-buttons i.fas,
 #accountStatusWidget .widget-buttons i.far,
@@ -563,7 +553,6 @@ body#email_confirmation {
   color: var(--bw-primary) !important;
 }
 
-/* Ensure Glyphicons render correctly here */
 #accountStatusWidget .widget-buttons .glyphicon,
 #accountStatusWidget .widget-buttons i.glyphicon,
 #accountStatusWidget .widget-buttons span.glyphicon {
@@ -573,14 +562,12 @@ body#email_confirmation {
   color: var(--bw-primary) !important;
 }
 
-/* If there are SVG icons inside links */
 #accountStatusWidget .widget-buttons svg {
   width: 18px !important;
   height: 18px !important;
   fill: var(--bw-primary) !important;
 }
 
-/* Keep danger red when system flags it */
 #accountStatusWidget .widget-buttons .text-danger,
 #accountStatusWidget .widget-buttons i.text-danger,
 #accountStatusWidget .widget-buttons span.text-danger,
@@ -589,7 +576,6 @@ body#email_confirmation {
   color: var(--bw-danger) !important;
 }
 
-/* Your previous special case */
 #accountStatusWidget
   .widget-buttons
   a
@@ -817,71 +803,150 @@ ul.panel-controls > li > a:hover {
 }
 
 /* =========================================================
-   FIX — LOGOUT POPUP (white background + black text)
-   (Added only this block)
+   FIX #A — SIDEBAR DROPDOWNS (Account Settings / Requests)
+   - background must be WHITE
+   - text readable
+   - caret/arrow must be visible (not white)
+========================================================= */
+
+.page-sidebar .x-navigation li > ul {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--bw-border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--bw-shadow) !important;
+  padding: 8px !important;
+  margin: 6px 0 10px 0 !important;
+}
+
+.page-sidebar .x-navigation li > ul li > a {
+  background: transparent !important;
+  color: var(--bw-text) !important;
+  border-radius: 10px !important;
+  padding: 10px 12px !important;
+}
+
+.page-sidebar .x-navigation li > ul li > a span,
+.page-sidebar .x-navigation li > ul li > a span.xn-text {
+  color: var(--bw-text) !important;
+}
+
+.page-sidebar .x-navigation li > ul li > a:hover {
+  background: #efefef !important;
+}
+.page-sidebar .x-navigation li > ul li > a:hover span,
+.page-sidebar .x-navigation li > ul li > a:hover span.xn-text {
+  color: var(--bw-primary) !important;
+}
+
+/* Caret / arrow on the right (covers both pseudo + icon cases) */
+.page-sidebar .x-navigation li.xn-openable > a:after,
+.page-sidebar .x-navigation li.xn-openable > a:before {
+  color: rgba(27, 27, 27, 0.55) !important;
+  opacity: 1 !important;
+}
+
+.page-sidebar .x-navigation li.xn-openable.active > a:after,
+.page-sidebar .x-navigation li.xn-openable.active > a:before {
+  color: var(--bw-primary) !important;
+}
+
+.page-sidebar .x-navigation li.xn-openable > a .fa-angle-down,
+.page-sidebar .x-navigation li.xn-openable > a .fa-angle-up,
+.page-sidebar .x-navigation li.xn-openable > a .fa-chevron-down,
+.page-sidebar .x-navigation li.xn-openable > a .fa-chevron-up,
+.page-sidebar .x-navigation li.xn-openable > a i.fa-angle-down,
+.page-sidebar .x-navigation li.xn-openable > a i.fa-angle-up,
+.page-sidebar .x-navigation li.xn-openable > a i.fa-chevron-down,
+.page-sidebar .x-navigation li.xn-openable > a i.fa-chevron-up,
+.page-sidebar .x-navigation li.xn-openable > a .glyphicon-chevron-down,
+.page-sidebar .x-navigation li.xn-openable > a .glyphicon-chevron-up {
+  color: rgba(27, 27, 27, 0.55) !important;
+}
+
+/* =========================================================
+   FIX #B — LOGOUT POPUP
+   - white box, black text
+   - remove the weird huge white bar
 ========================================================= */
 
 .message-box {
-  background: rgba(0, 0, 0, 0.55) !important; /* overlay dietro */
+  background: rgba(0, 0, 0, 0.55) !important;
 }
 
 .message-box .mb-container {
+  padding: 18px !important;
   background: transparent !important;
 }
 
 .message-box .mb-container .mb-middle {
   background: #ffffff !important;
-  border: 1px solid #ededed !important;
-  border-radius: 16px !important;
-  box-shadow: 0 10px 30px rgba(27, 27, 27, 0.10) !important;
-  padding: 26px 28px !important;
+  color: var(--bw-text) !important;
+  border: 1px solid var(--bw-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.20) !important;
+
+  width: 680px !important;
+  max-width: calc(100vw - 36px) !important;
+
+  padding: 22px 24px !important;
+  height: auto !important;
+  min-height: 0 !important;
+
+  position: relative !important;
+  overflow: hidden !important;
 }
 
-/* Titolo + testo */
-.message-box .mb-title,
-.message-box .mb-title *,
+/* Kill any decorative/pseudo elements that create that “blank bar” */
+.message-box .mb-container .mb-middle:before,
+.message-box .mb-container .mb-middle:after {
+  content: none !important;
+  display: none !important;
+}
+
+.message-box .mb-title {
+  color: var(--bw-text) !important;
+  font-weight: 700 !important;
+}
+
+.message-box .mb-title span,
+.message-box .mb-title i,
+.message-box .mb-title .fa,
+.message-box .mb-title .fas,
+.message-box .mb-title .far,
+.message-box .mb-title .fal,
+.message-box .mb-title .fab,
+.message-box .mb-title .glyphicon {
+  color: var(--bw-text) !important;
+}
+
 .message-box .mb-content,
-.message-box .mb-content * {
-  color: #1b1b1b !important;
+.message-box .mb-content p,
+.message-box .mb-content span,
+.message-box .mb-content small {
+  color: var(--bw-text) !important;
 }
 
-/* Icona */
-.message-box .mb-middle .fa,
-.message-box .mb-middle .fas,
-.message-box .mb-middle .far,
-.message-box .mb-middle .fal,
-.message-box .mb-middle .fab,
-.message-box .mb-middle .glyphicon {
-  color: #1b1b1b !important;
+.message-box .mb-footer .btn,
+.message-box .mb-footer a.btn,
+.message-box .mb-footer button.btn {
+  border-radius: 12px !important;
 }
 
-/* Footer */
-.message-box .mb-footer {
-  background: transparent !important;
-  border-top: 0 !important;
-  padding-top: 14px !important;
-}
-
-/* Bottoni */
-.message-box .mb-footer .btn {
-  border-radius: 10px !important;
-  min-width: 86px !important;
-  box-shadow: none !important;
-}
-
-/* YES */
-.message-box .mb-footer .btn.btn-success,
-.message-box .mb-footer .btn.btn-primary {
-  background: #0036ff !important;
-  border-color: #0036ff !important;
-  color: #ffffff !important;
-}
-
-/* NO */
+/* NO button */
 .message-box .mb-footer .btn.btn-default,
-.message-box .mb-footer .btn.btn-secondary,
-.message-box .mb-footer .btn.btn-danger {
-  background: #f3f3f3 !important;
-  border-color: #e2e2e2 !important;
-  color: #1b1b1b !important;
+.message-box .mb-footer .btn-default {
+  background: #ffffff !important;
+  border: 1px solid var(--bw-border-strong) !important;
+  color: var(--bw-text) !important;
+}
+
+/* YES button */
+.message-box .mb-footer .btn.btn-primary,
+.message-box .mb-footer .btn-primary,
+.message-box .mb-footer .btn.btn-success,
+.message-box .mb-footer .btn-success {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #ffffff !important;
 }
