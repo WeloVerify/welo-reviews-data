@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* =========================================================
-   BULLWAVES PORTAL — LIGHT THEME (Stable)
+   BULLWAVES PORTAL — LIGHT THEME (Stable.)
    - Inter everywhere
    - DO NOT override icon fonts (FontAwesome / Glyphicons)
    ========================================================= */
@@ -17,9 +17,6 @@
   --bw-danger: #f50100;
   --bw-shadow: 0 10px 30px rgba(27, 27, 27, 0.06);
   --bw-radius: 12px;
-
-  /* ✅ NEW: unified top widgets sizing */
-  --bw-top-widget-minh: 150px;
 }
 
 /* --------------------------
@@ -479,47 +476,10 @@ body#email_confirmation {
 #freeMarginWidget,
 #creditWidget,
 #accountStatusWidget {
-  min-height: var(--bw-top-widget-minh) !important;
+  min-height: 150px !important;
 }
 
-/* ✅ NEW: unify top widgets height + internal layout so they look IDENTICAL */
-#balanceWidget,
-#equityWidget,
-#marginWidget,
-#freeMarginWidget,
-#creditWidget,
-#accountStatusWidget {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important; /* centers content vertically */
-  padding: 16px 16px !important;
-}
-
-/* Keep title area consistent spacing on all top widgets */
-#balanceWidget .widget-title,
-#equityWidget .widget-title,
-#marginWidget .widget-title,
-#freeMarginWidget .widget-title,
-#creditWidget .widget-title,
-#accountStatusWidget .widget-title {
-  margin-bottom: 8px !important;
-}
-
-/* Keep value spacing consistent */
-#balanceWidget .widget-int,
-#balanceWidget .widget-big-int,
-#equityWidget .widget-int,
-#equityWidget .widget-big-int,
-#marginWidget .widget-int,
-#marginWidget .widget-big-int,
-#freeMarginWidget .widget-int,
-#freeMarginWidget .widget-big-int,
-#creditWidget .widget-int,
-#creditWidget .widget-big-int {
-  margin-top: 4px !important;
-}
-
-/* Remove the unwanted divider line in balance (existing) */
+/* Remove the unwanted divider line in balance */
 #balanceWidget hr,
 #balanceWidget .hr,
 #balanceWidget .divider,
@@ -531,26 +491,6 @@ body#email_confirmation {
 #balanceWidget .widget-controls {
   border: 0 !important;
   box-shadow: none !important;
-}
-
-/* ✅ NEW: remove that specific grey line (often an <hr> or a border-top element) */
-#balanceWidget hr,
-#balanceWidget .widget-separator,
-#balanceWidget .widget-divider,
-#balanceWidget .divider,
-#balanceWidget .hr,
-#balanceWidget .line,
-#balanceWidget .separator,
-#balanceWidget [style*="border-top"],
-#balanceWidget [style*="border-bottom"] {
-  border: 0 !important;
-  outline: 0 !important;
-  box-shadow: none !important;
-}
-
-/* Also kill any generic horizontal rule inside the Balance widget */
-#balanceWidget * {
-  -webkit-text-decoration-skip: objects;
 }
 
 /* BLUE TILES */
@@ -893,23 +833,9 @@ ul.panel-controls > li > a:hover {
   border-color: #0437F4 !important;
   color: #fff !important;
 
-  /* ✅ NEW: bigger + full width with side padding */
-  width: 100% !important;
-  max-width: calc(100% - 18px) !important; /* lateral padding effect */
-  margin: 10px auto 0 auto !important;
-
-  min-height: 44px !important; /* slightly bigger */
-  padding: 10px 18px !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-}
-
-/* remove any leftover underline on the deposit button text (safety) */
-#balanceWidget .btn-deposit:hover,
-#balanceWidget .btn.btn-success:hover,
-#balanceWidget .btn-success:hover,
-#balanceWidget a.btn-success:hover {
-  text-decoration: none !important;
+  min-height: 38px !important;
+  padding: 8px 18px !important;
+  border-radius: 999px !important;
 }
 
 /* =========================================================
