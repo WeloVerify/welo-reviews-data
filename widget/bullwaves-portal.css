@@ -1,5 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* =========================================================
+   BULLWAVES PORTAL — LIGHT THEME (Stable)
+   - Inter everywhere
+   - DO NOT override icon fonts (FontAwesome / Glyphicons)
+   - Fix: icons, login, footer text, deposit button, balance divider
+   ========================================================= */
+
 :root {
   --bw-text: #1b1b1b;
   --bw-muted: #959595;
@@ -13,6 +20,10 @@
   --bw-radius: 12px;
 }
 
+/* --------------------------
+   Global / Base
+--------------------------- */
+
 html,
 body {
   background: var(--bw-bg) !important;
@@ -23,6 +34,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Inter everywhere (safe list) */
 body,
 button,
 input,
@@ -54,21 +66,51 @@ ul,
 ol,
 li,
 strong,
-em {
+em,
+a {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
 }
 
+/* IMPORTANT: DO NOT break icon fonts */
 .fa,
 .fas,
 .far,
 .fal,
-.fab,
+.fab {
+  font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+  font-weight: 900 !important;
+}
 .glyphicon {
+  font-family: "Glyphicons Halflings" !important;
+}
+
+/* Some portals use these for iconography */
+.x-navigation li > a > i,
+.x-navigation li > a > .fa,
+.x-navigation li > a > .glyphicon {
   font-family: inherit;
+}
+
+/* Restore icons inside navigation explicitly */
+.page-sidebar .x-navigation li > a i.fa,
+.page-sidebar .x-navigation li > a i.fas,
+.page-sidebar .x-navigation li > a i.far,
+.page-sidebar .x-navigation li > a i.fal,
+.page-sidebar .x-navigation li > a i.fab {
+  font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+  font-weight: 900 !important;
+}
+.page-sidebar .x-navigation li > a span.glyphicon,
+.page-sidebar .x-navigation li > a i.glyphicon {
+  font-family: "Glyphicons Halflings" !important;
 }
 
 a {
   color: var(--bw-primary) !important;
+  text-decoration: none !important;
+}
+a:hover {
+  text-decoration: underline !important;
 }
 
 p,
@@ -83,6 +125,7 @@ span {
   color: var(--bw-muted) !important;
 }
 
+/* Force white backgrounds globally (removes legacy gradients) */
 .page-container,
 .page-container .page-content,
 .page-container .page-content-wrap,
@@ -94,26 +137,37 @@ span {
 .page-container .page-content .content-frame-body,
 .page-container .page-content .page-content-wrap,
 .page-container .page-content .page-content-wrap .row,
-.page-container .page-content .page-content-wrap .row > div {
+.page-container .page-content .page-content-wrap .row > div,
+.content-frame,
+.content-frame-body {
   background-color: var(--bw-bg) !important;
   background-image: none !important;
 }
 
+/* Main spacing */
 .page-container .page-content {
   padding: 22px 18px 40px !important;
   background: var(--bw-bg) !important;
 }
 
+/* --------------------------
+   Top bar / header
+--------------------------- */
+
 .x-navigation.x-navigation-horizontal {
   background: var(--bw-bg) !important;
   background-image: none !important;
   box-shadow: none !important;
+  border-bottom: 1px solid var(--bw-border) !important;
 }
 
-.x-navigation.x-navigation-horizontal > li > a {
+.x-navigation.x-navigation-horizontal > li > a,
+.x-navigation.x-navigation-horizontal li > a,
+.x-navigation.x-navigation-horizontal li > a span {
   color: var(--bw-text) !important;
 }
 
+/* Make sure logo is visible (not transparent / inverted wrongly) */
 .x-navigation.x-navigation-horizontal li.xn-logo img,
 .x-navigation.x-navigation-horizontal .xn-logo img,
 .x-navigation.x-navigation-horizontal .logo img,
@@ -122,13 +176,132 @@ span {
 .page-sidebar .x-navigation li.xn-logo img {
   opacity: 1 !important;
   visibility: visible !important;
-  filter: brightness(0) saturate(100%) !important;
+  filter: none !important;
 }
 
-.header-background img {
-  opacity: 1 !important;
-  visibility: visible !important;
+/* If the logo is dark-on-transparent and disappears on dark bg,
+   keep filter none and let the original asset render. */
+
+/* --------------------------
+   Login / Register pages
+--------------------------- */
+
+body#login,
+body#register,
+body#Login,
+body#Register,
+body#password_reminder,
+body#Password-Reminder,
+body#register_demo_account,
+body#Register-Demo-Account,
+body#email_confirmation {
+  background: var(--bw-bg) !important;
 }
+
+.login-container,
+.registration-container {
+  padding-top: 115px;
+  padding-bottom: 50px;
+  position: relative;
+  z-index: 1;
+  background: var(--bw-bg) !important;
+}
+
+.login-container::before,
+.registration-container::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 55%;
+  height: 55%;
+  max-width: 720px;
+  max-height: 720px;
+  background: url(https://s3.eu-west-1.amazonaws.com/skaleapps.io/Client+CDN/bullwaves/banner-absolute1.png) no-repeat;
+  background-size: contain;
+  z-index: -1;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.login-container::after,
+.registration-container::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 55%;
+  height: 55%;
+  max-width: 720px;
+  max-height: 720px;
+  background: url(https://s3.eu-west-1.amazonaws.com/skaleapps.io/Client+CDN/bullwaves/banner-absolute2.png) no-repeat;
+  background-size: contain;
+  z-index: -1;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.login-container .login-box .login-body,
+.registration-container .registration-box .registration-body {
+  border-radius: 20px !important;
+  background: var(--bw-bg) !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+.login-container .login-box .login-body .login-title,
+.registration-container .registration-box .registration-body .registration-title {
+  text-align: center;
+  font-size: 30px !important;
+  font-weight: 700 !important;
+  color: var(--bw-text) !important;
+}
+
+.login-container .login-box .login-body .login-subtitle,
+.registration-container .registration-box .registration-body .registration-subtitle {
+  text-align: center;
+  color: var(--bw-muted) !important;
+}
+
+.login-container .login-box .login-body label,
+.registration-container .registration-box .registration-body label {
+  color: var(--bw-text) !important;
+  font-weight: 500 !important;
+}
+
+.login-container .login-box .login-body .form-control,
+.registration-container .registration-box .registration-body .form-control {
+  border: 1px solid var(--bw-border-strong) !important;
+  background: var(--bw-bg) !important;
+  color: var(--bw-text) !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.login-container .login-box .login-body .form-control:focus,
+.registration-container .registration-box .registration-body .form-control:focus {
+  border-color: rgba(36, 83, 255, 0.65) !important;
+  box-shadow: 0 0 0 4px rgba(36, 83, 255, 0.12) !important;
+}
+
+.login-container .login-box .login-body .btn,
+.registration-container .registration-box .registration-body .btn {
+  border-radius: 12px !important;
+}
+
+.login-container .login-box .login-body .btn-primary,
+.registration-container .registration-box .registration-body .btn-primary,
+.login-container .login-box .login-body .btn-success,
+.registration-container .registration-box .registration-body .btn-success {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+}
+
+/* --------------------------
+   Sidebar
+--------------------------- */
 
 .page-container .page-sidebar {
   background: var(--bw-bg) !important;
@@ -158,23 +331,12 @@ span {
   font-weight: 500 !important;
 }
 
-.page-sidebar .x-navigation li > a .fa,
-.page-sidebar .x-navigation li > a .glyphicon {
-  color: var(--bw-text) !important;
-  opacity: 1 !important;
-}
-
 .page-sidebar .x-navigation li > a:hover {
   background: #efefef !important;
 }
 
 .page-sidebar .x-navigation li > a:hover span,
 .page-sidebar .x-navigation li > a:hover span.xn-text {
-  color: var(--bw-primary) !important;
-}
-
-.page-sidebar .x-navigation li > a:hover .fa,
-.page-sidebar .x-navigation li > a:hover .glyphicon {
   color: var(--bw-primary) !important;
 }
 
@@ -188,10 +350,39 @@ span {
   font-weight: 600 !important;
 }
 
+/* Icon color */
+.page-sidebar .x-navigation li > a .fa,
+.page-sidebar .x-navigation li > a i.fa,
+.page-sidebar .x-navigation li > a i.fas,
+.page-sidebar .x-navigation li > a i.far,
+.page-sidebar .x-navigation li > a i.fal,
+.page-sidebar .x-navigation li > a i.fab,
+.page-sidebar .x-navigation li > a .glyphicon {
+  color: var(--bw-text) !important;
+  opacity: 1 !important;
+}
 .page-sidebar .x-navigation li.active > a .fa,
+.page-sidebar .x-navigation li.active > a i.fa,
+.page-sidebar .x-navigation li.active > a i.fas,
+.page-sidebar .x-navigation li.active > a i.far,
+.page-sidebar .x-navigation li.active > a i.fal,
+.page-sidebar .x-navigation li.active > a i.fab,
 .page-sidebar .x-navigation li.active > a .glyphicon {
   color: var(--bw-primary) !important;
 }
+.page-sidebar .x-navigation li > a:hover .fa,
+.page-sidebar .x-navigation li > a:hover .glyphicon,
+.page-sidebar .x-navigation li > a:hover i.fa,
+.page-sidebar .x-navigation li > a:hover i.fas,
+.page-sidebar .x-navigation li > a:hover i.far,
+.page-sidebar .x-navigation li > a:hover i.fal,
+.page-sidebar .x-navigation li > a:hover i.fab {
+  color: var(--bw-primary) !important;
+}
+
+/* --------------------------
+   Widgets / Cards
+--------------------------- */
 
 .page-container .widget,
 .page-container .tile,
@@ -213,6 +404,7 @@ span {
   font-size: 14px !important;
   line-height: 1.2 !important;
   margin: 0 !important;
+  text-transform: none !important;
 }
 
 .page-container .widget .widget-int,
@@ -230,6 +422,7 @@ span {
   margin: 8px 0 0 0 !important;
 }
 
+/* Make the top summary cards consistent */
 #balanceWidget,
 #equityWidget,
 #marginWidget,
@@ -239,122 +432,54 @@ span {
   min-height: 150px !important;
 }
 
+/* Remove the unwanted divider line in balance */
 #balanceWidget hr,
 #balanceWidget .hr,
 #balanceWidget .divider,
 #balanceWidget .widget-divider,
 #balanceWidget .widget-separator,
 #balanceWidget .widget-buttons:before,
-#balanceWidget .widget-controls:before {
-  display: none !important;
-  border: 0 !important;
-  height: 0 !important;
-}
-
+#balanceWidget .widget-controls:before,
 #balanceWidget .widget-buttons,
-#balanceWidget .widget-controls,
-#balanceWidget .widget-buttons > div,
-#balanceWidget .widget-controls > div {
-  border-top: 0 !important;
+#balanceWidget .widget-controls {
+  border: 0 !important;
   box-shadow: none !important;
 }
 
-#balanceWidget .btn,
-#balanceWidget button,
-#balanceWidget a.btn,
-#balanceWidget .btn-success,
-#balanceWidget .btn.btn-success,
-#balanceWidget .btn-deposit,
-#balanceWidget a.btn-success,
-#balanceWidget button.btn-success {
-  background: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #fff !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-}
-
-#balanceWidget .btn:hover,
-#balanceWidget .btn-success:hover,
-#balanceWidget .btn-deposit:hover {
-  filter: brightness(0.95);
-}
-
-.btn {
-  border-radius: 10px !important;
-  box-shadow: none !important;
-}
-
-.btn-primary {
-  background: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #fff !important;
-}
-
-.btn-default,
-.btn.btn-default {
-  background: #fff !important;
-  border: 1px solid var(--bw-border-strong) !important;
-  color: var(--bw-text) !important;
-}
-
-.btn-default:hover {
-  background: #efefef !important;
-}
-
-.btn-danger {
-  background: transparent !important;
-  border-color: var(--bw-border-strong) !important;
-  color: var(--bw-danger) !important;
-}
-
-.btn-success,
-.btn.btn-success {
-  background: var(--bw-primary) !important;
-  border-color: var(--bw-primary) !important;
-  color: #fff !important;
-}
-
-.text-success {
-  color: var(--bw-primary) !important;
-}
-
-.progress-bar-success,
-.progress-bar.progress-bar-success {
-  background-color: var(--bw-primary) !important;
-}
-
-.label-success,
-.badge-success {
-  background-color: var(--bw-primary) !important;
-  color: #fff !important;
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-}
-
+/* BLUE TILES */
 .metatrader-color,
-.webtrader-color {
+.webtrader-color,
+#balanceWidget.metatrader-color,
+#balanceWidget.webtrader-color {
   background: linear-gradient(145deg, #2453ff 0%, #5176ff 100%) !important;
   border: 0 !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
-  border-top: 0 !important;
-  border-bottom: 0 !important;
   outline: none !important;
   box-shadow: var(--bw-shadow) !important;
 }
 
+/* Force text white on blue cards */
 .metatrader-color *,
 .webtrader-color * {
   color: #fff !important;
 }
 
-.metatrader-color :focus,
-.webtrader-color :focus {
-  outline: none !important;
-  box-shadow: none !important;
+/* If those titles were black (your issue), force them white */
+.metatrader-color .widget-title,
+.webtrader-color .widget-title,
+.metatrader-color .widget-int,
+.webtrader-color .widget-int,
+.metatrader-color .widget-subtitle,
+.webtrader-color .widget-subtitle,
+.metatrader-color h1,
+.metatrader-color h2,
+.metatrader-color h3,
+.webtrader-color h1,
+.webtrader-color h2,
+.webtrader-color h3 {
+  color: #fff !important;
 }
 
+/* Remove weird colored borders (green/orange strokes) */
 .metatrader-color,
 .webtrader-color,
 .metatrader-color .widget,
@@ -366,18 +491,45 @@ span {
   border-color: transparent !important;
 }
 
-#marginWidget .owl-theme .owl-controls .owl-page span {
-  margin: 4px !important;
-  opacity: 1 !important;
-  width: 6px !important;
-  height: 6px !important;
-  background: #d9d9d9 !important;
-}
-
-#marginWidget .owl-theme .owl-controls .owl-page.active span {
+/* Deposit button MUST be blue (not green) */
+#balanceWidget .btn,
+#balanceWidget button,
+#balanceWidget a.btn,
+#balanceWidget .btn-success,
+#balanceWidget .btn.btn-success,
+#balanceWidget .btn-deposit,
+#balanceWidget a.btn-success,
+#balanceWidget button.btn-success,
+#balanceWidget input[type="submit"] {
   background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+#balanceWidget .btn:hover,
+#balanceWidget .btn-success:hover,
+#balanceWidget .btn-deposit:hover {
+  filter: brightness(0.95);
 }
 
+/* Global: kill any remaining "success green" */
+.btn-success,
+.btn.btn-success,
+.text-success,
+.label-success,
+.badge-success,
+.progress-bar-success {
+  background-color: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+}
+.text-success {
+  color: var(--bw-primary) !important;
+}
+
+/* Account status progress */
 #accountStatusWidget .progress {
   height: 7px !important;
   width: 100% !important;
@@ -385,11 +537,11 @@ span {
   background: #efefef !important;
   border-radius: 999px !important;
 }
-
 #accountStatusWidget .progress-bar-success {
   background-color: var(--bw-primary) !important;
 }
 
+/* Account status action icons: no green */
 #accountStatusWidget .widget-buttons a span,
 #accountStatusWidget .widget-buttons a i,
 #accountStatusWidget .widget-buttons a .fa,
@@ -397,13 +549,7 @@ span {
   color: var(--bw-primary) !important;
 }
 
-#accountStatusWidget .widget-buttons a span.text-danger,
-#accountStatusWidget .widget-buttons a i.text-danger,
-#accountStatusWidget .widget-buttons a .fa.text-danger,
-#accountStatusWidget .widget-buttons a .glyphicon.text-danger {
-  color: var(--bw-danger) !important;
-}
-
+/* Keep danger red */
 #accountStatusWidget
   .widget-buttons
   a
@@ -411,17 +557,33 @@ span {
   color: var(--bw-danger) !important;
 }
 
+/* Margin widget dots */
+#marginWidget .owl-theme .owl-controls .owl-page span {
+  margin: 4px !important;
+  opacity: 1 !important;
+  width: 6px !important;
+  height: 6px !important;
+  background: #d9d9d9 !important;
+}
+#marginWidget .owl-theme .owl-controls .owl-page.active span {
+  background: var(--bw-primary) !important;
+}
+
+/* Links inside widget subtitle */
 #equityWidget .widget-subtitle a,
 .widget .widget-subtitle a {
   color: var(--bw-primary) !important;
   font-weight: 600 !important;
   text-decoration: none !important;
 }
-
 #equityWidget .widget-subtitle a:hover,
 .widget .widget-subtitle a:hover {
   text-decoration: underline !important;
 }
+
+/* --------------------------
+   Panels / Tables
+--------------------------- */
 
 .page-container .panel {
   background: var(--bw-bg) !important;
@@ -477,6 +639,10 @@ span {
   color: var(--bw-muted) !important;
 }
 
+/* --------------------------
+   Refresh button / controls
+--------------------------- */
+
 a.refreshWidgets {
   display: inline-flex !important;
   align-items: center !important;
@@ -488,15 +654,12 @@ a.refreshWidgets {
   border-radius: 10px !important;
   text-decoration: none !important;
 }
-
 a.refreshWidgets span {
   color: var(--bw-text) !important;
 }
-
 a.refreshWidgets:hover {
   background: #efefef !important;
 }
-
 a.refreshWidgets::after {
   content: '' !important;
 }
@@ -511,36 +674,42 @@ ul.panel-controls > li > a {
   padding: 6px 10px !important;
   background: #fff !important;
 }
-
 ul.panel-controls > li > a:hover {
   background: #efefef !important;
 }
 
+/* --------------------------
+   Footer / Disclaimer (text must be BLACK)
+--------------------------- */
+
 .x-navigation.disclaimer-color,
-.x-navigation.footer-color,
-.x-navigation.disclaimer-color *,
-.x-navigation.footer-color * {
+.x-navigation.footer-color {
   background: transparent !important;
   background-image: none !important;
-  color: var(--bw-text) !important;
 }
 
+/* Force footer text to dark */
+.x-navigation.disclaimer-color *,
+.x-navigation.footer-color *,
 .x-navigation.disclaimer-color a,
-.x-navigation.footer-color a {
+.x-navigation.footer-color a,
+.x-navigation.disclaimer-color span,
+.x-navigation.footer-color span,
+.x-navigation.disclaimer-color p,
+.x-navigation.footer-color p {
   color: var(--bw-text) !important;
+  opacity: 1 !important;
 }
 
-body#email_confirmation .x-navigation.x-navigation-horizontal,
-body#login .x-navigation.x-navigation-horizontal,
-body#register .x-navigation.x-navigation-horizontal,
-body#password_reminder .x-navigation.x-navigation-horizontal,
-body#register_demo_account .x-navigation.x-navigation-horizontal,
-body#Login .x-navigation.x-navigation-horizontal,
-body#Register .x-navigation.x-navigation-horizontal,
-body#Password-Reminder .x-navigation.x-navigation-horizontal,
-body#Register-Demo-Account .x-navigation.x-navigation-horizontal {
-  background: var(--bw-bg) !important;
-  background-image: none !important;
+/* --------------------------
+   Responsive
+--------------------------- */
+
+@media (max-width: 1199px) {
+  .login-container,
+  .registration-container {
+    padding-top: 70px;
+  }
 }
 
 @media (max-width: 1023px) {
@@ -558,10 +727,26 @@ body#Register-Demo-Account .x-navigation.x-navigation-horizontal {
   }
 }
 
+@media (max-width: 767px) {
+  .login-container,
+  .registration-container {
+    padding-top: 110px;
+  }
+  .login-container::after,
+  .registration-container::after {
+    opacity: 0.1;
+  }
+  .page-container .page-content {
+    padding: 18px 12px 30px !important;
+  }
+  .x-navigation.x-navigation-horizontal li > ul.xn-drop-left {
+    height: 300px;
+  }
+}
+
 .x-navigation.x-navigation-horizontal li > ul.xn-drop-left::-webkit-scrollbar {
   width: 6px;
 }
-
 .x-navigation.x-navigation-horizontal li > ul.xn-drop-left::-webkit-scrollbar-thumb {
   background-color: var(--bw-primary);
   border-radius: 10px;
