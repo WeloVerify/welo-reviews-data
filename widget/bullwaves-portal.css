@@ -1,9 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* =========================================================
-   BULLWAVES PORTAL — LIGHT THEME (Stable...)
+   BULLWAVES PORTAL — LIGHT THEME (Stable)
    - Inter everywhere
    - DO NOT override icon fonts (FontAwesome / Glyphicons)
+   - Fix: Account Status icons
+   - Fix: Deposit button visible + color #0437F4
+   - Fix (MOBILE): sidebar reaches bottom (scroll), balance widget smaller,
+     remove small white line on Balance section
    ========================================================= */
 
 :root {
@@ -343,90 +347,6 @@ body#email_confirmation {
   color: var(--bw-primary) !important;
 }
 
-/* =========================================================
-   FIX — Sidebar dropdowns (Account Settings / Requests)
-   - Remove the "white pill" empty blocks under items
-   - Dropdown must appear ONLY after click
-   - Arrow on the right must be BLACK and visible
-   - Do not change anything else
-========================================================= */
-
-/* 1) Remove any pseudo-elements / decorations that create empty rounded blocks */
-.page-sidebar .x-navigation li > a::before,
-.page-sidebar .x-navigation li > a::after {
-  content: none !important;
-}
-
-/* 2) Kill any extra elements used as "decorations" (common in templates) */
-.page-sidebar .x-navigation li > a .xn-text::before,
-.page-sidebar .x-navigation li > a .xn-text::after {
-  content: none !important;
-}
-
-/* 3) Ensure submenu is hidden by default and only shown when parent is active/open */
-.page-sidebar .x-navigation li > ul {
-  display: none !important;
-  height: auto !important;
-  overflow: hidden !important;
-  margin: 6px 0 0 0 !important;
-  padding: 8px 8px !important;
-  border-radius: 12px !important;
-  background: #ffffff !important;
-  border: 1px solid var(--bw-border) !important;
-  box-shadow: var(--bw-shadow) !important;
-}
-
-/* show submenu only when open/active (covers common classnames) */
-.page-sidebar .x-navigation li.active > ul,
-.page-sidebar .x-navigation li.open > ul,
-.page-sidebar .x-navigation li.xn-openable.active > ul,
-.page-sidebar .x-navigation li.xn-openable.open > ul {
-  display: block !important;
-}
-
-/* submenu items style (keeps consistent and avoids "strange dark blocks") */
-.page-sidebar .x-navigation li > ul > li > a {
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 10px !important;
-  padding: 10px 10px !important;
-  color: var(--bw-text) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-}
-.page-sidebar .x-navigation li > ul > li > a:hover {
-  background: #efefef !important;
-  color: var(--bw-primary) !important;
-}
-
-/* 4) Arrow on the right must be BLACK (usually .fa-angle-down / caret) */
-.page-sidebar .x-navigation li.xn-openable > a .fa-angle-down,
-.page-sidebar .x-navigation li.xn-openable > a .fa-angle-right,
-.page-sidebar .x-navigation li.xn-openable > a .fa-caret-down,
-.page-sidebar .x-navigation li.xn-openable > a .fa-caret-right,
-.page-sidebar .x-navigation li.xn-openable > a i[class*="angle"],
-.page-sidebar .x-navigation li.xn-openable > a i[class*="caret"],
-.page-sidebar .x-navigation li.xn-openable > a .xn-openable-icon,
-.page-sidebar .x-navigation li.xn-openable > a .xn-openable-indicator {
-  color: #000 !important;
-  opacity: 1 !important;
-}
-
-/* Some templates use a span/caret element floated right */
-.page-sidebar .x-navigation li.xn-openable > a span.pull-right,
-.page-sidebar .x-navigation li.xn-openable > a .pull-right {
-  color: #000 !important;
-  opacity: 1 !important;
-}
-
-/* Also ensure svg chevrons (if present) are black */
-.page-sidebar .x-navigation li.xn-openable > a svg {
-  fill: #000 !important;
-  stroke: #000 !important;
-  opacity: 1 !important;
-}
-
 /* --------------------------
    Widgets / Cards
 --------------------------- */
@@ -538,6 +458,29 @@ body#email_confirmation {
   border-color: transparent !important;
 }
 
+/* Deposit button MUST be blue */
+#balanceWidget .btn,
+#balanceWidget button,
+#balanceWidget a.btn,
+#balanceWidget .btn-success,
+#balanceWidget .btn.btn-success,
+#balanceWidget .btn-deposit,
+#balanceWidget a.btn-success,
+#balanceWidget button.btn-success,
+#balanceWidget input[type="submit"] {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+#balanceWidget .btn:hover,
+#balanceWidget .btn-success:hover,
+#balanceWidget .btn-deposit:hover {
+  filter: brightness(0.95);
+}
+
 /* Global: kill any remaining "success green" */
 .btn-success,
 .btn.btn-success,
@@ -564,9 +507,9 @@ body#email_confirmation {
   background-color: var(--bw-primary) !important;
 }
 
-/* --------------------------
-   Account Status icons
---------------------------- */
+/* =========================================================
+   FIX #2 — ACCOUNT STATUS ICONS (currently look wrong)
+========================================================= */
 
 #accountStatusWidget .widget-buttons a,
 #accountStatusWidget .widget-buttons button,
@@ -813,7 +756,9 @@ ul.panel-controls > li > a:hover {
   border-radius: 10px;
 }
 
-/* Deposit button visible + color #0437F4 */
+/* =========================================================
+   FIX: Deposit button visible + color #0437F4 (only)
+========================================================= */
 #balanceWidget .btn-deposit,
 #balanceWidget .btn.btn-success,
 #balanceWidget .btn-success,
@@ -836,4 +781,91 @@ ul.panel-controls > li > a:hover {
   min-height: 38px !important;
   padding: 8px 18px !important;
   border-radius: 999px !important;
+}
+
+/* =========================================================
+   MOBILE FIX #1: Sidebar must reach the bottom + scroll
+   - fixes menu that "stops" and leaves cut area
+========================================================= */
+@media (max-width: 991px) {
+  /* ensure full height for layout */
+  html,
+  body,
+  .page-container {
+    height: 100% !important;
+  }
+
+  /* sidebar takes full viewport height and scrolls */
+  .page-container .page-sidebar {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 24px !important; /* space for last item */
+  }
+
+  /* navigation list scrolls cleanly inside */
+  .page-sidebar .x-navigation {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
+
+/* =========================================================
+   MOBILE FIX #2: Balance widget too big on mobile
+   - makes it more compact without changing desktop
+========================================================= */
+@media (max-width: 767px) {
+  #balanceWidget,
+  #equityWidget,
+  #marginWidget,
+  #freeMarginWidget,
+  #creditWidget,
+  #accountStatusWidget {
+    min-height: 120px !important;
+  }
+
+  /* tighten paddings inside top widgets */
+  .page-container .widget {
+    padding: 14px 14px !important;
+  }
+
+  /* smaller numbers/titles on very small screens */
+  #balanceWidget .widget-int,
+  #balanceWidget .widget-big-int,
+  #equityWidget .widget-int,
+  #equityWidget .widget-big-int {
+    font-size: 28px !important;
+  }
+
+  #balanceWidget .widget-title,
+  #equityWidget .widget-title {
+    font-size: 13px !important;
+  }
+}
+
+/* =========================================================
+   MOBILE FIX #3: Remove the small white line on Balance section
+   - kills any pseudo elements / borders that appear as a thin line
+========================================================= */
+#balanceWidget::before,
+#balanceWidget::after,
+#balanceWidget .widget-content::before,
+#balanceWidget .widget-content::after,
+#balanceWidget .widget-title::after,
+#balanceWidget .widget-title::before {
+  content: none !important;
+  display: none !important;
+}
+
+#balanceWidget,
+#balanceWidget * {
+  border-top-color: transparent !important;
+}
+
+/* if theme adds a separator line via background-image */
+#balanceWidget {
+  background-image: none !important;
 }
