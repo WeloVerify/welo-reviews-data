@@ -790,3 +790,28 @@ ul.panel-controls > li > a:hover {
   background-color: var(--bw-primary);
   border-radius: 10px;
 }
+
+/* FIX: Deposit button visible + color #0437F4 (only this change) */
+#balanceWidget .btn-deposit,
+#balanceWidget .btn.btn-success,
+#balanceWidget .btn-success,
+#balanceWidget button.btn-success,
+#balanceWidget a.btn-success,
+#balanceWidget input.btn-success,
+#balanceWidget input[type="submit"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+
+  background: #0437F4 !important;
+  border-color: #0437F4 !important;
+  color: #fff !important;
+
+  min-height: 38px !important;
+  padding: 8px 18px !important;
+  border-radius: 999px !important;
+}
