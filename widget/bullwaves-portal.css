@@ -3,8 +3,8 @@
 /* =========================================================
    BULLWAVES PORTAL — LIGHT THEME (Stable.)
    - Inter everywhere
-   - DO NOT override icon fonts (FontAwesome / Glyphicons)
-   - Fix: top-left logo (white) + Account Status icons
+   - DO NOT override icon fonts incorrectly
+   - Deposit button color: #0437F4 (and visible)
    ========================================================= */
 
 :root {
@@ -71,15 +71,26 @@ a {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
 }
 
-/* IMPORTANT: DO NOT break icon fonts */
+/* IMPORTANT: Icon fonts (do NOT break them) */
 .fa,
 .fas,
-.far,
-.fal,
-.fab {
+.fa-solid {
   font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
   font-weight: 900 !important;
 }
+
+.far,
+.fa-regular {
+  font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+  font-weight: 400 !important;
+}
+
+.fab,
+.fa-brands {
+  font-family: "Font Awesome 5 Brands" !important;
+  font-weight: 400 !important;
+}
+
 .glyphicon {
   font-family: "Glyphicons Halflings" !important;
 }
@@ -147,8 +158,8 @@ span {
 }
 
 /* =========================================================
-   FIX #1 — TOP-LEFT LOGO IS WHITE
-   Keep logo rendering exactly as original asset (no filters/blend)
+   TOP-LEFT LOGO
+   (DO NOT CHANGE — keep as you already fixed it)
 ========================================================= */
 .x-navigation.x-navigation-horizontal li.xn-logo img,
 .x-navigation.x-navigation-horizontal .xn-logo img,
@@ -165,7 +176,6 @@ span {
   background: transparent !important;
 }
 
-/* Some templates apply masks or invert via parent */
 .x-navigation.x-navigation-horizontal li.xn-logo,
 .x-navigation.x-navigation-horizontal .xn-logo,
 .x-navigation.x-navigation-horizontal .logo,
@@ -354,6 +364,7 @@ body#email_confirmation {
   color: var(--bw-text) !important;
   opacity: 1 !important;
 }
+
 .page-sidebar .x-navigation li.active > a .fa,
 .page-sidebar .x-navigation li.active > a i.fa,
 .page-sidebar .x-navigation li.active > a i.fas,
@@ -363,6 +374,7 @@ body#email_confirmation {
 .page-sidebar .x-navigation li.active > a .glyphicon {
   color: var(--bw-primary) !important;
 }
+
 .page-sidebar .x-navigation li > a:hover .fa,
 .page-sidebar .x-navigation li > a:hover .glyphicon,
 .page-sidebar .x-navigation li > a:hover i.fa,
@@ -456,7 +468,6 @@ body#email_confirmation {
   color: #fff !important;
 }
 
-/* If those titles were black, force them white */
 .metatrader-color .widget-title,
 .webtrader-color .widget-title,
 .metatrader-color .widget-int,
@@ -484,7 +495,7 @@ body#email_confirmation {
   border-color: transparent !important;
 }
 
-/* Deposit button MUST be blue */
+/* Deposit button base (keeps it blue & visible) */
 #balanceWidget .btn,
 #balanceWidget button,
 #balanceWidget a.btn,
@@ -533,14 +544,7 @@ body#email_confirmation {
   background-color: var(--bw-primary) !important;
 }
 
-/* =========================================================
-   FIX #2 — ACCOUNT STATUS ICONS (currently look wrong)
-   - Ensure icons use proper icon fonts
-   - Remove square blocks / weird backgrounds
-   - Keep colors: Blue primary, Red danger when needed
-========================================================= */
-
-/* Remove any square blocks created by spans/buttons inside widget-buttons */
+/* Account Status icons — keep clean */
 #accountStatusWidget .widget-buttons a,
 #accountStatusWidget .widget-buttons button,
 #accountStatusWidget .widget-buttons span,
@@ -555,9 +559,10 @@ body#email_confirmation {
 #accountStatusWidget .widget-buttons i.fas,
 #accountStatusWidget .widget-buttons i.far,
 #accountStatusWidget .widget-buttons i.fal,
-#accountStatusWidget .widget-buttons i.fab {
-  font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
-  font-weight: 900 !important;
+#accountStatusWidget .widget-buttons i.fab,
+#accountStatusWidget .widget-buttons i.fa-solid,
+#accountStatusWidget .widget-buttons i.fa-regular,
+#accountStatusWidget .widget-buttons i.fa-brands {
   font-size: 18px !important;
   line-height: 1 !important;
   color: var(--bw-primary) !important;
@@ -589,7 +594,7 @@ body#email_confirmation {
   color: var(--bw-danger) !important;
 }
 
-/* Your previous special case */
+/* Special case */
 #accountStatusWidget
   .widget-buttons
   a
@@ -791,7 +796,10 @@ ul.panel-controls > li > a:hover {
   border-radius: 10px;
 }
 
-/* FIX: Deposit button visible + color #0437F4 (only this change) */
+/* =========================================================
+   FIX: Deposit button visible + color #0437F4
+   (kept as requested)
+========================================================= */
 #balanceWidget .btn-deposit,
 #balanceWidget .btn.btn-success,
 #balanceWidget .btn-success,
