@@ -984,3 +984,72 @@ ul.panel-controls > li > a:hover {
 .message-box.open {
   background: rgba(0, 0, 0, 0.55) !important;
 }
+
+
+/* =========================================================
+   ✅ FIX MOBILE iOS — White overlay covering #balanceWidget
+   - Only affects #balanceWidget
+   - Only on mobile
+========================================================= */
+
+@media (max-width: 767px) {
+  /* Make sure widget is not forcing a weird internal overlay layout */
+  #balanceWidget {
+    position: relative !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Kill any empty internal blocks that become giant on iOS */
+  #balanceWidget > div:empty {
+    display: none !important;
+  }
+
+  /* Most common culprit: controls/buttons layers */
+  #balanceWidget .widget-controls {
+    display: none !important; /* not needed for Balance widget */
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  #balanceWidget .widget-buttons {
+    position: static !important;   /* prevents absolute overlay */
+    display: block !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 12px 0 0 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ensure the real content stays above any weird layers */
+  #balanceWidget .widget-title,
+  #balanceWidget .widget-int,
+  #balanceWidget .widget-big-int,
+  #balanceWidget .widget-subtitle,
+  #balanceWidget .widget-data {
+    position: relative !important;
+    z-index: 2 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Extra hard-kill of any separators/overlays */
+  #balanceWidget hr,
+  #balanceWidget .divider,
+  #balanceWidget .widget-divider,
+  #balanceWidget .widget-separator,
+  #balanceWidget::before,
+  #balanceWidget::after {
+    display: none !important;
+    content: none !important;
+    border: 0 !important;
+    height: 0 !important;
+  }
+}
