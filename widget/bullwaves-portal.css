@@ -1068,3 +1068,34 @@ ul.panel-controls > li > a:hover {
     border: 0 !important;
   }
 }
+
+/* =========================================================
+   ✅ FIX MOBILE — overlay/box bianco sopra "Your Balance"
+   Culprit: #accountStatusWidget + pseudo-element on #widgets .row
+   (Only on mobile)
+========================================================= */
+
+@media (max-width: 767px) {
+  /* 1) Remove the phantom overlay/padding layer created by a row pseudo-element */
+  #widgets > .row::before,
+  #widgets > .row::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* 2) Hide the widget that becomes a big empty block overlay on mobile */
+  #accountStatusWidget {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* 3) Ensure Balance widget always stays on top */
+  #balanceWidget {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+}
