@@ -345,10 +345,6 @@ body#email_confirmation {
 
 /* =========================================================
    FIX — Sidebar dropdowns (Account Settings / Requests)
-   - Remove the "white pill" empty blocks under items
-   - Dropdown must appear ONLY after click
-   - Arrow on the right must be BLACK and visible
-   - Do not change anything else
 ========================================================= */
 
 /* 1) Remove any pseudo-elements / decorations that create empty rounded blocks */
@@ -384,7 +380,7 @@ body#email_confirmation {
   display: block !important;
 }
 
-/* submenu items style (keeps consistent and avoids "strange dark blocks") */
+/* submenu items style */
 .page-sidebar .x-navigation li > ul > li > a {
   background: transparent !important;
   border: 0 !important;
@@ -400,7 +396,7 @@ body#email_confirmation {
   color: var(--bw-primary) !important;
 }
 
-/* 4) Arrow on the right must be BLACK (usually .fa-angle-down / caret) */
+/* 4) Arrow on the right must be BLACK */
 .page-sidebar .x-navigation li.xn-openable > a .fa-angle-down,
 .page-sidebar .x-navigation li.xn-openable > a .fa-angle-right,
 .page-sidebar .x-navigation li.xn-openable > a .fa-caret-down,
@@ -413,14 +409,12 @@ body#email_confirmation {
   opacity: 1 !important;
 }
 
-/* Some templates use a span/caret element floated right */
 .page-sidebar .x-navigation li.xn-openable > a span.pull-right,
 .page-sidebar .x-navigation li.xn-openable > a .pull-right {
   color: #000 !important;
   opacity: 1 !important;
 }
 
-/* Also ensure svg chevrons (if present) are black */
 .page-sidebar .x-navigation li.xn-openable > a svg {
   fill: #000 !important;
   stroke: #000 !important;
@@ -892,16 +886,13 @@ ul.panel-controls > li > a:hover {
 
 /* 3) MOBILE "Your Balance": compact + no huge empty area + remove small white line */
 @media (max-width: 767px) {
-  /* Remove forced height so it doesn't create the giant empty block */
   #balanceWidget {
     min-height: unset !important;
     height: auto !important;
     padding: 14px 14px !important;
     margin-bottom: 12px !important;
-    overflow: hidden !important; /* helps kill any stray line/pseudo separators */
   }
 
-  /* Keep title + value tighter */
   #balanceWidget .widget-title {
     margin: 0 0 8px 0 !important;
     line-height: 1.1 !important;
@@ -915,7 +906,6 @@ ul.panel-controls > li > a:hover {
     margin-top: 8px !important;
   }
 
-  /* Kill any pseudo separators/lines (the “small white line”) */
   #balanceWidget::before,
   #balanceWidget::after,
   #balanceWidget .widget-controls::before,
@@ -926,7 +916,6 @@ ul.panel-controls > li > a:hover {
     display: none !important;
   }
 
-  /* If there is an hr/divider inside, force it hidden */
   #balanceWidget hr,
   #balanceWidget .divider,
   #balanceWidget .widget-divider,
@@ -937,9 +926,7 @@ ul.panel-controls > li > a:hover {
   }
 }
 
-/* 4) LOGOUT POPUP: always white (covers common templates) */
-
-/* SweetAlert2 */
+/* 4) LOGOUT POPUP: always white */
 .swal2-popup {
   background: #ffffff !important;
   color: #111111 !important;
@@ -951,7 +938,6 @@ ul.panel-controls > li > a:hover {
   color: #111111 !important;
 }
 
-/* Many admin templates use "message-box" */
 .message-box,
 .message-box .mb-container,
 .message-box .mb-container .mb-middle,
@@ -965,7 +951,6 @@ ul.panel-controls > li > a:hover {
   color: #111111 !important;
 }
 
-/* Bootstrap-like modal fallbacks */
 .modal .modal-content,
 .modal-dialog .modal-content,
 #logoutModal .modal-content {
@@ -978,78 +963,108 @@ ul.panel-controls > li > a:hover {
   color: #111111 !important;
 }
 
-/* Overlay/backdrop should darken page, NOT the popup itself */
 .swal2-container,
 .modal-backdrop,
 .message-box.open {
   background: rgba(0, 0, 0, 0.55) !important;
 }
 
-
 /* =========================================================
    ✅ FIX MOBILE iOS — White overlay covering #balanceWidget
    - Only affects #balanceWidget
    - Only on mobile
+   - More aggressive: neutralize absolute/fixed layers & huge heights
 ========================================================= */
 
 @media (max-width: 767px) {
-  /* Make sure widget is not forcing a weird internal overlay layout */
+  /* Make the widget a safe stacking context */
   #balanceWidget {
     position: relative !important;
+    z-index: 1 !important;
     height: auto !important;
     min-height: 0 !important;
-    overflow: visible !important;
+    overflow: visible !important; /* important: don't let internal absolute blocks "mask" content */
   }
 
-  /* Kill any empty internal blocks that become giant on iOS */
-  #balanceWidget > div:empty {
+  /* Common Skale/Template culprits: controls/buttons/content wrappers that go absolute and become a giant white layer */
+  #balanceWidget .widget-controls,
+  #balanceWidget .widget-buttons,
+  #balanceWidget .widget-content,
+  #balanceWidget .widget-data,
+  #balanceWidget .widget-item-left,
+  #balanceWidget .widget-item-right,
+  #balanceWidget .widget-item {
+    position: static !important;
+    float: none !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  /* Controls on Balance widget not needed: remove completely */
+  #balanceWidget .widget-controls {
     display: none !important;
   }
 
-  /* Most common culprit: controls/buttons layers */
-  #balanceWidget .widget-controls {
-    display: none !important; /* not needed for Balance widget */
-    background: transparent !important;
-    box-shadow: none !important;
-    border: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
-  }
-
+  /* Buttons container must NOT create a full-cover block */
   #balanceWidget .widget-buttons {
-    position: static !important;   /* prevents absolute overlay */
     display: block !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    border: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
+    width: 100% !important;
     margin: 12px 0 0 0 !important;
     padding: 0 !important;
   }
 
-  /* Ensure the real content stays above any weird layers */
+  /* Hard-kill any pseudo overlays inside balance widget */
+  #balanceWidget *::before,
+  #balanceWidget *::after {
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  /* Hide empty divs that can stretch to huge height on iOS */
+  #balanceWidget > div:empty,
+  #balanceWidget .widget-content > div:empty,
+  #balanceWidget .widget-data > div:empty {
+    display: none !important;
+  }
+
+  /* Keep real content always above */
   #balanceWidget .widget-title,
   #balanceWidget .widget-int,
   #balanceWidget .widget-big-int,
   #balanceWidget .widget-subtitle,
-  #balanceWidget .widget-data {
+  #balanceWidget .widget-data,
+  #balanceWidget .btn,
+  #balanceWidget button,
+  #balanceWidget a.btn,
+  #balanceWidget a.btn-success,
+  #balanceWidget .btn-success,
+  #balanceWidget .btn-deposit {
     position: relative !important;
-    z-index: 2 !important;
+    z-index: 3 !important;
     opacity: 1 !important;
     visibility: visible !important;
   }
 
-  /* Extra hard-kill of any separators/overlays */
+  /* Remove any dividers/hrs again (extra safety) */
   #balanceWidget hr,
   #balanceWidget .divider,
   #balanceWidget .widget-divider,
   #balanceWidget .widget-separator,
-  #balanceWidget::before,
-  #balanceWidget::after {
+  #balanceWidget .hr {
     display: none !important;
-    content: none !important;
-    border: 0 !important;
     height: 0 !important;
+    border: 0 !important;
   }
 }
