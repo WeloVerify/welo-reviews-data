@@ -1,13 +1,11 @@
 /* =========================================================
    WELO • MEDIA REVIEWS WIDGET (UPDATED)
    Fixes:
-   ✅ Safari: smoother 3D tilt (RAF + no transform transition while moving + Safari mask/clipping)
-   ✅ Videos: start muted by default (autoplay-safe)
-   ✅ Desktop: video starts on FIRST hover (preload + canplay retry)
-   ✅ Mobile: NO hover-play while scrolling (tap-only with move threshold)
-   ✅ Mobile: tap toggles play/pause (keeps playing until next tap)
-   ✅ Images ONLY: bottom-right small “+” button + REAL flip (whole card) to show review text
-   ✅ Flip text less bold
+   ✅ Safari: 3D tilt glitch (white triangle) fixed via inner clip + safari mask + 3D layers
+   ✅ Safari: tilt no “vibration” (RAF + disable transform transition while moving)
+   ✅ Images ONLY: bottom-right smaller “+” button → REAL full-card flip (front/back)
+   ✅ Flip: back text visible + less bold
+   ✅ Videos: start muted by default (autoplay-safe) + hover play unchanged
 ========================================================= */
 
 (() => {
@@ -181,13 +179,11 @@
   .wm-title{ font-size: 28px; }
 }
 
-/* Card */
+/* Card container */
 .wm-cardWrap{
   position: relative;
   perspective: 900px;
   -webkit-perspective: 900px;
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
   background:#fff;
   border-radius: 18px;
   overflow: visible;
@@ -195,56 +191,77 @@
   will-change: transform;
 }
 
+/* Tilt layer (this is what we rotate on hover) */
 .wm-card{
   position: relative;
   width: 100%;
-  aspect-ratio: 10 / 16; /* ✅ keep height exactly the same */
-  border-radius: 24px;
-  overflow: hidden;
-
-  /* ✅ helps Safari clip + 3D (prevents white artifacts) */
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-
-  /* fallback bg (so if anything leaks, it's not white) */
-  background: #0b0b0b;
-
+  aspect-ratio: 10 / 16;  /* ✅ keep the same height */
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
 
-  transform: rotateX(0deg) rotateY(0deg) translateZ(0.01px);
-  transform-origin: center;
+  transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0,0,0);
 
-  transition: transform 520ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms ease, filter 160ms ease;
+  transition: transform 140ms ease, box-shadow 160ms ease, filter 160ms ease;
   will-change: transform, box-shadow;
 }
 
-/* ✅ While moving: disable transform transition (prevents “vibration”) */
+/* ✅ While moving: disable transform transition (prevents Safari “vibration”) */
 .wm-cardWrap.is-tilting .wm-card{
   transition: box-shadow 160ms ease, filter 160ms ease;
 }
 
-/* Faces (for REAL flip on images) */
+/* Flip layer (full-card flip) */
+.wm-flip{
+  position:absolute;
+  inset:0;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+
+  transform: rotateY(0deg) translateZ(0.01px);
+  -webkit-transform: rotateY(0deg) translateZ(0.01px);
+
+  transition: transform 520ms cubic-bezier(.2,.9,.2,1);
+  will-change: transform;
+}
+.wm-cardWrap.is-flipped .wm-flip{
+  transform: rotateY(180deg) translateZ(0.01px);
+  -webkit-transform: rotateY(180deg) translateZ(0.01px);
+}
+
+/* Clip layer (fixes Safari triangles) */
+.wm-clip{
+  position:absolute;
+  inset:0;
+  border-radius: 24px;
+  overflow:hidden;
+  background:#0b0b0b;
+
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  /* ✅ Safari: force proper clipping during 3D transforms */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
+/* Faces */
 .wm-face{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
-  border-radius: 24px;
-  overflow:hidden;
-
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+.wm-front{
   transform: translateZ(0.02px);
   -webkit-transform: translateZ(0.02px);
 }
-
-.wm-front{
-  background:#0b0b0b;
-}
-
 .wm-back{
   transform: rotateY(180deg) translateZ(0.02px);
   -webkit-transform: rotateY(180deg) translateZ(0.02px);
@@ -252,10 +269,11 @@
   color:#0a0a0a;
   display:flex;
   flex-direction:column;
-  padding:18px 18px 18px 18px;
+  padding:18px;
   gap:12px;
 }
 
+/* Back content */
 .wm-backTop{
   display:flex;
   flex-direction:column;
@@ -297,9 +315,8 @@
   -webkit-user-drag:none;
   pointer-events:none;
 
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
   transform: translateZ(0.01px);
+  -webkit-transform: translateZ(0.01px);
 }
 
 /* Placeholder (videos) */
@@ -378,20 +395,23 @@
   opacity:0;
   transform: translateY(-4px);
   transition: opacity .16s ease, transform .16s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .wm-audio svg{ width:20px; height:20px; fill:#fff; }
 .wm-audio:active{ transform: translateY(0) scale(.96); }
+.wm-audio:focus{ outline:none; }
 
 /* ✅ “+” button (images only) - SMALL + bottom-right */
 .wm-flipBtn{
   position:absolute;
   right:14px;
   bottom:14px;
-  z-index:9;
+  z-index:20;
   width:44px;
   height:44px;
   border-radius:999px;
-  border:1px solid rgba(10,10,10,.08);
+  border:1px solid rgba(10,10,10,.10);
   background: rgba(255,255,255,.94);
   box-shadow: 0 14px 35px rgba(0,0,0,.18);
   display:grid;
@@ -399,9 +419,12 @@
   cursor:pointer;
   padding:0;
   transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+  outline:none;
+  -webkit-tap-highlight-color: transparent;
 }
 .wm-flipBtn:hover{ box-shadow: 0 18px 45px rgba(0,0,0,.22); transform: translateY(-1px); }
 .wm-flipBtn:active{ transform: translateY(0) scale(.98); opacity:.95; }
+.wm-flipBtn:focus{ outline:none; }
 .wm-flipBtn svg{
   width:20px;
   height:20px;
@@ -458,6 +481,7 @@
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce){
   .wm-card{ transition: box-shadow 160ms ease; transform:none !important; }
+  .wm-flip{ transition:none !important; }
 }
     `;
 
@@ -586,6 +610,9 @@
     const HOVER_CAPABLE = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    const ua = navigator.userAgent || "";
+    const IS_SAFARI = /safari/i.test(ua) && !/chrome|crios|android/i.test(ua);
+
     el.innerHTML = `
 <div class="wm-root">
   <div class="wm-wrap">
@@ -615,7 +642,7 @@
     const status = el.querySelector(".wm-status");
     const moreBtn = el.querySelector(".wm-moreBtn");
 
-    // ✅ Always start muted (autoplay-safe)
+    // ✅ Always start muted
     let muted = true;
 
     let items = [];
@@ -752,13 +779,11 @@
       await new Promise((resolve) => {
         let done = false;
         const finish = () => { if (done) return; done = true; resolve(); };
-
         const onCanPlay = async () => {
           videoEl.removeEventListener("canplay", onCanPlay);
           await tryPlay();
           finish();
         };
-
         videoEl.addEventListener("canplay", onCanPlay, { once: true });
         setTimeout(finish, 900);
       });
@@ -769,10 +794,19 @@
       wrap.className = "wm-cardWrap";
       wrap.classList.add(it.isVideo ? "is-video" : "is-image");
 
-      const card = document.createElement("div");
-      card.className = "wm-card";
+      // Tilt layer
+      const tilt = document.createElement("div");
+      tilt.className = "wm-card";
 
-      // FRONT face
+      // Flip layer
+      const flip = document.createElement("div");
+      flip.className = "wm-flip";
+
+      // Clip layer
+      const clip = document.createElement("div");
+      clip.className = "wm-clip";
+
+      // Front face
       const front = document.createElement("div");
       front.className = "wm-face wm-front";
 
@@ -859,12 +893,11 @@
         audioBtn.setAttribute("aria-label", muted ? t.muted : t.unmuted);
         audioBtn.innerHTML = muted ? iconMuted() : iconUnmuted();
 
-        audioBtn.addEventListener("click", async (e) => {
+        audioBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
 
           muted = !muted;
-          try { localStorage.setItem("welo_media_muted", String(muted)); } catch (_) {}
 
           grid.querySelectorAll("video.wm-media").forEach((vid) => {
             vid.muted = muted;
@@ -895,14 +928,11 @@
       if (audioBtn) front.appendChild(audioBtn);
       front.appendChild(caption);
 
-      card.appendChild(front);
+      clip.appendChild(front);
 
-      // BACK face (images only)
-      let back = null;
-      let flipBtn = null;
-
+      // Back face (images only)
       if (!it.isVideo) {
-        back = document.createElement("div");
+        const back = document.createElement("div");
         back.className = "wm-face wm-back";
 
         const top = document.createElement("div");
@@ -925,9 +955,16 @@
 
         back.appendChild(top);
         back.appendChild(reviewText);
-        card.appendChild(back);
+        clip.appendChild(back);
+      }
 
-        // “+” (images only)
+      flip.appendChild(clip);
+      tilt.appendChild(flip);
+      wrap.appendChild(tilt);
+
+      // “+” button (images only)
+      let flipBtn = null;
+      if (!it.isVideo) {
         flipBtn = document.createElement("button");
         flipBtn.type = "button";
         flipBtn.className = "wm-flipBtn";
@@ -936,27 +973,22 @@
         wrap.appendChild(flipBtn);
       }
 
-      wrap.appendChild(card);
-
-      // ===== Tilt + Flip logic =====
-      const MAX_TILT = 3.2;
+      // ===== Tilt (desktop) =====
+      const MAX_TILT = IS_SAFARI ? 2.2 : 3.2;
 
       let raf = 0;
       let lastX = 0;
       let lastY = 0;
       let rect = null;
 
-      function setTransform(rxDeg, ryDeg) {
-        const isFlipped = wrap.classList.contains("is-flipped");
-        const flip = isFlipped ? 180 : 0;
-        const ry = ryDeg + flip;
-
-        card.style.transform = `rotateX(${rxDeg.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateZ(0.01px)`;
+      function setTilt(rx, ry) {
+        tilt.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateZ(0.01px)`;
+        tilt.style.webkitTransform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateZ(0.01px)`;
       }
 
       function applyTiltFrame() {
         raf = 0;
-        if (!rect) rect = card.getBoundingClientRect();
+        if (!rect) rect = tilt.getBoundingClientRect();
 
         const x = (lastX - rect.left) / rect.width;
         const y = (lastY - rect.top) / rect.height;
@@ -964,16 +996,13 @@
         const ry = clamp((x - 0.5) * (MAX_TILT * 2), -MAX_TILT, MAX_TILT);
         const rx = clamp((0.5 - y) * (MAX_TILT * 2), -MAX_TILT, MAX_TILT);
 
-        setTransform(rx, ry);
+        setTilt(rx, ry);
       }
 
       function onMove(e) {
-        // ✅ if flipped (images), keep stable (no tilt)
-        if (wrap.classList.contains("is-flipped")) return;
-
+        if (wrap.classList.contains("is-flipped")) return; // no tilt while flipped
         lastX = e.clientX;
         lastY = e.clientY;
-
         if (!raf) {
           wrap.classList.add("is-tilting");
           raf = requestAnimationFrame(applyTiltFrame);
@@ -987,26 +1016,24 @@
         }
         rect = null;
         wrap.classList.remove("is-tilting");
-        // keep flip if active
-        setTransform(0, 0);
+        setTilt(0, 0);
       }
 
-      // Flip (images only) - REAL full card flip
+      // ===== Flip (images only) =====
       function toggleFlip(force) {
         if (it.isVideo) return;
-
         const next = typeof force === "boolean" ? force : !wrap.classList.contains("is-flipped");
         if (next) wrap.classList.add("is-flipped");
         else wrap.classList.remove("is-flipped");
 
-        // ensure smooth flip (no jitter)
+        // keep flip clean, no tilt
         resetTilt();
 
         if (flipBtn) flipBtn.setAttribute("aria-label", next ? t.closeReview : t.readReview);
       }
 
       if (!it.isVideo) {
-        // click on + toggles flip
+        // click + toggles flip
         if (flipBtn) {
           flipBtn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -1014,8 +1041,7 @@
             toggleFlip();
           });
         }
-
-        // click on FRONT only toggles flip (so back text can scroll without closing)
+        // clicking front opens (like your video)
         front.style.cursor = "pointer";
         front.addEventListener("click", (e) => {
           e.preventDefault();
@@ -1023,31 +1049,33 @@
         });
       }
 
-      // Desktop hover: tilt + preview play on hover (videos only)
+      // Desktop interactions
       if (HOVER_CAPABLE && !REDUCED_MOTION) {
         wrap.addEventListener("pointerenter", () => {
-          rect = card.getBoundingClientRect();
+          rect = tilt.getBoundingClientRect();
 
-          if (!it.isVideo) return;
-
-          const v = card.querySelector("video.wm-media");
-          if (!v) return;
-
-          wrap.classList.add("is-playing");
-          ensureVideoSrc(v);
-
-          try { v.currentTime = 0; } catch (_) {}
-          playWithFallback(v).catch(() => {});
+          // videos: play on hover
+          if (it.isVideo) {
+            const v = wrap.querySelector("video.wm-media");
+            if (!v) return;
+            wrap.classList.add("is-playing");
+            ensureVideoSrc(v);
+            try { v.currentTime = 0; } catch (_) {}
+            playWithFallback(v).catch(() => {});
+          }
         });
 
         wrap.addEventListener("pointermove", onMove, { passive: true });
 
         wrap.addEventListener("pointerleave", () => {
-          resetTilt();
+          // keep flipped stable, otherwise reset
+          if (!wrap.classList.contains("is-flipped")) resetTilt();
+          else resetTilt();
+
           wrap.classList.remove("is-playing");
 
           if (it.isVideo) {
-            const v = card.querySelector("video.wm-media");
+            const v = wrap.querySelector("video.wm-media");
             if (v) {
               try { v.pause(); } catch (_) {}
               try { v.currentTime = 0; } catch (_) {}
@@ -1058,9 +1086,7 @@
         resetTilt();
       }
 
-      // Mobile tap behaviour:
-      // - videos: tap toggles play/pause (already)
-      // - images: tap on front flips (tap threshold)
+      // Mobile tap behavior
       if (!HOVER_CAPABLE) {
         let downX = 0, downY = 0, downT = 0;
         let pointerId = null;
@@ -1080,12 +1106,11 @@
           const dx = Math.abs(e.clientX - downX);
           const dy = Math.abs(e.clientY - downY);
           const dtap = Date.now() - downT;
-
           const isTap = dx < 10 && dy < 10 && dtap < 450;
           if (!isTap) return;
 
           if (it.isVideo) {
-            const v = card.querySelector("video.wm-media");
+            const v = wrap.querySelector("video.wm-media");
             if (!v) return;
 
             if (v.paused) {
@@ -1098,10 +1123,8 @@
               wrap.classList.remove("is-playing");
             }
           } else {
-            // flip images: only if tap started on front (avoid closing when scrolling back text)
-            const target = e.target;
-            const isOnFront = target === front || (front && front.contains(target));
-            if (isOnFront) toggleFlip(true);
+            // images: tap on front opens
+            toggleFlip(true);
           }
         });
 
@@ -1111,7 +1134,7 @@
         });
       }
 
-      // Init transform
+      // Init
       resetTilt();
 
       return wrap;
