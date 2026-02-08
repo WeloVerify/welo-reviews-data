@@ -627,7 +627,7 @@
       wrap.appendChild(card);
 
       // ===== Hover behaviour: 3D tilt + video play =====
-      const maxTilt = 5; // degrees
+      const maxTilt = 4; // degrees
 
       function resetTilt() {
         card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg)`;
