@@ -1,15 +1,12 @@
 /* =========================================================
    WELO • MEDIA REVIEWS WIDGET (UPDATED)
-   Fixes:
-   ✅ Desktop: video starts on FIRST hover (preload + canplay retry)
-   ✅ Mobile: NO hover-play while scrolling (tap-only with move threshold)
-   ✅ Mobile: tap toggles play/pause (keeps playing until next tap)
-   ✅ Mobile header layout fixed (no overlapping CTA)
-   ✅ Slightly shorter cards
-   ✅ More space under subtitle
-   ✅ Slightly reduced 3D tilt
-   ✅ Hover shadow a bit stronger
-   ✅ On hover (desktop) or while playing (mobile): caption + dark gradient disappear
+   Changes requested:
+   ✅ Header title: "Recensioni verificate da Welo"
+   ✅ Subtitle: "Guarda cosa dicono i nostri clienti"
+   ✅ CTA button: "Vedi tutte le recensioni"
+   ✅ Videos: caption = Name + Date (relative)
+   ✅ Images: caption = Name + "Review text in quotes" (char-limited), NO date
+   ✅ Everything else identical (tilt, hover, mobile fixes, shadows, etc.)
 ========================================================= */
 
 (() => {
@@ -22,25 +19,30 @@
   const DEFAULT_BUCKET_PUBLIC_PATH = "/storage/v1/object/public/reviews-proof/";
   const DEFAULT_WELO_PAGE_BASE = "https://www.welobadge.com/welo-page/";
 
+  // ✅ Images review max characters (override with data-img-char-limit="140")
+  const DEFAULT_IMG_REVIEW_CHAR_LIMIT = 140;
+
   const I18N = {
     it: {
-      title: "Video recensioni",
+      title: "Recensioni verificate da Welo",
       subtitle: "Guarda cosa dicono i nostri clienti",
       more: "Mostra di più",
-      viewMore: "Vedi altre recensioni",
+      viewMore: "Vedi tutte le recensioni",
       muted: "Audio disattivato",
       unmuted: "Audio attivo",
       anonymous: "Cliente",
+      noReview: "Recensione verificata",
       timeAgo: (n, unit) => `${n} ${unit} fa`,
     },
     en: {
-      title: "Video reviews",
+      title: "Verified reviews by Welo",
       subtitle: "See what our customers say",
       more: "Show more",
-      viewMore: "View more reviews",
+      viewMore: "See all reviews",
       muted: "Muted",
       unmuted: "Sound on",
       anonymous: "Customer",
+      noReview: "Verified review",
       timeAgo: (n, unit) => `${n} ${unit} ago`,
     },
   };
@@ -103,9 +105,9 @@
   align-items:flex-start;
   justify-content:space-between;
   gap:16px;
-  padding: 6px 0 40px 0; /* ✅ more space under subtitle */
+  padding: 6px 0 40px 0; /* space under subtitle */
   background:#fff;
-  flex-wrap: wrap; /* ✅ prevents overlap */
+  flex-wrap: wrap;
 }
 .wm-hgroup{ min-width:0; }
 .wm-title{
@@ -164,7 +166,7 @@
 }
 @media (max-width: 720px){
   .wm-header{
-    flex-direction: column;          /* ✅ fixes mobile header overlap */
+    flex-direction: column;
     align-items: stretch;
     padding-bottom: 34px;
   }
@@ -183,12 +185,12 @@
   background:#fff;
   border-radius: 24px;
   overflow: visible;
-  touch-action: pan-y; /* ✅ smoother scroll, avoids accidental gestures */
+  touch-action: pan-y;
 }
 .wm-card{
   position: relative;
   width: 100%;
-  aspect-ratio: 10 / 16; /* ✅ slightly shorter than before */
+  aspect-ratio: 10 / 16; /* slightly shorter */
   border-radius: 24px;
   overflow: hidden;
   background:#fff;
@@ -208,10 +210,10 @@
   display:block;
   user-select:none;
   -webkit-user-drag:none;
-  pointer-events:none; /* ✅ prevents fullscreen click */
+  pointer-events:none;
 }
 
-/* Placeholder (helps when video first frame is loading) */
+/* Placeholder (videos) */
 .wm-ph{
   position:absolute;
   inset:0;
@@ -251,6 +253,17 @@
   line-height:1.2;
   font-weight:400;
   color: rgba(255,255,255,.86);
+}
+.wm-quote{
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 400;
+  color: rgba(255,255,255,.92);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;         /* extra safety on very small screens */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Play icon (videos only) */
@@ -294,18 +307,18 @@
 /* Desktop hover effects ONLY on hover-capable devices */
 @media (hover: hover) and (pointer: fine){
   .wm-cardWrap:hover .wm-card{
-    box-shadow: 0 22px 60px rgba(0,0,0,.22); /* ✅ a bit more visible */
+    box-shadow: 0 22px 60px rgba(0,0,0,.22);
   }
   .wm-cardWrap:hover .wm-caption{
     opacity:0;
     transform: translateY(8px);
   }
-  .wm-cardWrap:hover .wm-grad{ opacity:0; } /* ✅ hide dark bottom on hover */
+  .wm-cardWrap:hover .wm-grad{ opacity:0; }
   .wm-cardWrap:hover .wm-play{ opacity:0; transform: scale(.98); }
   .wm-cardWrap:hover .wm-audio{ opacity:1; transform: translateY(0); }
 }
 
-/* Playing state (used on mobile tap + also set on desktop hover) */
+/* Playing state (mobile tap + also set on desktop hover via JS) */
 .wm-cardWrap.is-playing .wm-caption{ opacity:0; transform: translateY(8px); }
 .wm-cardWrap.is-playing .wm-grad{ opacity:0; }
 .wm-cardWrap.is-playing .wm-play{ opacity:0; transform: scale(.98); }
@@ -353,6 +366,14 @@
   function safeStr(v, fallback = "") {
     if (typeof v === "string" && v.trim()) return v.trim();
     return fallback;
+  }
+
+  function truncateText(s, limit) {
+    const str = safeStr(s, "");
+    if (!str) return "";
+    const clean = str.replace(/\s+/g, " ").trim();
+    if (clean.length <= limit) return clean;
+    return clean.slice(0, Math.max(0, limit - 1)).trimEnd() + "…";
   }
 
   function parseDate(v) {
@@ -422,7 +443,7 @@
     ensureFont();
     ensureStyles();
 
-    // Force the mount element to be white too (helps when Webflow section is weird)
+    // Keep mount white (Webflow sections sometimes bleed)
     try { el.style.background = "#fff"; } catch (_) {}
 
     const locale = pickLocale(el);
@@ -447,11 +468,12 @@
     const initial = parseInt(el.getAttribute("data-initial") || "8", 10);
     const step = parseInt(el.getAttribute("data-step") || String(initial), 10);
 
+    const imgCharLimit = parseInt(el.getAttribute("data-img-char-limit") || String(DEFAULT_IMG_REVIEW_CHAR_LIMIT), 10);
+
     const weloPageUrl =
       el.getAttribute("data-url") ||
       `${DEFAULT_WELO_PAGE_BASE}${encodeURIComponent(company)}`;
 
-    // Optional anon key if your function requires it
     const anonKey = el.getAttribute("data-anon-key") || "";
 
     // Device capability
@@ -488,7 +510,7 @@
     const status = el.querySelector(".wm-status");
     const moreBtn = el.querySelector(".wm-moreBtn");
 
-    // Global mute preference (needed for autoplay policies)
+    // Global mute preference
     let muted = true;
     try {
       const saved = localStorage.getItem("welo_media_muted");
@@ -530,6 +552,19 @@
         item.submitted_at ||
         null;
 
+      // ✅ Review text (images)
+      const reviewText =
+        item.review ||
+        item.review_text ||
+        item.reviewText ||
+        item.text ||
+        item.body ||
+        item.comment ||
+        item.message ||
+        item.description ||
+        item.content ||
+        "";
+
       const isVideo =
         item.type === "video" ||
         item.media_type === "video" ||
@@ -540,6 +575,7 @@
         name: safeStr(name, t.anonymous),
         date: created,
         isVideo,
+        reviewText: safeStr(reviewText, ""),
       };
     }
 
@@ -548,7 +584,6 @@
       status.textContent = msg || "";
     }
 
-    // Pause all other videos (nice on mobile)
     function pauseAllExcept(exceptVideo) {
       grid.querySelectorAll("video.wm-media").forEach((v) => {
         if (v === exceptVideo) return;
@@ -558,7 +593,7 @@
       });
     }
 
-    // Lazy-load videos when near viewport
+    // Lazy-load videos near viewport
     const videoObserver = ("IntersectionObserver" in window)
       ? new IntersectionObserver((entries, obs) => {
           entries.forEach((entry) => {
@@ -593,7 +628,6 @@
           await videoEl.play();
           return true;
         } catch (e) {
-          // If unmuted blocks autoplay, fallback to muted
           if (!videoEl.muted) {
             videoEl.muted = true;
             try { await videoEl.play(); return true; } catch (_) {}
@@ -602,11 +636,9 @@
         }
       };
 
-      // Try immediately
       const ok = await tryPlay();
       if (ok) return;
 
-      // Retry once when it can play (first hover issue fix)
       await new Promise((resolve) => {
         let done = false;
         const finish = () => { if (done) return; done = true; resolve(); };
@@ -618,7 +650,7 @@
         };
 
         videoEl.addEventListener("canplay", onCanPlay, { once: true });
-        setTimeout(finish, 900); // safety timeout
+        setTimeout(finish, 900);
       });
     }
 
@@ -639,7 +671,7 @@
       if (it.isVideo) {
         const v = document.createElement("video");
         v.className = "wm-media";
-        v.dataset.src = it.url;            // ✅ lazy src (fixes mobile slow load)
+        v.dataset.src = it.url;
         v.preload = "none";
         v.muted = muted;
         v.loop = true;
@@ -652,15 +684,12 @@
         v.controlsList = "nodownload noplaybackrate noremoteplayback";
         v.crossOrigin = "anonymous";
 
-        // Mark ready when first frame is available
         v.addEventListener("loadeddata", () => {
           wrap.classList.add("is-ready");
         }, { once: true });
 
-        // Preload when near viewport (important for first hover on desktop)
         if (videoObserver) videoObserver.observe(v);
         else {
-          // fallback: load immediately
           v.src = it.url;
           v.preload = "metadata";
           try { v.load(); } catch (_) {}
@@ -675,12 +704,10 @@
         img.loading = "lazy";
         img.decoding = "async";
         mediaEl = img;
-
-        // images are always "ready"
         wrap.classList.add("is-ready");
       }
 
-      // Gradient overlay (for caption readability)
+      // Gradient overlay
       const grad = document.createElement("div");
       grad.className = "wm-grad";
 
@@ -691,15 +718,25 @@
       const nm = document.createElement("div");
       nm.className = "wm-name";
       nm.textContent = it.name;
-
-      const dt = document.createElement("div");
-      dt.className = "wm-date";
-      dt.textContent = relativeTimeFromNow(it.date, locale);
-
       caption.appendChild(nm);
-      caption.appendChild(dt);
 
-      // Play icon (video)
+      if (it.isVideo) {
+        // ✅ Video: name + date
+        const dt = document.createElement("div");
+        dt.className = "wm-date";
+        dt.textContent = relativeTimeFromNow(it.date, locale);
+        caption.appendChild(dt);
+      } else {
+        // ✅ Image: name + "review text" (limited), NO date
+        const raw = it.reviewText || t.noReview;
+        const clipped = truncateText(raw, imgCharLimit);
+        const quote = document.createElement("div");
+        quote.className = "wm-quote";
+        quote.textContent = `“${clipped}”`;
+        caption.appendChild(quote);
+      }
+
+      // Play icon for video
       let play = null;
       if (it.isVideo) {
         play = document.createElement("div");
@@ -707,7 +744,7 @@
         play.innerHTML = playSvg();
       }
 
-      // Audio toggle (video)
+      // Mute toggle for video
       let audioBtn = null;
       if (it.isVideo) {
         audioBtn = document.createElement("button");
@@ -746,15 +783,15 @@
       wrap.appendChild(card);
 
       // ===== Interactions =====
-      const MAX_TILT = 3.2; // ✅ slightly reduced tilt (change this if you want less/more)
+      const MAX_TILT = 3.2; // tilt intensity
 
       function resetTilt() {
         card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg)`;
       }
       function onMove(e) {
         const r = card.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;  // 0..1
-        const y = (e.clientY - r.top) / r.height; // 0..1
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
 
         const ry = clamp((x - 0.5) * (MAX_TILT * 2), -MAX_TILT, MAX_TILT);
         const rx = clamp((0.5 - y) * (MAX_TILT * 2), -MAX_TILT, MAX_TILT);
@@ -762,18 +799,19 @@
         card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
       }
 
-      // Desktop hover: tilt + preview play on hover (NO click)
+      // Desktop hover: tilt + video preview on hover
       if (HOVER_CAPABLE && !REDUCED_MOTION) {
         wrap.addEventListener("pointermove", (e) => onMove(e));
 
         wrap.addEventListener("pointerenter", async () => {
+          // mark as playing only for video (so caption/grad disappear)
+          if (it.isVideo) wrap.classList.add("is-playing");
+
           if (!it.isVideo) return;
           const v = card.querySelector("video.wm-media");
           if (!v) return;
 
-          wrap.classList.add("is-playing");
           ensureVideoSrc(v);
-
           try { v.currentTime = 0; } catch (_) {}
           await playWithFallback(v);
         });
@@ -791,11 +829,10 @@
           }
         });
       } else {
-        // No hover devices: keep tilt off
         resetTilt();
       }
 
-      // Mobile tap behaviour: tap toggles play/pause (no accidental play while scrolling)
+      // Mobile tap behaviour: only videos toggle play/pause
       if (!HOVER_CAPABLE && it.isVideo) {
         let downX = 0, downY = 0, downT = 0;
         let pointerId = null;
@@ -816,14 +853,12 @@
           const dy = Math.abs(e.clientY - downY);
           const dtap = Date.now() - downT;
 
-          // ✅ treat as TAP only if tiny movement (prevents scroll-trigger play)
           const isTap = dx < 10 && dy < 10 && dtap < 450;
           if (!isTap) return;
 
           const v = card.querySelector("video.wm-media");
           if (!v) return;
 
-          // Toggle
           if (v.paused) {
             pauseAllExcept(v);
             wrap.classList.add("is-playing");
