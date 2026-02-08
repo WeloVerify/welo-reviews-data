@@ -98,12 +98,12 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 6px 0 18px 0;
+  padding: 6px 0 30px 0;
   background: #fff;
 }
 .wm-hgroup { min-width: 0; }
 .wm-title {
-  font-size: 40px;
+  font-size: 30px;
   line-height: 1.05;
   font-weight: 600; /* ✅ requested */
   letter-spacing: -0.03em;
