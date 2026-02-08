@@ -181,7 +181,7 @@
 .wm-cardWrap{
   perspective: 900px;
   background:#fff;
-  border-radius: 24px;
+  border-radius: 18px;
   overflow: visible;
   touch-action: pan-y; /* ✅ smoother scroll, avoids accidental gestures */
 }
