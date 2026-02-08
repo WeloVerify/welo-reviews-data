@@ -1,16 +1,3 @@
-/* =========================================================
-   WELO • MEDIA REVIEWS WIDGET (UPDATED)
-   Fixes:
-   ✅ Desktop: video starts on FIRST hover (preload + canplay retry)
-   ✅ Mobile: NO hover-play while scrolling (tap-only with move threshold)
-   ✅ Mobile: tap toggles play/pause (keeps playing until next tap)
-   ✅ Mobile header layout fixed (no overlapping CTA)
-   ✅ Slightly shorter cards
-   ✅ More space under subtitle
-   ✅ Slightly reduced 3D tilt
-   ✅ Hover shadow a bit stronger
-   ✅ On hover (desktop) or while playing (mobile): caption + dark gradient disappear
-========================================================= */
 
 (() => {
   const STYLE_ID = "welo-media-widget-styles";
@@ -490,10 +477,6 @@
 
     // Global mute preference (needed for autoplay policies)
     let muted = true;
-    try {
-      const saved = localStorage.getItem("welo_media_muted");
-      if (saved !== null) muted = saved === "true";
-    } catch (_) {}
 
     // State
     let items = [];
