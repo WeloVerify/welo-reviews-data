@@ -6,30 +6,35 @@
   // =========================
   const API_BASE =
     "https://ufqvcojyfsnscuddadnw.supabase.co/functions/v1/welo-media-reviews";
-  const STYLE_ID = "welo-media-widget-styles-v3";
+  const STYLE_ID = "welo-media-widget-styles-v4";
+  const FONT_ID = "welo-inter-font";
 
   // =========================
-  // LOCALE (IT/US come richiesto)
+  // LOCALE (IT/US)
   // =========================
   function normalizeLocale(raw) {
     if (!raw) return null;
     const v = String(raw).trim().toLowerCase();
     if (v === "it" || v === "ita" || v === "italy" || v === "it-it") return "it";
-    if (v === "en" || v === "us" || v === "usa" || v === "uk" || v === "en-us" || v === "en-gb")
+    if (
+      v === "en" ||
+      v === "us" ||
+      v === "usa" ||
+      v === "uk" ||
+      v === "en-us" ||
+      v === "en-gb"
+    )
       return "en";
     return null;
   }
 
-  function detectLocaleFromElement(el) {
-    // 1) data-locale (se mai lo usi)
+  function detectLocale(el) {
     const dl = normalizeLocale(el.getAttribute("data-locale"));
     if (dl) return dl;
 
-    // 2) data-country="IT" | "US"
     const dc = normalizeLocale(el.getAttribute("data-country"));
     if (dc) return dc;
 
-    // 3) fallback path
     const p = (window.location.pathname || "").toLowerCase();
     if (p.startsWith("/en")) return "en";
     return "it";
@@ -41,6 +46,7 @@
       subtitleVideo: "Video dalla tua Welo Page",
       subtitleMedia: "Video e immagini dalla tua Welo Page",
       cta: "Vedi altre recensioni",
+      showMore: "Mostra di più",
       loading: "Caricamento…",
       empty: "Ancora nessun contenuto disponibile.",
       close: "Chiudi",
@@ -52,6 +58,7 @@
       subtitleVideo: "Videos from your Welo Page",
       subtitleMedia: "Videos and photos from your Welo Page",
       cta: "View more reviews",
+      showMore: "Show more",
       loading: "Loading…",
       empty: "No media available yet.",
       close: "Close",
@@ -78,10 +85,10 @@
       .replace(/'/g, "&#039;");
   }
 
-  function safeText(str) {
+  function safeText(str, maxLen) {
     const s = String(str || "").trim();
-    // niente wall of text: taglia duro
-    if (s.length > 140) return s.slice(0, 137) + "…";
+    if (!s) return "";
+    if (s.length > maxLen) return s.slice(0, maxLen - 1) + "…";
     return s;
   }
 
@@ -92,61 +99,52 @@
     return u.toString();
   }
 
-  function isVideoItem(item) {
+  function isVideo(item) {
     return item && item.type === "video";
   }
 
-  // pattern “mosaic” stile premium
-  // (si ripete per creare un layout simile allo screenshot)
-  const MOSAIC_PATTERN = [
-    "xl", // 1 grande
-    "md", // 2
-    "lg", // 3
-    "md", // 4
-    "md", // 5
-    "md", // 6
-    "lg", // 7
-    "md", // 8
-    "md", // 9
-    "md", // 10
-    "lg", // 11
-    "md", // 12
-  ];
-
-  function getSizeClass(index) {
-    const key = MOSAIC_PATTERN[index % MOSAIC_PATTERN.length] || "md";
-    return "wm-size-" + key;
+  // =========================
+  // STYLES (uniform cards like EightSleep)
+  // =========================
+  function injectFont() {
+    if (document.getElementById(FONT_ID)) return;
+    const link = document.createElement("link");
+    link.id = FONT_ID;
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap";
+    document.head.appendChild(link);
   }
 
-  // =========================
-  // STYLES
-  // =========================
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
+    injectFont();
 
     const css = `
 /* =========================
-   WELO • MEDIA WIDGET v3
-   Mosaic premium (no stars/date)
+   WELO • MEDIA WIDGET v4
+   Uniform grid (EightSleep-like)
    ========================= */
 .welo-media-widget {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 .wm-wrap { width:100%; }
+
 .wm-head {
   display:flex;
-  align-items:flex-end;
+  align-items:flex-start;
   justify-content:space-between;
   gap:16px;
   margin-bottom: 18px;
 }
-.wm-hgroup { display:flex; flex-direction:column; gap:6px; }
+.wm-hgroup { display:flex; flex-direction:column; gap:8px; }
 .wm-title {
-  font-size: 40px;
-  line-height: 1.05;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 44px;
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   color:#0b0b0b;
   margin:0;
 }
@@ -154,7 +152,7 @@
   font-size: 20px;
   line-height: 1.25;
   color:#9ca3af;
-  font-weight: 500;
+  font-weight: 600;
   margin:0;
 }
 
@@ -163,74 +161,72 @@
   align-items:center;
   gap:10px;
   padding: 14px 18px;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid #e5e7eb;
   background:#0b0b0b;
   color:#fff;
   text-decoration:none;
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 700;
   transition: transform .15s ease, opacity .15s ease;
   white-space:nowrap;
 }
 .wm-cta:hover { opacity:.92; transform: translateY(-1px); }
 .wm-cta svg { width:16px; height:16px; }
 
-.wm-grid {
-  display:grid;
-  gap: 16px;
-  grid-auto-flow: dense;
-}
-
-/* Desktop: 12 colonne */
-@media (min-width: 1024px){
-  .wm-grid { grid-template-columns: repeat(12, 1fr); }
-  .wm-size-xl { grid-column: span 6; grid-row: span 2; }
-  .wm-size-lg { grid-column: span 4; grid-row: span 2; }
-  .wm-size-md { grid-column: span 4; grid-row: span 1; }
-}
-
-/* Tablet: 6 colonne */
-@media (min-width: 640px) and (max-width: 1023px){
-  .wm-grid { grid-template-columns: repeat(6, 1fr); }
-  .wm-size-xl { grid-column: span 6; grid-row: span 2; }
-  .wm-size-lg { grid-column: span 3; grid-row: span 2; }
-  .wm-size-md { grid-column: span 3; grid-row: span 1; }
-}
-
-/* Mobile: 2 colonne */
-@media (max-width: 639px){
-  .wm-title { font-size: 28px; }
+@media (max-width: 640px){
+  .wm-head { flex-direction:column; align-items:flex-start; }
+  .wm-title { font-size: 30px; }
   .wm-subtitle { font-size: 16px; }
-  .wm-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .wm-size-xl { grid-column: span 2; grid-row: span 2; }
-  .wm-size-lg { grid-column: span 2; grid-row: span 1; }
-  .wm-size-md { grid-column: span 1; grid-row: span 1; }
+  .wm-cta { padding: 12px 14px; border-radius: 14px; }
 }
 
-/* Tile */
-.wm-tile {
-  position: relative;
-  border-radius: 18px;
-  overflow: hidden;
-  background: #0a0a0a;
+/* GRID: all same size */
+.wm-grid{
+  display:grid;
+  gap: 18px;
+}
+@media (min-width: 1024px){
+  .wm-grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 740px) and (max-width: 1023px){
+  .wm-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 480px) and (max-width: 739px){
+  .wm-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+}
+@media (max-width: 479px){
+  .wm-grid{ grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 14px; }
+}
+
+/* TILE */
+.wm-tile{
+  position:relative;
+  border-radius: 22px;
+  overflow:hidden;
+  background:#0a0a0a;
   border: 1px solid #eef0f3;
-  cursor: pointer;
+  cursor:pointer;
   transform: translateZ(0);
   box-shadow: 0 1px 0 rgba(0,0,0,.04);
   transition: transform .18s ease, box-shadow .18s ease;
-  min-height: 230px;
+  aspect-ratio: 3 / 4; /* SAME SIZE ALWAYS */
+  min-height: 320px;
 }
-.wm-tile:hover {
+@media (max-width: 640px){
+  .wm-tile{ min-height: 380px; }
+}
+.wm-tile:hover{
   transform: translateY(-2px);
   box-shadow: 0 18px 50px rgba(0,0,0,.14);
 }
-.wm-media {
+
+.wm-media{
   position:absolute;
   inset:0;
 }
 .wm-media img,
-.wm-media video {
+.wm-media video{
   width:100%;
   height:100%;
   object-fit: cover;
@@ -239,73 +235,79 @@
   transition: transform .35s ease;
 }
 .wm-tile:hover .wm-media img,
-.wm-tile:hover .wm-media video {
+.wm-tile:hover .wm-media video{
   transform: scale(1.06);
 }
 
-/* overlay gradient */
-.wm-overlay {
+/* bottom gradient for text */
+.wm-overlay{
   position:absolute;
   inset:0;
   background: linear-gradient(
     to top,
-    rgba(0,0,0,.78) 0%,
-    rgba(0,0,0,.28) 40%,
-    rgba(0,0,0,0) 70%
+    rgba(0,0,0,.86) 0%,
+    rgba(0,0,0,.30) 42%,
+    rgba(0,0,0,0) 72%
   );
   pointer-events:none;
 }
 
-/* play icon for videos */
-.wm-play {
+/* PLAY ICON (big, centered, like screenshot) */
+.wm-play{
   position:absolute;
-  left: 18px;
-  top: 18px;
-  width: 56px;
-  height: 56px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 84px;
+  height: 84px;
   border-radius: 999px;
   background: rgba(255,255,255,.92);
-  box-shadow: 0 10px 26px rgba(0,0,0,.30);
+  box-shadow: 0 14px 34px rgba(0,0,0,.32);
   display:flex;
   align-items:center;
   justify-content:center;
   pointer-events:none;
+  transition: transform .18s ease, background .18s ease;
 }
-.wm-play:before {
+.wm-tile:hover .wm-play{
+  transform: translate(-50%, -50%) scale(1.05);
+  background: rgba(255,255,255,.96);
+}
+.wm-play:before{
   content:"";
-  margin-left: 4px;
-  width: 0; height: 0;
+  margin-left: 6px;
+  width:0;height:0;
   border-style: solid;
-  border-width: 10px 0 10px 16px;
-  border-color: transparent transparent transparent #111;
+  border-width: 14px 0 14px 22px;
+  border-color: transparent transparent transparent #0b0b0b;
 }
 
-/* short text (optional) */
-.wm-copy {
+/* TEXT (short, premium) */
+.wm-copy{
   position:absolute;
   left: 18px;
   right: 18px;
-  bottom: 16px;
+  bottom: 18px;
   display:flex;
   flex-direction:column;
-  gap: 6px;
+  gap: 8px;
   color:#fff;
 }
-.wm-copy-title {
-  font-size: 16px;
-  font-weight: 750;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+.wm-copy-title{
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   display:-webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow:hidden;
 }
-.wm-copy-desc {
-  font-size: 13px;
+.wm-copy-desc{
+  font-size: 15px;
   line-height: 1.35;
-  color: rgba(255,255,255,.84);
-  font-weight: 550;
+  color: rgba(255,255,255,.88);
+  font-weight: 600;
   display:-webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -313,17 +315,41 @@
 }
 
 /* Loading / empty */
-.wm-loading, .wm-empty {
+.wm-loading, .wm-empty{
   border: 1px dashed #e5e7eb;
   border-radius: 18px;
   padding: 18px;
   background: #fff;
   color: #6b7280;
-  font-weight: 650;
+  font-weight: 700;
 }
 
-/* Modal */
-.wm-modal {
+/* SHOW MORE button (center) */
+.wm-more-wrap{
+  display:flex;
+  justify-content:center;
+  margin-top: 18px;
+}
+.wm-more{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 14px 22px;
+  min-width: 220px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background:#0b0b0b;
+  color:#fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor:pointer;
+  transition: transform .15s ease, opacity .15s ease;
+}
+.wm-more:hover{ opacity:.92; transform: translateY(-1px); }
+.wm-more:active{ transform: translateY(0px); }
+
+/* MODAL */
+.wm-modal{
   position: fixed;
   inset: 0;
   z-index: 999999;
@@ -334,23 +360,23 @@
   background: rgba(10,12,16,.86);
   backdrop-filter: blur(4px);
 }
-.wm-modal.is-open { display:flex; }
-.wm-modal-inner {
-  width: min(1050px, 96vw);
+.wm-modal.is-open{ display:flex; }
+.wm-modal-inner{
+  width: min(1100px, 96vw);
   border-radius: 18px;
   overflow:hidden;
   background:#000;
   position:relative;
   box-shadow: 0 28px 90px rgba(0,0,0,.48);
 }
-.wm-modal-media {
+.wm-modal-media{
   width:100%;
   max-height: 84vh;
   display:block;
   object-fit: contain;
   background:#000;
 }
-.wm-modal-close {
+.wm-modal-close{
   position:absolute;
   top: 12px;
   right: 12px;
@@ -367,9 +393,9 @@
   justify-content:center;
   transition: transform .15s ease, background .15s ease;
 }
-.wm-modal-close:hover { transform: scale(1.06); background: rgba(0,0,0,.75); }
+.wm-modal-close:hover{ transform: scale(1.06); background: rgba(0,0,0,.75); }
 
-.wm-nav {
+.wm-nav{
   position:absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -386,10 +412,10 @@
   justify-content:center;
   transition: transform .15s ease, background .15s ease, opacity .15s ease;
 }
-.wm-nav:hover { transform: translateY(-50%) scale(1.06); background: rgba(0,0,0,.75); }
-.wm-nav[disabled] { opacity: .35; cursor: default; transform: translateY(-50%); }
-.wm-prev { left: 12px; }
-.wm-next { right: 12px; }
+.wm-nav:hover{ transform: translateY(-50%) scale(1.06); background: rgba(0,0,0,.75); }
+.wm-nav[disabled]{ opacity:.35; cursor: default; transform: translateY(-50%); }
+.wm-prev{ left: 12px; }
+.wm-next{ right: 12px; }
     `.trim();
 
     const style = document.createElement("style");
@@ -401,28 +427,65 @@
   // =========================
   // VIDEO THUMB (first frame)
   // =========================
-  function initVideoThumbs(root) {
-    const vids = root.querySelectorAll("video[data-wm-thumb='1']");
+  function primeVideoFrame(video) {
+    try {
+      video.muted = true;
+      video.playsInline = true;
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+      video.preload = "metadata";
+
+      const showFrame = function () {
+        try {
+          if (video.currentTime < 0.1) video.currentTime = 0.1;
+        } catch (_) {}
+      };
+
+      if (video.readyState >= 2) showFrame();
+      else {
+        video.addEventListener("loadeddata", showFrame, { once: true });
+        video.addEventListener("loadedmetadata", showFrame, { once: true });
+      }
+    } catch (_) {}
+  }
+
+  // =========================
+  // LAZY LOAD videos (optimized)
+  // =========================
+  function lazyLoadVideos(root) {
+    const vids = Array.from(root.querySelectorAll("video[data-src]"));
+    if (!vids.length) return;
+
+    if (!("IntersectionObserver" in window)) {
+      vids.forEach(function (v) {
+        v.src = v.getAttribute("data-src");
+        v.removeAttribute("data-src");
+        v.load();
+        primeVideoFrame(v);
+      });
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          const v = e.target;
+          const src = v.getAttribute("data-src");
+          if (src) {
+            v.src = src;
+            v.removeAttribute("data-src");
+            v.load();
+            primeVideoFrame(v);
+          }
+          io.unobserve(v);
+        });
+      },
+      { root: null, threshold: 0.15 }
+    );
+
     vids.forEach(function (v) {
-      try {
-        v.muted = true;
-        v.playsInline = true;
-        v.setAttribute("playsinline", "");
-        v.setAttribute("webkit-playsinline", "");
-        v.preload = "metadata";
-
-        const showFrame = function () {
-          try {
-            if (v.currentTime < 0.1) v.currentTime = 0.1;
-          } catch (_) {}
-        };
-
-        if (v.readyState >= 2) showFrame();
-        else {
-          v.addEventListener("loadeddata", showFrame, { once: true });
-          v.addEventListener("loadedmetadata", showFrame, { once: true });
-        }
-      } catch (_) {}
+      io.observe(v);
     });
   }
 
@@ -464,7 +527,7 @@
       const item = state.items[state.index];
       if (!item) return;
 
-      if (isVideoItem(item)) {
+      if (isVideo(item)) {
         const video = document.createElement("video");
         video.className = "wm-modal-media";
         video.src = item.url;
@@ -530,22 +593,25 @@
   }
 
   // =========================
-  // RENDER
+  // FETCH + RENDER
   // =========================
-  function render(el) {
+  function renderWidget(el) {
     injectStyles();
 
-    const locale = detectLocaleFromElement(el);
+    const locale = detectLocale(el);
     const t = TEXTS[locale] || TEXTS.it;
 
     const company = (el.getAttribute("data-welo") || "").trim();
     if (!company) return;
 
-    const only = (el.getAttribute("data-only") || "video").trim().toLowerCase();
-    const limit = clamp(el.getAttribute("data-limit") || 12, 1, 50);
-    const showText = (el.getAttribute("data-show-text") || "true").trim().toLowerCase() !== "false";
-    const url = (el.getAttribute("data-url") || "").trim();
+    const only = (el.getAttribute("data-only") || "video").trim().toLowerCase(); // video | media
+    const showText =
+      (el.getAttribute("data-show-text") || "true").trim().toLowerCase() !== "false";
 
+    const initialLimit = clamp(el.getAttribute("data-limit") || 8, 1, 50);
+    const step = clamp(el.getAttribute("data-step") || 4, 1, 20);
+
+    const url = (el.getAttribute("data-url") || "").trim();
     const subtitle = only === "media" ? t.subtitleMedia : t.subtitleVideo;
 
     el.innerHTML =
@@ -575,129 +641,161 @@
 
     const wrap = el.querySelector(".wm-wrap");
     const loadingBox = el.querySelector(".wm-loading");
-
     const modal = buildModal(locale);
 
-    fetch(buildUrl(company, limit), { method: "GET" })
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (data) {
-        const items = Array.isArray(data && data.items) ? data.items : [];
+    let currentLimit = initialLimit;
 
-        // filtro client-side (in caso il backend ritorni tutto)
-        const filtered = items.filter(function (it) {
-          if (!it || !it.url) return false;
-          if (only === "media") return true;
-          return it.type === "video";
-        });
+    function paint(items, totalCount) {
+      // filtro client-side
+      const filtered = (items || []).filter(function (it) {
+        if (!it || !it.url) return false;
+        if (only === "media") return true;
+        return it.type === "video";
+      });
 
-        if (!filtered.length) {
-          loadingBox.outerHTML = '<div class="wm-empty">' + escapeHtml(t.empty) + "</div>";
-          return;
+      loadingBox.remove();
+
+      // remove old grid / button
+      const oldGrid = wrap.querySelector(".wm-grid");
+      if (oldGrid) oldGrid.remove();
+      const oldMore = wrap.querySelector(".wm-more-wrap");
+      if (oldMore) oldMore.remove();
+
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "wm-empty";
+        empty.textContent = t.empty;
+        wrap.appendChild(empty);
+        return;
+      }
+
+      const grid = document.createElement("div");
+      grid.className = "wm-grid";
+
+      filtered.forEach(function (item, idx) {
+        const tile = document.createElement("div");
+        tile.className = "wm-tile";
+        tile.setAttribute("role", "button");
+        tile.setAttribute("tabindex", "0");
+
+        const media = document.createElement("div");
+        media.className = "wm-media";
+
+        if (isVideo(item)) {
+          const v = document.createElement("video");
+          v.setAttribute("data-src", item.url); // lazy load
+          v.muted = true;
+          v.playsInline = true;
+          v.preload = "metadata";
+          media.appendChild(v);
+
+          const play = document.createElement("div");
+          play.className = "wm-play";
+          tile.appendChild(play);
+        } else {
+          const img = document.createElement("img");
+          img.src = item.url;
+          img.alt = "";
+          img.loading = "lazy";
+          media.appendChild(img);
         }
 
-        const grid = document.createElement("div");
-        grid.className = "wm-grid";
+        tile.appendChild(media);
 
-        filtered.forEach(function (item, idx) {
-          const tile = document.createElement("div");
-          tile.className = "wm-tile " + getSizeClass(idx);
-          tile.setAttribute("role", "button");
-          tile.setAttribute("tabindex", "0");
+        const overlay = document.createElement("div");
+        overlay.className = "wm-overlay";
+        tile.appendChild(overlay);
 
-          // media layer
-          const media = document.createElement("div");
-          media.className = "wm-media";
+        if (showText) {
+          const title = safeText(item.title || "", 60);
+          const desc = safeText(item.text || "", 90);
 
-          if (isVideoItem(item)) {
-            const v = document.createElement("video");
-            v.src = item.url;
-            v.setAttribute("data-wm-thumb", "1");
-            v.muted = true;
-            v.playsInline = true;
-            v.preload = "metadata";
-            media.appendChild(v);
+          if (title || desc) {
+            const copy = document.createElement("div");
+            copy.className = "wm-copy";
 
-            const play = document.createElement("div");
-            play.className = "wm-play";
-            tile.appendChild(play);
-          } else {
-            const img = document.createElement("img");
-            img.src = item.url;
-            img.alt = "";
-            img.loading = "lazy";
-            media.appendChild(img);
-          }
-
-          tile.appendChild(media);
-
-          // overlay gradient
-          const overlay = document.createElement("div");
-          overlay.className = "wm-overlay";
-          tile.appendChild(overlay);
-
-          // short text overlay (optional)
-          if (showText) {
-            const title = safeText(item.title || "");
-            const desc = safeText(item.text || "");
-
-            if (title || desc) {
-              const copy = document.createElement("div");
-              copy.className = "wm-copy";
-
-              if (title) {
-                const ct = document.createElement("div");
-                ct.className = "wm-copy-title";
-                ct.textContent = title;
-                copy.appendChild(ct);
-              }
-
-              if (desc) {
-                const cd = document.createElement("div");
-                cd.className = "wm-copy-desc";
-                cd.textContent = desc;
-                copy.appendChild(cd);
-              }
-
-              tile.appendChild(copy);
+            if (title) {
+              const ct = document.createElement("div");
+              ct.className = "wm-copy-title";
+              ct.textContent = title;
+              copy.appendChild(ct);
             }
-          }
 
-          function open() {
-            modal.open(filtered, idx);
-          }
-
-          tile.addEventListener("click", open);
-          tile.addEventListener("keydown", function (e) {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              open();
+            if (desc) {
+              const cd = document.createElement("div");
+              cd.className = "wm-copy-desc";
+              cd.textContent = desc;
+              copy.appendChild(cd);
             }
-          });
 
-          grid.appendChild(tile);
+            tile.appendChild(copy);
+          }
+        }
+
+        function open() {
+          modal.open(filtered, idx);
+        }
+
+        tile.addEventListener("click", open);
+        tile.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open();
+          }
         });
 
-        loadingBox.remove();
-        wrap.appendChild(grid);
-
-        // set first-frame thumbs for videos
-        initVideoThumbs(wrap);
-      })
-      .catch(function () {
-        loadingBox.outerHTML = '<div class="wm-empty">' + escapeHtml(t.empty) + "</div>";
+        grid.appendChild(tile);
       });
+
+      wrap.appendChild(grid);
+      lazyLoadVideos(wrap);
+
+      // show more button only if there are more total items
+      const total = Number(totalCount || 0);
+      const currentlyShown = filtered.length;
+
+      // Nota: count viene dal backend (totale); items.length è quanto hai caricato con limit
+      if (total > items.length) {
+        const moreWrap = document.createElement("div");
+        moreWrap.className = "wm-more-wrap";
+        moreWrap.innerHTML =
+          '<button type="button" class="wm-more">' + escapeHtml(t.showMore) + "</button>";
+        wrap.appendChild(moreWrap);
+
+        moreWrap.querySelector(".wm-more").addEventListener("click", function () {
+          currentLimit = clamp(currentLimit + step, 1, 50);
+          fetchAndRender();
+        });
+      }
+    }
+
+    function fetchAndRender() {
+      // ripristina loading solo la prima volta: no, manteniamo smooth
+      fetch(buildUrl(company, currentLimit), { method: "GET" })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          const items = Array.isArray(data && data.items) ? data.items : [];
+          const count = data && typeof data.count !== "undefined" ? data.count : items.length;
+          paint(items, count);
+        })
+        .catch(function () {
+          loadingBox.outerHTML = '<div class="wm-empty">' + escapeHtml(t.empty) + "</div>";
+        });
+    }
+
+    fetchAndRender();
   }
 
   // =========================
-  // INIT (multi-widgets safe)
+  // INIT
   // =========================
   function init() {
     const nodes = document.querySelectorAll(".welo-media-widget");
     nodes.forEach(function (el) {
       try {
-        render(el);
+        renderWidget(el);
       } catch (_) {}
     });
   }
