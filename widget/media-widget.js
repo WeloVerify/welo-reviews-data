@@ -81,15 +81,15 @@
 .wm-root { 
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
   width: 100%;
-  background: #fff; /* ✅ fixes "grey" feeling */
+  background: #fff;
   color: #0a0a0a;
   overflow: visible;
 }
 .wm-wrap {
   width: min(1200px, 100%);
   margin: 0 auto;
-  padding: 0 16px 18px 16px; /* ✅ extra space bottom */
-  background: #fff;         /* ✅ keeps white under tilt */
+  padding: 0 16px 26px 16px;
+  background: #fff;
   overflow: visible;
 }
 
@@ -98,14 +98,14 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 6px 0 30px 0;
+  padding: 6px 0 46px 0; /* ✅ (2) più spazio tra subtitle e cards */
   background: #fff;
 }
 .wm-hgroup { min-width: 0; }
 .wm-title {
   font-size: 30px;
   line-height: 1.05;
-  font-weight: 600; /* ✅ requested */
+  font-weight: 600;
   letter-spacing: -0.03em;
   margin: 0;
 }
@@ -113,7 +113,7 @@
   margin-top: 10px;
   font-size: 18px;
   line-height: 1.35;
-  font-weight: 500; /* ✅ requested */
+  font-weight: 500;
   color: #6b7280;
 }
 
@@ -140,7 +140,7 @@
 .wm-cta svg { width: 16px; height: 16px; }
 
 .wm-gridWrap {
-  background: #fff; /* ✅ keeps white behind cards */
+  background: #fff;
   overflow: visible;
 }
 
@@ -166,7 +166,7 @@
 /* Card wrapper gives perspective */
 .wm-cardWrap {
   perspective: 900px;
-  background: #fff; /* ✅ corners stay white while tilting */
+  background: #fff;
   border-radius: 24px;
   overflow: visible;
 }
@@ -175,19 +175,19 @@
 .wm-card {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 5;         /* ✅ same size for image/video */
+  aspect-ratio: 5 / 8;         /* ✅ (1) leggermente meno alta (prima 3/5) */
   border-radius: 24px;
   overflow: hidden;
-  background: #fff;              /* ✅ removes grey edges */
+  background: #fff;
   transform-style: preserve-3d;
   transform: perspective(900px) rotateX(0deg) rotateY(0deg);
   transition: transform 120ms ease, box-shadow 160ms ease, filter 160ms ease;
   will-change: transform, box-shadow;
 }
 
-/* ✅ subtle shadow on hover */
+/* ✅ (4) shadow hover più visibile */
 .wm-cardWrap:hover .wm-card {
-  box-shadow: 0 18px 50px rgba(0,0,0,.16);
+  box-shadow: 0 24px 70px rgba(0,0,0,.22);
 }
 
 /* Media (img/video) */
@@ -200,7 +200,7 @@
   display: block;
   user-select: none;
   -webkit-user-drag: none;
-  pointer-events: none; /* ✅ prevents click fullscreen */
+  pointer-events: none;
 }
 
 /* Soft gradient bottom for caption */
@@ -209,6 +209,12 @@
   inset: 0;
   background: linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.22) 35%, rgba(0,0,0,0) 60%);
   pointer-events: none;
+  transition: opacity .18s ease; /* ✅ (5) fade out */
+}
+
+/* ✅ (5) su hover sparisce anche il gradiente scuro */
+.wm-cardWrap:hover .wm-grad {
+  opacity: 0;
 }
 
 /* Caption (name + date) — hidden ONLY on hover */
@@ -224,7 +230,7 @@
 .wm-name {
   font-size: 18px;
   line-height: 1.15;
-  font-weight: 500; /* ✅ requested */
+  font-weight: 500;
   letter-spacing: -0.01em;
   margin: 0;
 }
@@ -232,7 +238,7 @@
   margin-top: 8px;
   font-size: 15px;
   line-height: 1.2;
-  font-weight: 400; /* ✅ requested */
+  font-weight: 400;
   color: rgba(255,255,255,.86);
 }
 
@@ -253,7 +259,7 @@
   transition: opacity .15s ease, transform .15s ease;
 }
 .wm-cardWrap:hover .wm-play {
-  opacity: .0; /* fade out on hover */
+  opacity: .0;
   transform: scale(.98);
 }
 .wm-playIcon {
@@ -315,7 +321,6 @@
   .wm-cardWrap:hover .wm-card { transform: none !important; }
 }
 @media (hover: none) {
-  /* mobile: no tilt + keep play icon a bit visible */
   .wm-card { transform: none !important; }
   .wm-cardWrap:hover .wm-play { opacity: 1; }
   .wm-audio { opacity: 1; transform: none; }
@@ -339,7 +344,6 @@
   }
 
   function parseDate(v) {
-    // accepts ISO string, timestamp, or Date
     if (!v) return null;
     if (v instanceof Date) return v;
     if (typeof v === "number") return new Date(v);
@@ -372,7 +376,6 @@
 
   // ---------- SVGs ----------
   function playSvg() {
-    // Rounded-ish play triangle (matches your attached vibe)
     return `
 <svg class="wm-playIcon" viewBox="0 0 96 96" aria-hidden="true">
   <defs>
@@ -433,10 +436,8 @@
       el.getAttribute("data-url") ||
       `${DEFAULT_WELO_PAGE_BASE}${encodeURIComponent(company)}`;
 
-    // Optional anon key if your function requires it
     const anonKey = el.getAttribute("data-anon-key") || "";
 
-    // Root markup
     el.innerHTML = `
 <div class="wm-root">
   <div class="wm-wrap">
@@ -466,19 +467,17 @@
     const status = el.querySelector(".wm-status");
     const moreBtn = el.querySelector(".wm-moreBtn");
 
-    // Global mute preference (needed for autoplay policies)
+    // Global mute preference
     let muted = true;
     try {
       const saved = localStorage.getItem("welo_media_muted");
       if (saved !== null) muted = saved === "true";
     } catch (_) {}
 
-    // State
     let items = [];
     let shown = 0;
 
     function normalizeItem(item) {
-      // Try common shapes
       const rawUrl =
         item.url ||
         item.mediaUrl ||
@@ -534,7 +533,6 @@
       const card = document.createElement("div");
       card.className = "wm-card";
 
-      // Media element
       let mediaEl;
       if (it.isVideo) {
         const v = document.createElement("video");
@@ -560,11 +558,9 @@
         mediaEl = img;
       }
 
-      // Gradient overlay
       const grad = document.createElement("div");
       grad.className = "wm-grad";
 
-      // Caption (name + date) -> hidden on hover via CSS
       const caption = document.createElement("div");
       caption.className = "wm-caption";
 
@@ -579,7 +575,6 @@
       caption.appendChild(nm);
       caption.appendChild(dt);
 
-      // Play icon for video
       let play = null;
       if (it.isVideo) {
         play = document.createElement("div");
@@ -587,7 +582,6 @@
         play.innerHTML = playSvg();
       }
 
-      // Mute toggle for video
       let audioBtn = null;
       if (it.isVideo) {
         audioBtn = document.createElement("button");
@@ -603,10 +597,8 @@
           muted = !muted;
           try { localStorage.setItem("welo_media_muted", String(muted)); } catch (_) {}
 
-          // Update all videos in this widget
           grid.querySelectorAll("video.wm-media").forEach((vid) => {
             vid.muted = muted;
-            // If user just unmuted, try to continue playback (gesture-based click helps)
             if (!muted) {
               vid.volume = 1;
               vid.play().catch(() => {});
@@ -627,7 +619,7 @@
       wrap.appendChild(card);
 
       // ===== Hover behaviour: 3D tilt + video play =====
-      const maxTilt = 4; // degrees
+      const maxTilt = 3; // ✅ (3) tilt ridotto (prima 4)
 
       function resetTilt() {
         card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg)`;
@@ -635,19 +627,16 @@
 
       function onMove(e) {
         const r = card.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;  // 0..1
-        const y = (e.clientY - r.top) / r.height; // 0..1
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
 
-        // rotateX based on Y, rotateY based on X
         const ry = clamp((x - 0.5) * (maxTilt * 2), -maxTilt, maxTilt);
         const rx = clamp((0.5 - y) * (maxTilt * 2), -maxTilt, maxTilt);
 
         card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
       }
 
-      // Pointer events (desktop)
       wrap.addEventListener("pointermove", (e) => {
-        // avoid heavy work on touch
         if (window.matchMedia("(hover: none)").matches) return;
         onMove(e);
       });
@@ -669,16 +658,13 @@
           if (!v) return;
           v.muted = muted;
 
-          // Start from beginning for a clean "preview"
           try { v.currentTime = 0; } catch (_) {}
-
-          // Autoplay on hover works best muted (browser policy)
           v.play().catch(() => {});
         }
       });
 
-      // Mobile: tap to play/pause (since hover doesn't exist)
-      wrap.addEventListener("click", (e) => {
+      // Mobile: tap to play/pause
+      wrap.addEventListener("click", () => {
         if (!it.isVideo) return;
         const v = card.querySelector("video.wm-media");
         if (!v) return;
@@ -701,11 +687,7 @@
       const slice = items.slice(0, shown);
       slice.forEach((it) => grid.appendChild(createCard(it)));
 
-      if (items.length > shown) {
-        moreBtn.style.display = "inline-block";
-      } else {
-        moreBtn.style.display = "none";
-      }
+      moreBtn.style.display = items.length > shown ? "inline-block" : "none";
     }
 
     moreBtn.addEventListener("click", () => {
@@ -715,8 +697,6 @@
 
     async function load() {
       setStatus("", false);
-
-      // Loading hint
       setStatus(locale === "it" ? "Caricamento…" : "Loading…", true);
 
       try {
@@ -761,17 +741,11 @@
   }
 
   function init() {
-    // Supports:
-    // <div class="welo-media-widget" data-welo="slug"></div>
-    // <div data-welo-media data-welo="slug"></div>
     const nodes = [
       ...document.querySelectorAll(".welo-media-widget"),
       ...document.querySelectorAll("[data-welo-media]"),
     ];
-
-    // Avoid duplicates if element has both selectors
     const unique = Array.from(new Set(nodes));
-
     unique.forEach(buildWidget);
   }
 
