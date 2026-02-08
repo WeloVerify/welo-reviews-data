@@ -1,836 +1,783 @@
-/*!
- * WELO • Media Reviews Widget (Images + Videos)
- * - Same-size cards (image + video)
- * - Hover: 3D tilt + video autoplay (no fullscreen)
- * - Video: mute toggle top-right + play icon overlay
- * - Caption: only Name + Date
- * - i18n: data-country="IT|US" or data-lang="it|en"
- */
+/* =========================================================
+   WELO • MEDIA REVIEWS WIDGET
+   - Same-size cards (image + video)
+   - 3D tilt on hover
+   - Video plays on hover (no fullscreen, no controls)
+   - Mute toggle top-right (videos only)
+   - Caption (name + date) hidden ONLY on hover
+   - White background fixed (no "grey clipping")
+   - Show more / Mostra di più
+========================================================= */
 
 (() => {
-  "use strict";
+  const STYLE_ID = "welo-media-widget-styles";
+  const FONT_ID = "welo-media-widget-font";
 
-  // =========================
-  // CONFIG (override via <script data-*>)
-  // =========================
+  // ✅ Defaults (override via data-attributes)
   const DEFAULT_PROJECT_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
-  const DEFAULT_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
-
-  const STYLE_ID = "welo-media-widget-styles-v3";
-  const FONT_ID = "welo-inter-font-v1";
+  const DEFAULT_FUNCTION_PATH = "/functions/v1/welo-media-reviews";
+  const DEFAULT_BUCKET_PUBLIC_PATH = "/storage/v1/object/public/reviews-proof/";
+  const DEFAULT_WELO_PAGE_BASE = "https://www.welobadge.com/welo-page/";
 
   const I18N = {
     it: {
       title: "Video recensioni",
       subtitle: "Guarda cosa dicono i nostri clienti",
-      cta: "Vedi altre recensioni",
-      showMore: "Mostra di più",
-      verifiedCustomer: "Cliente verificato",
+      more: "Mostra di più",
+      viewMore: "Vedi altre recensioni",
+      muted: "Audio disattivato",
+      unmuted: "Audio attivo",
+      anonymous: "Cliente",
+      timeAgo: (n, unit) => `${n} ${unit} fa`,
     },
     en: {
       title: "Video reviews",
       subtitle: "See what our customers say",
-      cta: "View more reviews",
-      showMore: "Show more",
-      verifiedCustomer: "Verified customer",
+      more: "Show more",
+      viewMore: "View more reviews",
+      muted: "Muted",
+      unmuted: "Sound on",
+      anonymous: "Customer",
+      timeAgo: (n, unit) => `${n} ${unit} ago`,
     },
   };
 
-  // =========================
-  // HELPERS
-  // =========================
-  const isTouchLike = () =>
-    window.matchMedia &&
-    (window.matchMedia("(hover: none)").matches ||
-      window.matchMedia("(pointer: coarse)").matches);
+  // ---------- Utils ----------
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  function pickLocale(el) {
+    const raw =
+      (el.getAttribute("data-locale") ||
+        el.getAttribute("data-lang") ||
+        el.getAttribute("data-language") ||
+        el.getAttribute("data-market") ||
+        el.getAttribute("data-country") ||
+        "")
+        .toLowerCase()
+        .trim();
 
-  const escapeHtml = (s) =>
-    String(s ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+    if (raw === "it" || raw === "ita" || raw === "italy" || raw === "it-it" || raw === "it") return "it";
+    if (raw === "us" || raw === "en" || raw === "eng" || raw === "en-us" || raw === "uk" || raw === "en-gb") return "en";
 
-  function findScriptSelf() {
-    // Best effort: currentScript OR last script that includes media-widget.js
-    const cs = document.currentScript;
-    if (cs && cs.src && cs.src.includes("media-widget.js")) return cs;
-    const scripts = Array.from(document.scripts).reverse();
-    return (
-      scripts.find((s) => (s.src || "").includes("media-widget.js")) || cs || null
-    );
+    const nav = (navigator.language || "en").toLowerCase();
+    return nav.startsWith("it") ? "it" : "en";
   }
 
-  function normalizeLocale(raw) {
-    const v = String(raw || "").trim().toLowerCase();
-    if (!v) return "it";
-    if (v === "it" || v === "ita" || v === "italy") return "it";
-    if (v === "en" || v === "us" || v === "uk" || v === "usa" || v === "english")
-      return "en";
-    return v.startsWith("en") ? "en" : "it";
-  }
-
-  function getLocaleFromScript(scriptEl) {
-    const lang = scriptEl?.dataset?.lang;
-    const country = scriptEl?.dataset?.country;
-    const locale = scriptEl?.dataset?.locale;
-
-    // Priority: data-lang > data-locale > data-country
-    if (lang) return normalizeLocale(lang);
-    if (locale) return normalizeLocale(locale);
-    if (country) return normalizeLocale(country);
-    return "it";
-  }
-
-  function formatRelativeDate(input, locale) {
-    if (!input) return "";
-    const d = new Date(input);
-    if (Number.isNaN(d.getTime())) return "";
-
-    const now = new Date();
-    const diffMs = d.getTime() - now.getTime();
-    const diffSec = Math.round(diffMs / 1000);
-
-    const rtf = new Intl.RelativeTimeFormat(locale === "it" ? "it-IT" : "en-US", {
-      numeric: "auto",
-    });
-
-    const abs = Math.abs(diffSec);
-    const MIN = 60;
-    const H = 60 * MIN;
-    const D = 24 * H;
-    const W = 7 * D;
-    const M = 30 * D;
-    const Y = 365 * D;
-
-    if (abs < MIN) return rtf.format(Math.round(diffSec), "second");
-    if (abs < H) return rtf.format(Math.round(diffSec / MIN), "minute");
-    if (abs < D) return rtf.format(Math.round(diffSec / H), "hour");
-    if (abs < W) return rtf.format(Math.round(diffSec / D), "day");
-    if (abs < M) return rtf.format(Math.round(diffSec / W), "week");
-    if (abs < Y) return rtf.format(Math.round(diffSec / M), "month");
-    return rtf.format(Math.round(diffSec / Y), "year");
-  }
-
-  function pick(obj, keys) {
-    for (const k of keys) {
-      if (obj && obj[k] !== undefined && obj[k] !== null && obj[k] !== "")
-        return obj[k];
-    }
-    return null;
-  }
-
-  function isVideoByUrl(url) {
-    const u = String(url || "").toLowerCase();
-    return (
-      u.endsWith(".mp4") ||
-      u.endsWith(".mov") ||
-      u.endsWith(".webm") ||
-      u.endsWith(".m4v") ||
-      u.includes("video")
-    );
-  }
-
-  function buildPublicStorageUrl(projectUrl, bucket, path) {
-    // path like "Welo/xxx.mp4"
-    const cleanPath = String(path || "").replace(/^\/+/, "");
-    return `${projectUrl}/storage/v1/object/public/${bucket}/${cleanPath}`;
-  }
-
-  function injectInterFontOnce() {
+  function ensureFont() {
     if (document.getElementById(FONT_ID)) return;
-
     const link = document.createElement("link");
     link.id = FONT_ID;
     link.rel = "stylesheet";
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap";
+    link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap";
     document.head.appendChild(link);
   }
 
-  function injectStylesOnce() {
+  function ensureStyles() {
     if (document.getElementById(STYLE_ID)) return;
+
+    const css = `
+/* ============ WELO MEDIA WIDGET (namespaced) ============ */
+.wm-root, .wm-root * { box-sizing: border-box; }
+.wm-root { 
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+  width: 100%;
+  background: #fff; /* ✅ fixes "grey" feeling */
+  color: #0a0a0a;
+  overflow: visible;
+}
+.wm-wrap {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 0 16px 18px 16px; /* ✅ extra space bottom */
+  background: #fff;         /* ✅ keeps white under tilt */
+  overflow: visible;
+}
+
+.wm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0 18px 0;
+  background: #fff;
+}
+.wm-hgroup { min-width: 0; }
+.wm-title {
+  font-size: 40px;
+  line-height: 1.05;
+  font-weight: 600; /* ✅ requested */
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.wm-subtitle {
+  margin-top: 10px;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 500; /* ✅ requested */
+  color: #6b7280;
+}
+
+.wm-cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(10,10,10,.12);
+  background: #0a0a0a;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  box-shadow: 0 10px 30px rgba(0,0,0,.10);
+}
+.wm-cta:hover { transform: translateY(-1px); box-shadow: 0 16px 40px rgba(0,0,0,.16); }
+.wm-cta:active { transform: translateY(0px) scale(.98); opacity: .95; }
+.wm-cta svg { width: 16px; height: 16px; }
+
+.wm-gridWrap {
+  background: #fff; /* ✅ keeps white behind cards */
+  overflow: visible;
+}
+
+.wm-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  background: #fff;
+  overflow: visible;
+}
+
+/* ✅ Mobile optimized */
+@media (max-width: 980px) {
+  .wm-title { font-size: 32px; }
+  .wm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .wm-title { font-size: 28px; }
+  .wm-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .wm-cta { width: 100%; justify-content: center; }
+}
+
+/* Card wrapper gives perspective */
+.wm-cardWrap {
+  perspective: 900px;
+  background: #fff; /* ✅ corners stay white while tilting */
+  border-radius: 24px;
+  overflow: visible;
+}
+
+/* Card itself */
+.wm-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;         /* ✅ same size for image/video */
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fff;              /* ✅ removes grey edges */
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(0deg) rotateY(0deg);
+  transition: transform 120ms ease, box-shadow 160ms ease, filter 160ms ease;
+  will-change: transform, box-shadow;
+}
+
+/* ✅ subtle shadow on hover */
+.wm-cardWrap:hover .wm-card {
+  box-shadow: 0 18px 50px rgba(0,0,0,.16);
+}
+
+/* Media (img/video) */
+.wm-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none; /* ✅ prevents click fullscreen */
+}
+
+/* Soft gradient bottom for caption */
+.wm-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.22) 35%, rgba(0,0,0,0) 60%);
+  pointer-events: none;
+}
+
+/* Caption (name + date) — hidden ONLY on hover */
+.wm-caption {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  color: #fff;
+  z-index: 4;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.wm-name {
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 500; /* ✅ requested */
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.wm-date {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 400; /* ✅ requested */
+  color: rgba(255,255,255,.86);
+}
+
+/* ✅ hide caption on hover */
+.wm-cardWrap:hover .wm-caption {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* Play icon (videos only) */
+.wm-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity .15s ease, transform .15s ease;
+}
+.wm-cardWrap:hover .wm-play {
+  opacity: .0; /* fade out on hover */
+  transform: scale(.98);
+}
+.wm-playIcon {
+  width: 84px;
+  height: 84px;
+  filter: drop-shadow(0 10px 25px rgba(0,0,0,.25));
+}
+
+/* Mute toggle top-right (videos only) */
+.wm-audio {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity .16s ease, transform .16s ease;
+}
+.wm-cardWrap:hover .wm-audio { opacity: 1; transform: translateY(0); }
+.wm-audio svg { width: 20px; height: 20px; fill: #fff; }
+.wm-audio:active { transform: translateY(0) scale(.96); }
+
+/* Loading / empty */
+.wm-status {
+  padding: 18px 0 6px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.wm-moreBtn {
+  margin: 18px auto 0 auto;
+  display: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(10,10,10,.12);
+  background: #fff;
+  color: #0a0a0a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.wm-moreBtn:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0,0,0,.10); }
+.wm-moreBtn:active { transform: translateY(0) scale(.98); }
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .wm-card { transition: box-shadow 160ms ease; transform: none !important; }
+  .wm-cardWrap:hover .wm-card { transform: none !important; }
+}
+@media (hover: none) {
+  /* mobile: no tilt + keep play icon a bit visible */
+  .wm-card { transform: none !important; }
+  .wm-cardWrap:hover .wm-play { opacity: 1; }
+  .wm-audio { opacity: 1; transform: none; }
+}
+    `;
 
     const style = document.createElement("style");
     style.id = STYLE_ID;
-    style.textContent = `
-/* =========================
-   WELO • Media Widget (scoped)
-   ========================= */
-.wm-root{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; width:100%}
-.wm-wrap{width:100%}
-.wm-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin:0 0 22px}
-.wm-hgroup{min-width:0}
-.wm-title{margin:0; font-weight:600; letter-spacing:-0.03em; color:#0A0A0A; font-size:clamp(26px,3.2vw,40px); line-height:1.05}
-.wm-sub{margin:10px 0 0; font-weight:500; color:#9CA3AF; font-size:clamp(15px,1.6vw,20px); line-height:1.25}
-.wm-cta{flex:0 0 auto; display:inline-flex; align-items:center; gap:10px; text-decoration:none;
-  background:#0A0A0A; color:#fff; border-radius:999px; padding:14px 18px;
-  font-weight:600; font-size:14px; letter-spacing:-0.01em;
-  box-shadow:0 10px 30px rgba(0,0,0,.14); border:1px solid rgba(0,0,0,.08);
-  transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-}
-.wm-cta:hover{transform:translateY(-1px); box-shadow:0 14px 40px rgba(0,0,0,.18)}
-.wm-cta:active{transform:translateY(0px) scale(.99); opacity:.92}
-.wm-cta svg{width:16px; height:16px}
-
-.wm-rail{
-  display:flex; gap:22px; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory;
-  padding-bottom:14px; -webkit-overflow-scrolling:touch;
-}
-.wm-rail::-webkit-scrollbar{height:10px}
-.wm-rail::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12); border-radius:999px}
-.wm-rail{scrollbar-color:rgba(0,0,0,.14) transparent}
-
-.wm-card{
-  position:relative; flex:0 0 auto;
-  width:min(82vw, 360px);
-  aspect-ratio:3/4;
-  border-radius:26px; overflow:hidden;
-  background:#0A0A0A;
-  scroll-snap-align:start;
-  transform:perspective(900px) rotateX(0deg) rotateY(0deg);
-  will-change:transform;
-  transition:box-shadow .18s ease, transform .18s ease;
-  box-shadow:0 18px 50px rgba(0,0,0,.12);
-  cursor:pointer;
-}
-@media (min-width:1024px){
-  .wm-card{width:calc((100% - (22px * 3)) / 4)}
-}
-.wm-card.is-hovered{box-shadow:0 26px 70px rgba(0,0,0,.18)}
-.wm-card:focus{outline:none}
-.wm-card:focus-visible{outline:3px solid rgba(1,54,255,.25); outline-offset:4px}
-
-.wm-media{
-  position:absolute; inset:0; overflow:hidden; border-radius:26px;
-}
-.wm-media img, .wm-media video{
-  width:100%; height:100%;
-  object-fit:cover; display:block;
-  transform:scale(1.02);
-}
-.wm-media video{pointer-events:none} /* no fullscreen, no controls interaction */
-
-.wm-gradient{
-  position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(0,0,0,.76) 0%, rgba(0,0,0,0) 55%);
-  pointer-events:none;
-}
-
-.wm-caption{
-  position:absolute; left:18px; right:18px; bottom:18px;
-  color:#fff; z-index:3;
-  display:flex; flex-direction:column; gap:4px;
-  text-shadow:0 8px 24px rgba(0,0,0,.45);
-}
-.wm-name{font-size:18px; font-weight:500; line-height:1.15; letter-spacing:-0.02em}
-.wm-date{font-size:15px; font-weight:400; opacity:.88; line-height:1.2}
-
-.wm-play{
-  position:absolute; left:50%; top:50%;
-  transform:translate(-50%,-50%);
-  z-index:4;
-  width:84px; height:84px;
-  display:flex; align-items:center; justify-content:center;
-  pointer-events:none;
-  filter:drop-shadow(0 18px 40px rgba(0,0,0,.35));
-  opacity:1; transition:opacity .18s ease, transform .18s ease;
-}
-.wm-card.is-playing .wm-play{opacity:0; transform:translate(-50%,-50%) scale(.96)}
-.wm-play svg{width:84px; height:84px}
-
-.wm-mute{
-  position:absolute; top:14px; right:14px; z-index:6;
-  width:44px; height:44px; border-radius:999px;
-  background:rgba(10,10,10,.55);
-  border:1px solid rgba(255,255,255,.16);
-  backdrop-filter:blur(10px);
-  display:flex; align-items:center; justify-content:center;
-  color:#fff;
-  cursor:pointer;
-  transition:transform .16s ease, opacity .16s ease, background .16s ease;
-}
-.wm-mute:hover{transform:scale(1.03)}
-.wm-mute:active{transform:scale(.98); opacity:.9}
-.wm-mute svg{width:20px; height:20px}
-
-.wm-moreRow{display:flex; justify-content:center; margin-top:18px}
-.wm-moreBtn{
-  background:#0A0A0A; color:#fff; border:none;
-  border-radius:999px; padding:14px 20px;
-  font-weight:600; font-size:14px;
-  box-shadow:0 16px 45px rgba(0,0,0,.14);
-  cursor:pointer;
-  transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-}
-.wm-moreBtn:hover{transform:translateY(-1px); box-shadow:0 22px 60px rgba(0,0,0,.18)}
-.wm-moreBtn:active{transform:translateY(0px) scale(.99); opacity:.92}
-
-@media (max-width:520px){
-  .wm-cta{padding:12px 14px; font-size:13px}
-  .wm-head{margin-bottom:18px}
-}
-    `;
+    style.textContent = css;
     document.head.appendChild(style);
   }
 
-  function iconArrowUpRight() {
+  function isVideoUrl(url = "") {
+    const u = url.toLowerCase().split("?")[0];
+    return u.endsWith(".mp4") || u.endsWith(".webm") || u.endsWith(".mov") || u.endsWith(".m4v");
+  }
+
+  function safeStr(v, fallback = "") {
+    if (typeof v === "string" && v.trim()) return v.trim();
+    return fallback;
+  }
+
+  function parseDate(v) {
+    // accepts ISO string, timestamp, or Date
+    if (!v) return null;
+    if (v instanceof Date) return v;
+    if (typeof v === "number") return new Date(v);
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function relativeTimeFromNow(date, locale) {
+    const t = I18N[locale] || I18N.en;
+    const d = parseDate(date);
+    if (!d) return "";
+
+    const now = new Date();
+    const diffMs = now - d;
+    const diffSec = Math.floor(diffMs / 1000);
+
+    const minutes = Math.floor(diffSec / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    if (years >= 1) return t.timeAgo(years, locale === "it" ? (years === 1 ? "anno" : "anni") : (years === 1 ? "year" : "years"));
+    if (months >= 1) return t.timeAgo(months, locale === "it" ? (months === 1 ? "mese" : "mesi") : (months === 1 ? "month" : "months"));
+    if (days >= 1) return t.timeAgo(days, locale === "it" ? (days === 1 ? "giorno" : "giorni") : (days === 1 ? "day" : "days"));
+    if (hours >= 1) return t.timeAgo(hours, locale === "it" ? (hours === 1 ? "ora" : "ore") : (hours === 1 ? "hour" : "hours"));
+    if (minutes >= 1) return t.timeAgo(minutes, locale === "it" ? (minutes === 1 ? "minuto" : "minuti") : (minutes === 1 ? "minute" : "minutes"));
+    return locale === "it" ? "poco fa" : "just now";
+  }
+
+  // ---------- SVGs ----------
+  function playSvg() {
+    // Rounded-ish play triangle (matches your attached vibe)
     return `
-<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <path d="M10 7h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<svg class="wm-playIcon" viewBox="0 0 96 96" aria-hidden="true">
+  <defs>
+    <filter id="wmSoft" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(0,0,0,.25)"/>
+    </filter>
+  </defs>
+  <g filter="url(#wmSoft)">
+    <path d="M40 30 L68 48 L40 66 Q34 70 34 64 V32 Q34 26 40 30Z" fill="#fff" opacity="0.98"/>
+  </g>
 </svg>`;
   }
 
-  function iconPlayRounded() {
-    // Rounded "play" similar to your reference (white rounded triangle)
+  function iconMuted() {
     return `
-<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-  <path d="M24 18.8c0-3.4 3.7-5.6 6.7-3.8l22 12.7c3 1.7 3 6 0 7.7l-22 12.7c-3 1.8-6.7-.4-6.7-3.8V18.8Z" fill="#FFFFFF"/>
+<svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M11 5.5 7.9 8H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2.9L11 18.5a1 1 0 0 0 1.6-.8V6.3A1 1 0 0 0 11 5.5Z"></path>
+  <path d="M16.5 9.5 21 14m0-4.5-4.5 4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"></path>
+</svg>`;
+  }
+  function iconUnmuted() {
+    return `
+<svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M11 5.5 7.9 8H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2.9L11 18.5a1 1 0 0 0 1.6-.8V6.3A1 1 0 0 0 11 5.5Z"></path>
+  <path d="M15.5 9.2c1.2 1.2 1.2 4.4 0 5.6" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"></path>
+  <path d="M18.2 6.6c3 3 3 7.8 0 10.8" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".85"></path>
 </svg>`;
   }
 
-  function iconVolumeOn() {
-    return `
-<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M11 5L6.8 8.5H4.5A1.5 1.5 0 0 0 3 10v4a1.5 1.5 0 0 0 1.5 1.5h2.3L11 19V5Z" fill="currentColor"/>
-  <path d="M14.5 9.2a4 4 0 0 1 0 5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <path d="M16.8 7a7 7 0 0 1 0 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-</svg>`;
-  }
-
-  function iconVolumeOff() {
-    return `
-<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M11 5L6.8 8.5H4.5A1.5 1.5 0 0 0 3 10v4a1.5 1.5 0 0 0 1.5 1.5h2.3L11 19V5Z" fill="currentColor"/>
-  <path d="M16 9l5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <path d="M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-</svg>`;
-  }
-
-  // =========================
-  // DATA FETCH
-  // =========================
-  async function fetchMediaItems({
-    projectUrl,
-    anonKey,
-    company,
-    limit,
-  }) {
-    const url = `${projectUrl}/functions/v1/welo-media-reviews?company=${encodeURIComponent(
-      company
-    )}&limit=${encodeURIComponent(limit)}`;
-
-    const res = await fetch(url, {
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`,
-      },
-    });
-
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new Error(`Fetch failed (${res.status}): ${txt}`);
-    }
-    const json = await res.json();
-    return Array.isArray(json?.items) ? json.items : [];
-  }
-
-  function normalizeItem(raw, { projectUrl, bucket, locale, t }) {
-    // media can be:
-    // - raw.url / raw.media_url / raw.prove_di_acquisto (path) / raw.media (array)
-    const mediaMaybe = pick(raw, [
-      "media",
-      "media_items",
-      "assets",
-      "files",
-    ]);
-
-    let mediaEntry = null;
-    if (Array.isArray(mediaMaybe) && mediaMaybe.length) {
-      mediaEntry = mediaMaybe[0];
-    }
-
-    const mediaUrlRaw =
-      (mediaEntry && (mediaEntry.url || mediaEntry.media_url || mediaEntry.path)) ||
-      pick(raw, [
-        "url",
-        "media_url",
-        "mediaUrl",
-        "proof_url",
-        "prove_di_acquisto",
-        "path",
-        "file",
-      ]);
-
-    if (!mediaUrlRaw) return null;
-
-    const fullUrl =
-      String(mediaUrlRaw).startsWith("http")
-        ? String(mediaUrlRaw)
-        : buildPublicStorageUrl(projectUrl, bucket, String(mediaUrlRaw));
-
-    const mediaTypeRaw =
-      (mediaEntry && (mediaEntry.type || mediaEntry.media_type)) ||
-      pick(raw, ["type", "media_type", "mime_type", "mime"]);
-
-    const isVideo =
-      String(mediaTypeRaw || "").toLowerCase().includes("video") ||
-      isVideoByUrl(fullUrl);
-
-    const name =
-      pick(raw, ["name", "customer_name", "author", "reviewer_name", "full_name"]) ||
-      t("verifiedCustomer");
-
-    const dateRaw = pick(raw, [
-      "created_at",
-      "submitted_at",
-      "date",
-      "createdAt",
-      "submittedAt",
-    ]);
-
-    const dateLabel = dateRaw ? formatRelativeDate(dateRaw, locale) : "";
-
-    return {
-      url: fullUrl,
-      isVideo,
-      name,
-      dateLabel,
-      _raw: raw,
-    };
-  }
-
-  // =========================
-  // UI BUILD
-  // =========================
-  function buildWidgetShell({ locale, t, pageUrl }) {
-    const wrap = document.createElement("div");
-    wrap.className = "wm-wrap";
-
-    const head = document.createElement("div");
-    head.className = "wm-head";
-
-    const hgroup = document.createElement("div");
-    hgroup.className = "wm-hgroup";
-    hgroup.innerHTML = `
-      <h2 class="wm-title">${escapeHtml(t("title"))}</h2>
-      <p class="wm-sub">${escapeHtml(t("subtitle"))}</p>
-    `;
-
-    const cta = document.createElement("a");
-    cta.className = "wm-cta";
-    cta.href = pageUrl;
-    cta.target = "_blank";
-    cta.rel = "noopener";
-    cta.innerHTML = `${escapeHtml(t("cta"))} ${iconArrowUpRight()}`;
-
-    head.appendChild(hgroup);
-    head.appendChild(cta);
-
-    const rail = document.createElement("div");
-    rail.className = "wm-rail";
-    rail.setAttribute("role", "list");
-
-    const moreRow = document.createElement("div");
-    moreRow.className = "wm-moreRow";
-    const moreBtn = document.createElement("button");
-    moreBtn.className = "wm-moreBtn";
-    moreBtn.type = "button";
-    moreBtn.textContent = t("showMore");
-    moreBtn.style.display = "none";
-    moreRow.appendChild(moreBtn);
-
-    wrap.appendChild(head);
-    wrap.appendChild(rail);
-    wrap.appendChild(moreRow);
-
-    return { wrap, rail, moreBtn };
-  }
-
-  function buildCard({
-    item,
-    locale,
-    t,
-    allowTilt,
-    globalVideoMutedState,
-  }) {
-    const card = document.createElement("div");
-    card.className = "wm-card";
-    card.tabIndex = 0;
-
-    // media
-    const media = document.createElement("div");
-    media.className = "wm-media";
-
-    let videoEl = null;
-
-    if (item.isVideo) {
-      videoEl = document.createElement("video");
-      videoEl.src = item.url;
-      videoEl.preload = "metadata";
-      videoEl.playsInline = true;
-      videoEl.muted = globalVideoMutedState.value; // default muted
-      videoEl.loop = true;
-      videoEl.controls = false;
-      videoEl.setAttribute("playsinline", "");
-      videoEl.setAttribute("webkit-playsinline", "");
-      videoEl.setAttribute("disablepictureinpicture", "");
-      videoEl.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
-      media.appendChild(videoEl);
-    } else {
-      const img = document.createElement("img");
-      img.src = item.url;
-      img.loading = "lazy";
-      img.alt = "";
-      media.appendChild(img);
-    }
-
-    const gradient = document.createElement("div");
-    gradient.className = "wm-gradient";
-
-    const caption = document.createElement("div");
-    caption.className = "wm-caption";
-    caption.innerHTML = `
-      <div class="wm-name">${escapeHtml(item.name)}</div>
-      <div class="wm-date">${escapeHtml(item.dateLabel || "")}</div>
-    `;
-
-    // play icon overlay (only for videos)
-    const play = document.createElement("div");
-    play.className = "wm-play";
-    play.innerHTML = iconPlayRounded();
-    play.style.display = item.isVideo ? "flex" : "none";
-
-    // mute toggle (only for videos)
-    const muteBtn = document.createElement("button");
-    muteBtn.type = "button";
-    muteBtn.className = "wm-mute";
-    muteBtn.style.display = item.isVideo ? "flex" : "none";
-    muteBtn.innerHTML = globalVideoMutedState.value ? iconVolumeOff() : iconVolumeOn();
-    muteBtn.setAttribute("aria-label", "Toggle sound");
-
-    // compose
-    card.appendChild(media);
-    card.appendChild(gradient);
-    card.appendChild(play);
-    card.appendChild(muteBtn);
-    card.appendChild(caption);
-
-    // Prevent any default "open" behaviors
-    card.addEventListener("click", (e) => {
-      // On touch devices: tap toggles play/pause for videos
-      if (!item.isVideo || !videoEl) return;
-      if (!isTouchLike()) return;
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (videoEl.paused) {
-        safePlay(videoEl, card);
-      } else {
-        safeStop(videoEl, card);
-      }
-    });
-
-    // Mute toggle
-    muteBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!videoEl) return;
-
-      globalVideoMutedState.value = !globalVideoMutedState.value;
-      videoEl.muted = globalVideoMutedState.value;
-      muteBtn.innerHTML = globalVideoMutedState.value ? iconVolumeOff() : iconVolumeOn();
-
-      // If user unmutes, try to keep playback working
-      if (!videoEl.paused) {
-        try {
-          await videoEl.play();
-        } catch {
-          // If autoplay w/ sound is blocked, fallback to muted
-          globalVideoMutedState.value = true;
-          videoEl.muted = true;
-          muteBtn.innerHTML = iconVolumeOff();
-        }
-      }
-    });
-
-    // Hover play for desktop
-    if (item.isVideo && videoEl) {
-      const onEnter = () => {
-        if (isTouchLike()) return;
-        safePlay(videoEl, card);
-      };
-      const onLeave = () => {
-        if (isTouchLike()) return;
-        safeStop(videoEl, card);
-      };
-
-      card.addEventListener("mouseenter", onEnter);
-      card.addEventListener("mouseleave", onLeave);
-      card.addEventListener("focus", onEnter);
-      card.addEventListener("blur", onLeave);
-    }
-
-    // 3D Tilt
-    if (allowTilt) attachTilt(card);
-
-    // Pause videos if they leave viewport
-    if (item.isVideo && videoEl) {
-      attachViewportPause(card, videoEl);
-    }
-
-    return card;
-  }
-
-  async function safePlay(videoEl, cardEl) {
-    try {
-      cardEl.classList.add("is-playing");
-      await videoEl.play();
-    } catch {
-      // If blocked, ensure muted and retry
-      try {
-        videoEl.muted = true;
-        await videoEl.play();
-      } catch {
-        // ignore
-      }
-    }
-  }
-
-  function safeStop(videoEl, cardEl) {
-    try {
-      videoEl.pause();
-      videoEl.currentTime = 0;
-    } catch {
-      // ignore
-    }
-    cardEl.classList.remove("is-playing");
-  }
-
-  function attachViewportPause(card, videoEl) {
-    if (!("IntersectionObserver" in window)) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) {
-            if (!videoEl.paused) safeStop(videoEl, card);
-          }
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    io.observe(card);
-  }
-
-  function attachTilt(card) {
-    let raf = 0;
-    let rect = null;
-
-    const maxRot = 8; // degrees
-    const maxLift = 1.02;
-
-    const onEnter = () => {
-      card.classList.add("is-hovered");
-      rect = card.getBoundingClientRect();
-    };
-
-    const onMove = (e) => {
-      if (!rect) rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-
-      const rotY = (x - 0.5) * (maxRot * 2);
-      const rotX = -(y - 0.5) * (maxRot * 2);
-
-      if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        card.style.transform = `perspective(900px) rotateX(${rotX.toFixed(
-          2
-        )}deg) rotateY(${rotY.toFixed(2)}deg) scale(${maxLift})`;
-      });
-    };
-
-    const onLeave = () => {
-      card.classList.remove("is-hovered");
-      if (raf) cancelAnimationFrame(raf);
-      raf = 0;
-      rect = null;
-      card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)`;
-    };
-
-    // Only on real hover pointers
-    card.addEventListener("mouseenter", () => {
-      if (isTouchLike()) return;
-      onEnter();
-    });
-    card.addEventListener("mousemove", (e) => {
-      if (isTouchLike()) return;
-      onMove(e);
-    });
-    card.addEventListener("mouseleave", () => {
-      if (isTouchLike()) return;
-      onLeave();
-    });
-  }
-
-  // =========================
-  // INIT
-  // =========================
-  function initAll() {
-    const scriptEl = findScriptSelf();
-
-    const projectUrl = scriptEl?.dataset?.projectUrl || DEFAULT_PROJECT_URL;
-    const anonKey = scriptEl?.dataset?.anonKey || DEFAULT_ANON_KEY;
-
-    const locale = getLocaleFromScript(scriptEl);
-    const dict = I18N[locale] || I18N.it;
-    const t = (k) => dict[k] || I18N.en[k] || "";
-
-    injectInterFontOnce();
-    injectStylesOnce();
-
-    const nodes = Array.from(
-      document.querySelectorAll(
-        ".welo-media-widget[data-welo], .welo-media[data-welo], [data-welo-media][data-welo]"
-      )
-    );
-
-    if (!nodes.length) return;
-
-    for (const host of nodes) {
-      try {
-        initSingle(host, { projectUrl, anonKey, locale, t });
-      } catch {
-        // ignore
-      }
-    }
-  }
-
-  async function initSingle(host, { projectUrl, anonKey, locale, t }) {
-    // Avoid double init
-    if (host.__weloMediaInited) return;
-    host.__weloMediaInited = true;
-
-    host.classList.add("wm-root");
+  // ---------- Widget ----------
+  function buildWidget(el) {
+    ensureFont();
+    ensureStyles();
+
+    const locale = pickLocale(el);
+    const t = I18N[locale] || I18N.en;
 
     const company =
-      host.dataset.welo || host.dataset.company || host.getAttribute("data-welo-media");
-    if (!company) return;
+      el.getAttribute("data-welo") ||
+      el.getAttribute("data-company") ||
+      el.getAttribute("data-slug") ||
+      "";
 
-    const limit = parseInt(host.dataset.limit || "40", 10);
-    const initial = parseInt(host.dataset.initial || "4", 10);
-    const step = parseInt(host.dataset.step || "4", 10);
-
-    const weloPageUrl =
-      host.dataset.url || `https://www.welobadge.com/welo-page/${encodeURIComponent(company)}`;
-
-    // Build skeleton
-    host.innerHTML = "";
-    const { wrap, rail, moreBtn } = buildWidgetShell({
-      locale,
-      t,
-      pageUrl: weloPageUrl,
-    });
-    host.appendChild(wrap);
-
-    // Fetch & render
-    const bucket = host.dataset.bucket || "reviews-proof";
-
-    // Simple cache (5 min)
-    const cacheKey = `welo_media_${company}_${limit}_${locale}`;
-    const cached = sessionStorage.getItem(cacheKey);
-    const cachedTs = sessionStorage.getItem(cacheKey + "_ts");
-    const now = Date.now();
-    let itemsRaw = null;
-
-    if (cached && cachedTs && now - Number(cachedTs) < 5 * 60 * 1000) {
-      try {
-        itemsRaw = JSON.parse(cached);
-      } catch {
-        itemsRaw = null;
-      }
-    }
-
-    if (!itemsRaw) {
-      itemsRaw = await fetchMediaItems({
-        projectUrl,
-        anonKey,
-        company,
-        limit,
-      });
-      sessionStorage.setItem(cacheKey, JSON.stringify(itemsRaw));
-      sessionStorage.setItem(cacheKey + "_ts", String(now));
-    }
-
-    const items = itemsRaw
-      .map((r) => normalizeItem(r, { projectUrl, bucket, locale, t }))
-      .filter(Boolean);
-
-    if (!items.length) {
-      // If no media, hide the widget block
-      host.style.display = "none";
+    if (!company) {
+      el.innerHTML = `<div class="wm-root"><div class="wm-wrap"><div class="wm-status">Missing data-welo (company slug).</div></div></div>`;
       return;
     }
 
-    const allowTilt = !isTouchLike();
-    const globalVideoMutedState = { value: true };
+    const projectUrl = el.getAttribute("data-project-url") || DEFAULT_PROJECT_URL;
+    const apiUrl = el.getAttribute("data-api") || `${projectUrl}${DEFAULT_FUNCTION_PATH}`;
+    const storageBase = el.getAttribute("data-storage-base") || `${projectUrl}${DEFAULT_BUCKET_PUBLIC_PATH}`;
 
-    let visibleCount = Math.min(initial, items.length);
+    const limit = parseInt(el.getAttribute("data-limit") || "24", 10);
+    const initial = parseInt(el.getAttribute("data-initial") || "8", 10);
+    const step = parseInt(el.getAttribute("data-step") || String(initial), 10);
 
-    const render = () => {
-      rail.innerHTML = "";
-      const slice = items.slice(0, visibleCount);
+    const weloPageUrl =
+      el.getAttribute("data-url") ||
+      `${DEFAULT_WELO_PAGE_BASE}${encodeURIComponent(company)}`;
 
-      for (const item of slice) {
-        const card = buildCard({
-          item,
-          locale,
-          t,
-          allowTilt,
-          globalVideoMutedState,
-        });
-        rail.appendChild(card);
+    // Optional anon key if your function requires it
+    const anonKey = el.getAttribute("data-anon-key") || "";
+
+    // Root markup
+    el.innerHTML = `
+<div class="wm-root">
+  <div class="wm-wrap">
+    <div class="wm-header">
+      <div class="wm-hgroup">
+        <div class="wm-title">${t.title}</div>
+        <div class="wm-subtitle">${t.subtitle}</div>
+      </div>
+      <a class="wm-cta" href="${weloPageUrl}" target="_blank" rel="noopener">
+        ${t.viewMore}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 17L17 7M9 7h8v8" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="wm-gridWrap">
+      <div class="wm-grid" aria-live="polite"></div>
+      <div class="wm-status" style="display:none;"></div>
+      <button class="wm-moreBtn" type="button">${t.more}</button>
+    </div>
+  </div>
+</div>
+    `;
+
+    const grid = el.querySelector(".wm-grid");
+    const status = el.querySelector(".wm-status");
+    const moreBtn = el.querySelector(".wm-moreBtn");
+
+    // Global mute preference (needed for autoplay policies)
+    let muted = true;
+    try {
+      const saved = localStorage.getItem("welo_media_muted");
+      if (saved !== null) muted = saved === "true";
+    } catch (_) {}
+
+    // State
+    let items = [];
+    let shown = 0;
+
+    function normalizeItem(item) {
+      // Try common shapes
+      const rawUrl =
+        item.url ||
+        item.mediaUrl ||
+        item.media_url ||
+        item.public_url ||
+        item.proof_url ||
+        item.prove_di_acquisto_url ||
+        "";
+
+      const proofPath = item.prove_di_acquisto || item.proof_path || item.path || "";
+      const url = rawUrl || (proofPath ? `${storageBase}${proofPath}` : "");
+
+      const name =
+        item.author ||
+        item.author_name ||
+        item.reviewer ||
+        item.reviewer_name ||
+        item.display_name ||
+        item.name ||
+        "";
+
+      const created =
+        item.created_at ||
+        item.createdAt ||
+        item.date ||
+        item.timestamp ||
+        item.inserted_at ||
+        item.submitted_at ||
+        null;
+
+      const isVideo =
+        item.type === "video" ||
+        item.media_type === "video" ||
+        isVideoUrl(url);
+
+      return {
+        url,
+        name: safeStr(name, t.anonymous),
+        date: created,
+        isVideo,
+      };
+    }
+
+    function setStatus(msg, show = true) {
+      status.style.display = show ? "block" : "none";
+      status.textContent = msg || "";
+    }
+
+    function createCard(it) {
+      const wrap = document.createElement("div");
+      wrap.className = "wm-cardWrap";
+
+      const card = document.createElement("div");
+      card.className = "wm-card";
+
+      // Media element
+      let mediaEl;
+      if (it.isVideo) {
+        const v = document.createElement("video");
+        v.className = "wm-media";
+        v.src = it.url;
+        v.muted = muted;
+        v.loop = true;
+        v.playsInline = true;
+        v.preload = "metadata";
+        v.setAttribute("webkit-playsinline", "true");
+        v.setAttribute("playsinline", "true");
+        v.disablePictureInPicture = true;
+        v.controls = false;
+        v.crossOrigin = "anonymous";
+        mediaEl = v;
+      } else {
+        const img = document.createElement("img");
+        img.className = "wm-media";
+        img.src = it.url;
+        img.alt = it.name;
+        img.loading = "lazy";
+        img.decoding = "async";
+        mediaEl = img;
       }
 
-      if (visibleCount < items.length) {
-        moreBtn.style.display = "inline-flex";
+      // Gradient overlay
+      const grad = document.createElement("div");
+      grad.className = "wm-grad";
+
+      // Caption (name + date) -> hidden on hover via CSS
+      const caption = document.createElement("div");
+      caption.className = "wm-caption";
+
+      const nm = document.createElement("div");
+      nm.className = "wm-name";
+      nm.textContent = it.name;
+
+      const dt = document.createElement("div");
+      dt.className = "wm-date";
+      dt.textContent = relativeTimeFromNow(it.date, locale);
+
+      caption.appendChild(nm);
+      caption.appendChild(dt);
+
+      // Play icon for video
+      let play = null;
+      if (it.isVideo) {
+        play = document.createElement("div");
+        play.className = "wm-play";
+        play.innerHTML = playSvg();
+      }
+
+      // Mute toggle for video
+      let audioBtn = null;
+      if (it.isVideo) {
+        audioBtn = document.createElement("button");
+        audioBtn.type = "button";
+        audioBtn.className = "wm-audio";
+        audioBtn.setAttribute("aria-label", muted ? t.muted : t.unmuted);
+        audioBtn.innerHTML = muted ? iconMuted() : iconUnmuted();
+
+        audioBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          muted = !muted;
+          try { localStorage.setItem("welo_media_muted", String(muted)); } catch (_) {}
+
+          // Update all videos in this widget
+          grid.querySelectorAll("video.wm-media").forEach((vid) => {
+            vid.muted = muted;
+            // If user just unmuted, try to continue playback (gesture-based click helps)
+            if (!muted) {
+              vid.volume = 1;
+              vid.play().catch(() => {});
+            }
+          });
+
+          audioBtn.setAttribute("aria-label", muted ? t.muted : t.unmuted);
+          audioBtn.innerHTML = muted ? iconMuted() : iconUnmuted();
+        });
+      }
+
+      card.appendChild(mediaEl);
+      card.appendChild(grad);
+      if (play) card.appendChild(play);
+      if (audioBtn) card.appendChild(audioBtn);
+      card.appendChild(caption);
+
+      wrap.appendChild(card);
+
+      // ===== Hover behaviour: 3D tilt + video play =====
+      const maxTilt = 7; // degrees
+
+      function resetTilt() {
+        card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg)`;
+      }
+
+      function onMove(e) {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;  // 0..1
+        const y = (e.clientY - r.top) / r.height; // 0..1
+
+        // rotateX based on Y, rotateY based on X
+        const ry = clamp((x - 0.5) * (maxTilt * 2), -maxTilt, maxTilt);
+        const rx = clamp((0.5 - y) * (maxTilt * 2), -maxTilt, maxTilt);
+
+        card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+      }
+
+      // Pointer events (desktop)
+      wrap.addEventListener("pointermove", (e) => {
+        // avoid heavy work on touch
+        if (window.matchMedia("(hover: none)").matches) return;
+        onMove(e);
+      });
+
+      wrap.addEventListener("pointerleave", () => {
+        resetTilt();
+        if (it.isVideo) {
+          const v = card.querySelector("video.wm-media");
+          if (v) {
+            v.pause();
+            try { v.currentTime = 0; } catch (_) {}
+          }
+        }
+      });
+
+      wrap.addEventListener("pointerenter", () => {
+        if (it.isVideo) {
+          const v = card.querySelector("video.wm-media");
+          if (!v) return;
+          v.muted = muted;
+
+          // Start from beginning for a clean "preview"
+          try { v.currentTime = 0; } catch (_) {}
+
+          // Autoplay on hover works best muted (browser policy)
+          v.play().catch(() => {});
+        }
+      });
+
+      // Mobile: tap to play/pause (since hover doesn't exist)
+      wrap.addEventListener("click", (e) => {
+        if (!it.isVideo) return;
+        const v = card.querySelector("video.wm-media");
+        if (!v) return;
+
+        if (v.paused) {
+          v.muted = muted;
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+        }
+      });
+
+      return wrap;
+    }
+
+    function render() {
+      grid.innerHTML = "";
+      setStatus("");
+
+      const slice = items.slice(0, shown);
+      slice.forEach((it) => grid.appendChild(createCard(it)));
+
+      if (items.length > shown) {
+        moreBtn.style.display = "inline-block";
       } else {
         moreBtn.style.display = "none";
       }
-    };
+    }
 
     moreBtn.addEventListener("click", () => {
-      visibleCount = Math.min(visibleCount + step, items.length);
+      shown = Math.min(items.length, shown + step);
       render();
-      // Keep the user on the same horizontal position after expand
-      // (no hard jump)
     });
 
-    render();
+    async function load() {
+      setStatus("", false);
+
+      // Loading hint
+      setStatus(locale === "it" ? "Caricamento…" : "Loading…", true);
+
+      try {
+        const url = new URL(apiUrl);
+        url.searchParams.set("company", company);
+        url.searchParams.set("limit", String(limit));
+
+        const headers = {};
+        if (anonKey) headers["Authorization"] = `Bearer ${anonKey}`;
+
+        const res = await fetch(url.toString(), {
+          method: "GET",
+          headers,
+          cache: "no-store",
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+
+        const rawItems = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        items = rawItems.map(normalizeItem).filter((x) => !!x.url);
+
+        shown = Math.min(initial, items.length);
+
+        if (!items.length) {
+          setStatus(locale === "it" ? "Nessun media disponibile." : "No media available.", true);
+          moreBtn.style.display = "none";
+          grid.innerHTML = "";
+          return;
+        }
+
+        setStatus("", false);
+        render();
+      } catch (err) {
+        console.error("Welo media widget error:", err);
+        setStatus(locale === "it" ? "Errore nel caricamento dei media." : "Error loading media.", true);
+      }
+    }
+
+    load();
   }
 
-  // Run when ready
-  const run = () => initAll();
+  function init() {
+    // Supports:
+    // <div class="welo-media-widget" data-welo="slug"></div>
+    // <div data-welo-media data-welo="slug"></div>
+    const nodes = [
+      ...document.querySelectorAll(".welo-media-widget"),
+      ...document.querySelectorAll("[data-welo-media]"),
+    ];
+
+    // Avoid duplicates if element has both selectors
+    const unique = Array.from(new Set(nodes));
+
+    unique.forEach(buildWidget);
+  }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", run, { once: true });
+    document.addEventListener("DOMContentLoaded", init);
   } else {
-    run();
+    init();
   }
-
-  // If Webflow loads sections dynamically
-  const mo = new MutationObserver(() => {
-    // lightweight re-init
-    initAll();
-  });
-  mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
