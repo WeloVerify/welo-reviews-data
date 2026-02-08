@@ -175,7 +175,7 @@
 .wm-card {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16;         /* ✅ same size for image/video */
+  aspect-ratio: 3 / 5;         /* ✅ same size for image/video */
   border-radius: 24px;
   overflow: hidden;
   background: #fff;              /* ✅ removes grey edges */
