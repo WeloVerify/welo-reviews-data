@@ -1,9 +1,8 @@
-
 (() => {
   const STYLE_ID = "welo-media-widget-styles";
   const FONT_ID = "welo-media-widget-font";
 
-  // ✅ Defaults (override via data-attributes)
+  // Defaults (override via data-attributes)
   const DEFAULT_PROJECT_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const DEFAULT_FUNCTION_PATH = "/functions/v1/welo-media-reviews";
   const DEFAULT_BUCKET_PUBLIC_PATH = "/storage/v1/object/public/reviews-proof/";
@@ -32,7 +31,7 @@
     },
   };
 
-  // ---------- Utils ----------
+  // Utils
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
   function pickLocale(el) {
@@ -53,6 +52,17 @@
     return nav.startsWith("it") ? "it" : "en";
   }
 
+  function pickTheme(el) {
+    const raw = (el.getAttribute("data-theme") || "auto").toLowerCase().trim();
+    if (raw === "light" || raw === "white") return "light";
+    if (raw === "dark" || raw === "black") return "dark";
+    if (raw === "auto") {
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      return prefersDark ? "dark" : "light";
+    }
+    return "light";
+  }
+
   function ensureFont() {
     if (document.getElementById(FONT_ID)) return;
     const link = document.createElement("link");
@@ -68,18 +78,62 @@
     const css = `
 /* ============ WELO MEDIA WIDGET (namespaced) ============ */
 .wm-root, .wm-root * { box-sizing: border-box; }
+
 .wm-root{
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  /* LIGHT defaults */
+  --wm-bg: #ffffff;
+  --wm-fg: #0a0a0a;
+  --wm-muted: #6b7280;
+  --wm-border: rgba(10,10,10,.12);
+  --wm-card: #ffffff;
+  --wm-card-border: rgba(10,10,10,.10);
+  --wm-shadow: rgba(0,0,0,.10);
+
+  --wm-cta-bg: #0a0a0a;
+  --wm-cta-fg: #ffffff;
+  --wm-cta-border: rgba(10,10,10,.12);
+
+  --wm-more-bg: #ffffff;
+  --wm-more-fg: #0a0a0a;
+  --wm-more-border: rgba(10,10,10,.12);
+
+  --wm-ph-a: #f3f4f6;
+  --wm-ph-b: #e5e7eb;
+
   width: 100%;
-  background: #fff;
-  color: #0a0a0a;
+  background: var(--wm-bg);
+  color: var(--wm-fg);
   overflow: visible;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
+
+/* DARK overrides */
+.wm-root[data-theme="dark"]{
+  --wm-bg: #0a0a0a;
+  --wm-fg: #ffffff;
+  --wm-muted: rgba(255,255,255,.72);
+  --wm-border: rgba(255,255,255,.14);
+  --wm-card: #0a0a0a;
+  --wm-card-border: rgba(255,255,255,.12);
+  --wm-shadow: rgba(0,0,0,.35);
+
+  --wm-cta-bg: #ffffff;
+  --wm-cta-fg: #0a0a0a;
+  --wm-cta-border: rgba(255,255,255,.18);
+
+  --wm-more-bg: rgba(255,255,255,.06);
+  --wm-more-fg: #ffffff;
+  --wm-more-border: rgba(255,255,255,.16);
+
+  --wm-ph-a: rgba(255,255,255,.10);
+  --wm-ph-b: rgba(255,255,255,.06);
+}
+
 .wm-wrap{
   width: min(1200px, 100%);
   margin: 0 auto;
   padding: 0 16px 18px 16px;
-  background:#fff;
+  background: var(--wm-bg);
   overflow: visible;
   isolation: isolate;
 }
@@ -90,9 +144,9 @@
   align-items:flex-start;
   justify-content:space-between;
   gap:16px;
-  padding: 6px 0 40px 0; /* ✅ more space under subtitle */
-  background:#fff;
-  flex-wrap: wrap; /* ✅ prevents overlap */
+  padding: 6px 0 40px 0;
+  background: var(--wm-bg);
+  flex-wrap: wrap;
 }
 .wm-hgroup{ min-width:0; }
 .wm-title{
@@ -107,7 +161,7 @@
   font-size: 18px;
   line-height: 1.35;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--wm-muted);
 }
 
 /* CTA */
@@ -119,39 +173,37 @@
   gap:10px;
   padding:14px 18px;
   border-radius:999px;
-  border:1px solid rgba(10,10,10,.12);
-  background:#0a0a0a;
-  color:#fff;
+  border:1px solid var(--wm-cta-border);
+  background: var(--wm-cta-bg);
+  color: var(--wm-cta-fg);
   text-decoration:none;
   font-weight:600;
   font-size:14px;
   line-height:1;
   white-space:nowrap;
   transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-  box-shadow: 0 10px 30px rgba(0,0,0,.10);
+  box-shadow: 0 10px 30px var(--wm-shadow);
   max-width: 100%;
 }
-.wm-cta:hover{ transform: translateY(-1px); box-shadow: 0 16px 40px rgba(0,0,0,.16); }
+.wm-cta:hover{ transform: translateY(-1px); box-shadow: 0 16px 40px var(--wm-shadow); }
 .wm-cta:active{ transform: translateY(0) scale(.98); opacity:.95; }
 .wm-cta svg{ width:16px; height:16px; }
 
 /* Grid */
-.wm-gridWrap{ background:#fff; overflow: visible; }
+.wm-gridWrap{ background: var(--wm-bg); overflow: visible; }
 .wm-grid{
   display:grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
-  background:#fff;
+  background: var(--wm-bg);
   overflow: visible;
 }
-
-/* Responsive */
 @media (max-width: 980px){
   .wm-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 720px){
   .wm-header{
-    flex-direction: column;          /* ✅ fixes mobile header overlap */
+    flex-direction: column;
     align-items: stretch;
     padding-bottom: 34px;
   }
@@ -167,18 +219,19 @@
 /* Card */
 .wm-cardWrap{
   perspective: 900px;
-  background:#fff;
+  background: var(--wm-bg);
   border-radius: 18px;
   overflow: visible;
-  touch-action: pan-y; /* ✅ smoother scroll, avoids accidental gestures */
+  touch-action: pan-y;
 }
 .wm-card{
   position: relative;
   width: 100%;
-  aspect-ratio: 10 / 16; /* ✅ slightly shorter than before */
+  aspect-ratio: 10 / 16;
   border-radius: 24px;
   overflow: hidden;
-  background:#fff;
+  background: var(--wm-card);
+  border: 1px solid var(--wm-card-border);
   transform-style: preserve-3d;
   transform: perspective(900px) rotateX(0deg) rotateY(0deg);
   transition: transform 120ms ease, box-shadow 160ms ease, filter 160ms ease;
@@ -195,14 +248,14 @@
   display:block;
   user-select:none;
   -webkit-user-drag:none;
-  pointer-events:none; /* ✅ prevents fullscreen click */
+  pointer-events:none;
 }
 
-/* Placeholder (helps when video first frame is loading) */
+/* Placeholder */
 .wm-ph{
   position:absolute;
   inset:0;
-  background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
+  background: linear-gradient(180deg, var(--wm-ph-a) 0%, var(--wm-ph-b) 100%);
   opacity: 0;
   transition: opacity .18s ease;
 }
@@ -240,7 +293,7 @@
   color: rgba(255,255,255,.86);
 }
 
-/* Play icon (videos only) */
+/* Play */
 .wm-play{
   position:absolute;
   inset:0;
@@ -256,7 +309,7 @@
   filter: drop-shadow(0 10px 25px rgba(0,0,0,.25));
 }
 
-/* Mute toggle (videos only) */
+/* Mute toggle */
 .wm-audio{
   position:absolute;
   top:14px; right:14px;
@@ -278,31 +331,24 @@
 .wm-audio svg{ width:20px; height:20px; fill:#fff; }
 .wm-audio:active{ transform: translateY(0) scale(.96); }
 
-/* Desktop hover effects ONLY on hover-capable devices */
+/* Hover effects */
 @media (hover: hover) and (pointer: fine){
-  .wm-cardWrap:hover .wm-card{
-    box-shadow: 0 22px 60px rgba(0,0,0,.22); /* ✅ a bit more visible */
-  }
-  .wm-cardWrap:hover .wm-caption{
-    opacity:0;
-    transform: translateY(8px);
-  }
-  .wm-cardWrap:hover .wm-grad{ opacity:0; } /* ✅ hide dark bottom on hover */
+  .wm-cardWrap:hover .wm-card{ box-shadow: 0 22px 60px rgba(0,0,0,.22); }
+  .wm-cardWrap:hover .wm-caption{ opacity:0; transform: translateY(8px); }
+  .wm-cardWrap:hover .wm-grad{ opacity:0; }
   .wm-cardWrap:hover .wm-play{ opacity:0; transform: scale(.98); }
   .wm-cardWrap:hover .wm-audio{ opacity:1; transform: translateY(0); }
 }
-
-/* Playing state (used on mobile tap + also set on desktop hover) */
 .wm-cardWrap.is-playing .wm-caption{ opacity:0; transform: translateY(8px); }
 .wm-cardWrap.is-playing .wm-grad{ opacity:0; }
 .wm-cardWrap.is-playing .wm-play{ opacity:0; transform: scale(.98); }
 .wm-cardWrap.is-playing .wm-audio{ opacity:1; transform: translateY(0); }
 .wm-cardWrap.is-playing .wm-card{ box-shadow: 0 22px 60px rgba(0,0,0,.22); }
 
-/* Loading / empty */
+/* Status / More */
 .wm-status{
   padding: 18px 0 6px 0;
-  color:#6b7280;
+  color: var(--wm-muted);
   font-size:14px;
 }
 .wm-moreBtn{
@@ -310,9 +356,9 @@
   display:none;
   padding:12px 18px;
   border-radius:12px;
-  border:1px solid rgba(10,10,10,.12);
-  background:#fff;
-  color:#0a0a0a;
+  border:1px solid var(--wm-more-border);
+  background: var(--wm-more-bg);
+  color: var(--wm-more-fg);
   font-weight:600;
   cursor:pointer;
   transition: transform .14s ease, box-shadow .14s ease;
@@ -373,7 +419,7 @@
     return locale === "it" ? "poco fa" : "just now";
   }
 
-  // ---------- SVGs ----------
+  // SVGs
   function playSvg() {
     return `
 <svg class="wm-playIcon" viewBox="0 0 96 96" aria-hidden="true">
@@ -404,13 +450,10 @@
 </svg>`;
   }
 
-  // ---------- Widget ----------
+  // Widget
   function buildWidget(el) {
     ensureFont();
     ensureStyles();
-
-    // Force the mount element to be white too (helps when Webflow section is weird)
-    try { el.style.background = "#fff"; } catch (_) {}
 
     const locale = pickLocale(el);
     const t = I18N[locale] || I18N.en;
@@ -426,6 +469,8 @@
       return;
     }
 
+    const theme = pickTheme(el);
+
     const projectUrl = el.getAttribute("data-project-url") || DEFAULT_PROJECT_URL;
     const apiUrl = el.getAttribute("data-api") || `${projectUrl}${DEFAULT_FUNCTION_PATH}`;
     const storageBase = el.getAttribute("data-storage-base") || `${projectUrl}${DEFAULT_BUCKET_PUBLIC_PATH}`;
@@ -438,16 +483,17 @@
       el.getAttribute("data-url") ||
       `${DEFAULT_WELO_PAGE_BASE}${encodeURIComponent(company)}`;
 
-    // Optional anon key if your function requires it
+    const only = (el.getAttribute("data-only") || "media").toLowerCase().trim(); // media | video
     const anonKey = el.getAttribute("data-anon-key") || "";
 
-    // Device capability
     const HOVER_CAPABLE = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Root markup
+    // Mount (do not force background on host element)
+    try { el.style.background = "transparent"; } catch (_) {}
+
     el.innerHTML = `
-<div class="wm-root">
+<div class="wm-root" data-theme="${theme}">
   <div class="wm-wrap">
     <div class="wm-header">
       <div class="wm-hgroup">
@@ -457,7 +503,7 @@
       <a class="wm-cta" href="${weloPageUrl}" target="_blank" rel="noopener">
         ${t.viewMore}
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7 17L17 7M9 7h8v8" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>
     </div>
@@ -475,10 +521,12 @@
     const status = el.querySelector(".wm-status");
     const moreBtn = el.querySelector(".wm-moreBtn");
 
-    // Global mute preference (needed for autoplay policies)
     let muted = true;
+    try {
+      const saved = localStorage.getItem("welo_media_muted");
+      if (saved === "false") muted = false;
+    } catch (_) {}
 
-    // State
     let items = [];
     let shown = 0;
 
@@ -531,7 +579,6 @@
       status.textContent = msg || "";
     }
 
-    // Pause all other videos (nice on mobile)
     function pauseAllExcept(exceptVideo) {
       grid.querySelectorAll("video.wm-media").forEach((v) => {
         if (v === exceptVideo) return;
@@ -541,7 +588,6 @@
       });
     }
 
-    // Lazy-load videos when near viewport
     const videoObserver = ("IntersectionObserver" in window)
       ? new IntersectionObserver((entries, obs) => {
           entries.forEach((entry) => {
@@ -576,7 +622,6 @@
           await videoEl.play();
           return true;
         } catch (e) {
-          // If unmuted blocks autoplay, fallback to muted
           if (!videoEl.muted) {
             videoEl.muted = true;
             try { await videoEl.play(); return true; } catch (_) {}
@@ -585,11 +630,9 @@
         }
       };
 
-      // Try immediately
       const ok = await tryPlay();
       if (ok) return;
 
-      // Retry once when it can play (first hover issue fix)
       await new Promise((resolve) => {
         let done = false;
         const finish = () => { if (done) return; done = true; resolve(); };
@@ -601,7 +644,7 @@
         };
 
         videoEl.addEventListener("canplay", onCanPlay, { once: true });
-        setTimeout(finish, 900); // safety timeout
+        setTimeout(finish, 900);
       });
     }
 
@@ -613,16 +656,14 @@
       const card = document.createElement("div");
       card.className = "wm-card";
 
-      // Placeholder (videos)
       const ph = document.createElement("div");
       ph.className = "wm-ph";
 
-      // Media
       let mediaEl;
       if (it.isVideo) {
         const v = document.createElement("video");
         v.className = "wm-media";
-        v.dataset.src = it.url;            // ✅ lazy src (fixes mobile slow load)
+        v.dataset.src = it.url;
         v.preload = "none";
         v.muted = muted;
         v.loop = true;
@@ -635,15 +676,12 @@
         v.controlsList = "nodownload noplaybackrate noremoteplayback";
         v.crossOrigin = "anonymous";
 
-        // Mark ready when first frame is available
         v.addEventListener("loadeddata", () => {
           wrap.classList.add("is-ready");
         }, { once: true });
 
-        // Preload when near viewport (important for first hover on desktop)
         if (videoObserver) videoObserver.observe(v);
         else {
-          // fallback: load immediately
           v.src = it.url;
           v.preload = "metadata";
           try { v.load(); } catch (_) {}
@@ -658,16 +696,12 @@
         img.loading = "lazy";
         img.decoding = "async";
         mediaEl = img;
-
-        // images are always "ready"
         wrap.classList.add("is-ready");
       }
 
-      // Gradient overlay (for caption readability)
       const grad = document.createElement("div");
       grad.className = "wm-grad";
 
-      // Caption
       const caption = document.createElement("div");
       caption.className = "wm-caption";
 
@@ -682,7 +716,6 @@
       caption.appendChild(nm);
       caption.appendChild(dt);
 
-      // Play icon (video)
       let play = null;
       if (it.isVideo) {
         play = document.createElement("div");
@@ -690,7 +723,6 @@
         play.innerHTML = playSvg();
       }
 
-      // Audio toggle (video)
       let audioBtn = null;
       if (it.isVideo) {
         audioBtn = document.createElement("button");
@@ -699,7 +731,7 @@
         audioBtn.setAttribute("aria-label", muted ? t.muted : t.unmuted);
         audioBtn.innerHTML = muted ? iconMuted() : iconUnmuted();
 
-        audioBtn.addEventListener("click", async (e) => {
+        audioBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
 
@@ -725,19 +757,17 @@
       if (play) card.appendChild(play);
       if (audioBtn) card.appendChild(audioBtn);
       card.appendChild(caption);
-
       wrap.appendChild(card);
 
-      // ===== Interactions =====
-      const MAX_TILT = 3.2; // ✅ slightly reduced tilt (change this if you want less/more)
+      const MAX_TILT = 3.2;
 
       function resetTilt() {
         card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg)`;
       }
       function onMove(e) {
         const r = card.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;  // 0..1
-        const y = (e.clientY - r.top) / r.height; // 0..1
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
 
         const ry = clamp((x - 0.5) * (MAX_TILT * 2), -MAX_TILT, MAX_TILT);
         const rx = clamp((0.5 - y) * (MAX_TILT * 2), -MAX_TILT, MAX_TILT);
@@ -745,7 +775,6 @@
         card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
       }
 
-      // Desktop hover: tilt + preview play on hover (NO click)
       if (HOVER_CAPABLE && !REDUCED_MOTION) {
         wrap.addEventListener("pointermove", (e) => onMove(e));
 
@@ -756,7 +785,6 @@
 
           wrap.classList.add("is-playing");
           ensureVideoSrc(v);
-
           try { v.currentTime = 0; } catch (_) {}
           await playWithFallback(v);
         });
@@ -774,14 +802,11 @@
           }
         });
       } else {
-        // No hover devices: keep tilt off
         resetTilt();
       }
 
-      // Mobile tap behaviour: tap toggles play/pause (no accidental play while scrolling)
       if (!HOVER_CAPABLE && it.isVideo) {
-        let downX = 0, downY = 0, downT = 0;
-        let pointerId = null;
+        let downX = 0, downY = 0, downT = 0, pointerId = null;
 
         wrap.addEventListener("pointerdown", (e) => {
           if (e.pointerType !== "touch") return;
@@ -799,14 +824,12 @@
           const dy = Math.abs(e.clientY - downY);
           const dtap = Date.now() - downT;
 
-          // ✅ treat as TAP only if tiny movement (prevents scroll-trigger play)
           const isTap = dx < 10 && dy < 10 && dtap < 450;
           if (!isTap) return;
 
           const v = card.querySelector("video.wm-media");
           if (!v) return;
 
-          // Toggle
           if (v.paused) {
             pauseAllExcept(v);
             wrap.classList.add("is-playing");
@@ -833,7 +856,6 @@
 
       const slice = items.slice(0, shown);
       slice.forEach((it) => grid.appendChild(createCard(it)));
-
       moreBtn.style.display = items.length > shown ? "inline-block" : "none";
     }
 
@@ -851,20 +873,22 @@
         url.searchParams.set("limit", String(limit));
 
         const headers = {};
-        if (anonKey) headers["Authorization"] = `Bearer ${anonKey}`;
+        if (anonKey) {
+          headers["Authorization"] = `Bearer ${anonKey}`;
+          headers["apikey"] = anonKey;
+        }
 
-        const res = await fetch(url.toString(), {
-          method: "GET",
-          headers,
-          cache: "no-store",
-        });
-
+        const res = await fetch(url.toString(), { method: "GET", headers, cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
-        const rawItems = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
-        items = rawItems.map(normalizeItem).filter((x) => !!x.url);
+        let rawItems = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        rawItems = rawItems.map(normalizeItem).filter((x) => !!x.url);
 
+        // filter by "only"
+        if (only === "video") rawItems = rawItems.filter((x) => x.isVideo);
+
+        items = rawItems;
         shown = Math.min(initial, items.length);
 
         if (!items.length) {
@@ -894,9 +918,6 @@
     unique.forEach(buildWidget);
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
 })();
