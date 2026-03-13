@@ -1,29 +1,13 @@
-
 (() => {
-  /* ===========================================
-     Bullwaves Prime Course Area (JS)
-     - No login
-     - Auto mark as complete on visit
-     - Progress + mobile drawer
-     - Final quiz in popup
-     - Reward after passing quiz
-     - Topic videos mapped one by one
-     =========================================== */
-
   const ROOT_ID = "bwp__c7X9";
-
-  const STORAGE_KEY_BASE = "bwp_course_state_v2";
-  const STORAGE_KEY = `${STORAGE_KEY_BASE}:${location.hostname}${location.pathname}:${ROOT_ID}`;
+  const STORAGE_KEY = `bwp_course_state_v4:${location.hostname}${location.pathname}:${ROOT_ID}`;
   const HASH_PREFIX = "bwp-";
-
   const BRAND_LOGO =
     "https://cdn.prod.website-files.com/66f2e0fef32885327272def5/67d1ad5a62ad06f120c0b82c_Frame%202147223939%201aaaa.png";
 
-  const EXIT_URL = "";
   const REWARD_URL = "https://bwp.bullwaves.com/buy-challenge/";
   const REWARD_CODE = "course15";
   const PASSING_SCORE = 70;
-
   const NAV_SELECTOR_FALLBACKS = [".w-nav", "[data-nav]", ".navbar", "header"];
 
   const ICONS = {
@@ -38,16 +22,15 @@
 
   const INTRO_SCREEN = {
     title: "Welcome to the course",
-    desc: "Thanks for joining. You can start right now and go lesson by lesson.",
+    desc: "Thanks for joining. Start now and go lesson by lesson.",
     video: "https://youtu.be/aD2Yp8svIYM",
-    videoCap: "Quick welcome and course overview.",
     html: `
       <div class="i0__intro">
         <p><strong>Welcome to the Bullwaves Prime course.</strong></p>
-        <p>This course is split into 4 modules so you can build your foundations step by step, without rushing through the basics.</p>
-        <p>Each lesson includes a short video and a written recap, so you can watch first and then review the key concepts quickly.</p>
+        <p>This course is split into 4 modules so you can build strong foundations step by step.</p>
+        <p>Each lesson includes a video and a short written recap so you can review the key ideas quickly.</p>
         <p>Once you complete the course, you’ll unlock the final quiz. Pass it and you’ll receive a <strong>15% discount code</strong> for your next Bullwaves Prime challenge.</p>
-        <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
           <button class="n1__btn" type="button" data-bwp="startCourse" data-primary="true" style="min-width:160px;">
             Start now ${ICONS.arrowR}
           </button>
@@ -78,8 +61,7 @@
                 id: "m1_t1",
                 title: "What is Forex",
                 desc: "A simple introduction to the Forex market and why currencies are always traded in pairs.",
-                video: "https://www.youtube.com/watch?v=XbgPZY7nhjc",
-                videoCap: "Forex basics explained in a simple way.",
+                video: "https://youtu.be/XbgPZY7nhjc",
                 html: `
                   <p>This video introduces <strong>Forex</strong> as the global market where one currency is exchanged for another.</p>
                   <p>The main idea is simple: traders speculate on whether one currency will become stronger or weaker relative to another, which is why currencies are always shown in pairs such as <strong>EUR/USD</strong>.</p>
@@ -90,8 +72,7 @@
                 id: "m1_t2",
                 title: "Currency Pairs",
                 desc: "Base currency, quote currency, and how to read a Forex quote correctly.",
-                video: "https://www.youtube.com/watch?v=eMimFwMPC3E",
-                videoCap: "Learn how currency pairs are structured.",
+                video: "https://youtu.be/eMimFwMPC3E",
                 html: `
                   <p>This lesson focuses on how <strong>currency pairs</strong> work.</p>
                   <p>You’ll see the difference between the <strong>base currency</strong> and the <strong>quote currency</strong>, and how a price like <strong>EUR/USD = 1.1050</strong> should be interpreted.</p>
@@ -102,8 +83,7 @@
                 id: "m1_t3",
                 title: "Who Trades Forex",
                 desc: "The major participants in the Forex market, from institutions to retail traders.",
-                video: "https://www.youtube.com/watch?v=Wz5VSaGxzXQ",
-                videoCap: "Who moves the Forex market and why.",
+                video: "https://youtu.be/Wz5VSaGxzXQ",
                 html: `
                   <p>This video explains <strong>who takes part in the Forex market</strong>.</p>
                   <p>It covers major institutions, banks, governments, corporations, brokers, and retail traders, showing that the market is driven by many different types of participants with different goals.</p>
@@ -114,8 +94,7 @@
                 id: "m1_t4",
                 title: "Summary Points",
                 desc: "A quick wrap-up of the first module and the ideas you should remember.",
-                video: "https://www.youtube.com/watch?v=gN3dGDm11hw",
-                videoCap: "Module 1 recap.",
+                video: "https://youtu.be/gN3dGDm11hw",
                 html: `
                   <p>This recap video brings together the most important ideas from the first module.</p>
                   <p>By this point, you should understand what Forex is, how currency pairs work, and who the main players are inside the market.</p>
@@ -138,35 +117,32 @@
                 id: "m2_t1",
                 title: "Intro to Module 2",
                 desc: "An introduction to the essential mechanics every trader should know.",
-                video: "https://www.youtube.com/watch?v=XhDnyl8oKLk",
-                videoCap: "Introduction to the second module.",
+                video: "https://youtu.be/XhDnyl8oKLk",
                 html: `
-                  <p>This introduction sets up the second module, which moves from broad market understanding into the <strong>practical basics of trading</strong>.</p>
+                  <p>This introduction sets up the second module by moving from general market understanding into the <strong>practical basics of trading</strong>.</p>
                   <p>Here the focus becomes more direct: trade direction, essential terminology, sizing, and the mechanics that affect risk and execution.</p>
-                  <p>The recap is straightforward: before strategy, indicators, or advanced setups, you need to understand the language and the structure of a trade itself. That is what this module is designed to build.</p>
+                  <p>The recap is straightforward: before anything advanced, you need to understand the language and structure of a trade itself. That is what this module is designed to build.</p>
                 `
               },
               {
                 id: "m2_t2",
                 title: "Trade Direction: LONG vs SHORT",
                 desc: "What it means to buy, what it means to sell, and how traders profit in both directions.",
-                video: "https://www.youtube.com/watch?v=0G3c8W7C-A8",
-                videoCap: "Long positions vs short positions.",
+                video: "https://youtu.be/0G3c8W7C-A8",
                 html: `
                   <p>This lesson explains the difference between going <strong>long</strong> and going <strong>short</strong>.</p>
                   <p>Going long means you expect price to rise, while going short means you expect price to fall. In CFDs and Forex, both directions are available, which is one of the main reasons traders are attracted to these markets.</p>
-                  <p>The main takeaway is that direction is not just a button on the platform, it is the core decision behind every trade. If you misunderstand long and short, everything else becomes harder to manage correctly.</p>
+                  <p>The main takeaway is that direction is not just a button on the platform. It is the core decision behind every trade.</p>
                 `
               },
               {
                 id: "m2_t3",
                 title: "Key Terms Every Trader MUST KNOW",
                 desc: "Pips, bid, ask, spread, and the language used in everyday trading.",
-                video: "https://www.youtube.com/watch?v=Ai0d2ukotVc",
-                videoCap: "Core trading terms every beginner should know.",
+                video: "https://youtu.be/Ai0d2ukotVc",
                 html: `
                   <p>This video covers the essential vocabulary of trading.</p>
-                  <p>Terms like <strong>pip</strong>, <strong>bid</strong>, <strong>ask</strong>, and <strong>spread</strong> are not optional, they are part of almost every trade you place and every chart you analyse.</p>
+                  <p>Terms like <strong>pip</strong>, <strong>bid</strong>, <strong>ask</strong>, and <strong>spread</strong> are not optional. They are part of almost every trade you place and every chart you analyse.</p>
                   <p>The recap here is that understanding these terms helps you read pricing correctly, estimate costs more accurately, and avoid confusion when using trading platforms or evaluating a setup.</p>
                 `
               },
@@ -174,20 +150,18 @@
                 id: "m2_t4",
                 title: "Trade Sizing",
                 desc: "How lot size changes exposure, risk, and the real impact of each pip.",
-                video: "https://www.youtube.com/watch?v=QOCh66bnvsU",
-                videoCap: "How trade size affects risk and reward.",
+                video: "https://youtu.be/QOCh66bnvsU",
                 html: `
                   <p>This lesson is about <strong>trade sizing</strong>, one of the most important concepts in risk management.</p>
                   <p>Even when two traders take the same setup, the result can be completely different depending on their size. Lot size affects how much each pip is worth and how much money is at risk on the trade.</p>
-                  <p>The most important takeaway is that sizing is what turns an idea into real exposure. Good traders do not only think about where price might go, they also think about how large the position should be before entering.</p>
+                  <p>The most important takeaway is that sizing is what turns an idea into real exposure.</p>
                 `
               },
               {
                 id: "m2_t5",
                 title: "Why These Basics Matter",
                 desc: "Why understanding the basics is directly connected to discipline, consistency, and survival.",
-                video: "https://www.youtube.com/watch?v=rJvCa7yjjqo",
-                videoCap: "Why solid basics matter in real trading.",
+                video: "https://youtu.be/rJvCa7yjjqo",
                 html: `
                   <p>This video connects all the basics to real-world trading performance.</p>
                   <p>The message is simple: many mistakes do not come from advanced strategy problems, they come from weak foundations, poor understanding of trade mechanics, and confusion around risk.</p>
@@ -198,12 +172,11 @@
                 id: "m2_t6",
                 title: "Summary Points Module 2",
                 desc: "A final review of the trading basics covered in this module.",
-                video: "https://www.youtube.com/watch?v=rdYv6DKxpcg",
-                videoCap: "Module 2 recap.",
+                video: "https://youtu.be/rdYv6DKxpcg",
                 html: `
                   <p>This summary reviews the key ideas from the second module.</p>
                   <p>By now you should be comfortable with trade direction, basic trading terms, and the relationship between position size and risk.</p>
-                  <p>The final takeaway is that these are not small details, they are the daily building blocks of every trade. Once these concepts feel natural, moving into structure and liquidity becomes much easier.</p>
+                  <p>The final takeaway is that these are not small details, they are the daily building blocks of every trade.</p>
                 `
               }
             ]
@@ -223,10 +196,9 @@
                 title: "Intro Market Structure",
                 desc: "An introduction to how the market is organised behind the charts.",
                 video: "https://youtu.be/qQo9uSWZtvE",
-                videoCap: "Introduction to market structure.",
                 html: `
                   <p>This introduction opens the market structure section by shifting the focus from individual trade mechanics to the <strong>environment trades take place in</strong>.</p>
-                  <p>Instead of only asking where price goes, this module asks how the market is built, who provides liquidity, and why execution differs across participants.</p>
+                  <p>Instead of only asking where price goes, this module asks how the market is built.</p>
                   <p>The recap is that understanding structure helps traders stop looking at price as random movement and start seeing the logic behind how the market operates.</p>
                 `
               },
@@ -235,7 +207,6 @@
                 title: "What is Market Structure?",
                 desc: "The idea of a decentralised market and the framework behind price delivery.",
                 video: "https://youtu.be/ZyTgks4FY7Q",
-                videoCap: "What market structure means in Forex.",
                 html: `
                   <p>This lesson explains what <strong>market structure</strong> actually means in the Forex context.</p>
                   <p>Because Forex is decentralised, there is no single exchange controlling all price activity. Instead, different entities interact through networks of liquidity, pricing, and order flow.</p>
@@ -247,7 +218,6 @@
                 title: "The Tiers of Participation",
                 desc: "Who sits at the top, who sits in the middle, and where retail traders fit in.",
                 video: "https://youtu.be/rm4O_uvI1wY",
-                videoCap: "The liquidity hierarchy in Forex.",
                 html: `
                   <p>This video breaks down the <strong>tiers of participation</strong> in the market.</p>
                   <p>It shows the hierarchy between interbank institutions, liquidity aggregators, brokers, and retail traders, helping you understand why not all participants experience the market in the same way.</p>
@@ -259,7 +229,6 @@
                 title: "Brokers and Liquidity Providers Explained",
                 desc: "How brokers source pricing and where liquidity providers fit into the process.",
                 video: "https://youtu.be/IG7nCYp9icc",
-                videoCap: "Brokers and liquidity providers explained.",
                 html: `
                   <p>This lesson explains the relationship between <strong>brokers</strong> and <strong>liquidity providers</strong>.</p>
                   <p>Retail traders usually do not access institutional liquidity directly, so brokers act as the bridge. Depending on the broker model, pricing and execution can be handled in different ways.</p>
@@ -271,11 +240,10 @@
                 title: "Trading Sessions and Liquidity Timing",
                 desc: "Why timing matters and when the market is typically most active.",
                 video: "https://youtu.be/F02ObYoDcmY",
-                videoCap: "Trading sessions and liquidity windows.",
                 html: `
                   <p>This video explains how <strong>trading sessions</strong> affect activity and liquidity.</p>
                   <p>Different parts of the day bring different conditions, and session overlaps, especially <strong>London–New York</strong>, are often where volume and volatility become more significant.</p>
-                  <p>The recap is that timing matters. Traders should not only know what they are trading, but also when they are trading it, because liquidity and movement change throughout the day.</p>
+                  <p>Traders should not only know what they are trading, but also when they are trading it, because liquidity and movement change throughout the day.</p>
                 `
               }
             ]
@@ -295,7 +263,6 @@
                 title: "Final Takeaways",
                 desc: "A final recap of the course before you move into the assessment.",
                 video: "https://youtu.be/NcQI4zSiDZc",
-                videoCap: "Final course recap.",
                 html: `
                   <p>This final recap pulls together the entire course into one clear review.</p>
                   <p>At this point you’ve covered Forex fundamentals, the basics of trading mechanics, market structure, liquidity, and timing.</p>
@@ -307,17 +274,16 @@
                 title: "Ready to Put It All Together?",
                 desc: "You’ve completed the lessons. Open the final quiz and unlock your reward.",
                 video: "",
-                videoCap: "",
                 html: `
-                  <p>You’ve now completed all four modules of the course.</p>
-                  <p>Before moving on, take the final quiz to confirm that you understand the core concepts covered across Forex, CFDs, trade mechanics, and market structure.</p>
+                  <p>You’ve now completed the course.</p>
+                  <p>Take the final quiz to confirm that you understand the core concepts covered across the modules.</p>
                   <p>You’ll answer <strong>10 multiple choice questions</strong>. Pass with at least <strong>${PASSING_SCORE}%</strong> and you’ll unlock your exclusive discount code for Bullwaves Prime.</p>
 
                   <div class="c5__note">
                     Reward after passing: <strong>${REWARD_CODE}</strong> for <strong>15% OFF</strong>.
                   </div>
 
-                  <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+                  <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
                     <button class="n1__btn" type="button" data-bwp="openQuizInline" data-primary="true">
                       Open final quiz ${ICONS.arrowR}
                     </button>
@@ -518,12 +484,12 @@
     const h = getNavOffsetPx(root);
 
     const safeTop =
-      (window.CSS && CSS.supports && CSS.supports("top: env(safe-area-inset-top)"))
+      window.CSS && CSS.supports && CSS.supports("top: env(safe-area-inset-top)")
         ? "env(safe-area-inset-top)"
         : "0px";
 
     const vhUnit =
-      (window.CSS && CSS.supports && CSS.supports("height: 100dvh"))
+      window.CSS && CSS.supports && CSS.supports("height: 100dvh)")
         ? "100dvh"
         : "100vh";
 
@@ -565,274 +531,187 @@
     applyDrawerMaskOffset(root);
   }
 
-  function injectMinorBodyStyles() {
-    const id = "bwp__minor_injected_css_v2";
+  function injectStyles() {
+    const id = "bwp__course_styles_v4";
     if (document.getElementById(id)) return;
 
     const st = document.createElement("style");
     st.id = id;
     st.textContent = `
-      #${ROOT_ID} .c5__body a{ color: rgba(255,255,255,.92); text-decoration: underline; text-underline-offset: 3px; }
-      #${ROOT_ID} .c5__body table{ width:100%; border-collapse: collapse; margin: 10px 0; }
-      #${ROOT_ID} .c5__body th, #${ROOT_ID} .c5__body td{
-        border: 1px solid rgba(255,255,255,.10);
-        padding: 10px;
-        vertical-align: top;
-        font-size: 13.5px;
-        color: rgba(255,255,255,.78);
-      }
-      #${ROOT_ID} .c5__body th{
-        font-weight: 600;
-        color: rgba(255,255,255,.90);
-        background: rgba(255,255,255,.02);
-      }
-      #${ROOT_ID} .c5__body hr{ border:0; height:1px; background: rgba(255,255,255,.10); margin: 14px 0; }
-
-      #${ROOT_ID} .v0__box{ margin-top:14px; }
-      #${ROOT_ID} .v0__cap{ margin-top:10px; font-size:12.5px; color: rgba(255,255,255,.60); }
-      #${ROOT_ID} .v0__frame iframe{ border-radius:16px; }
+      #${ROOT_ID} .c5__body a{color:rgba(255,255,255,.92);text-decoration:underline;text-underline-offset:3px}
+      #${ROOT_ID} .c5__body table{width:100%;border-collapse:collapse;margin:10px 0}
+      #${ROOT_ID} .c5__body th,#${ROOT_ID} .c5__body td{border:1px solid rgba(255,255,255,.10);padding:10px;vertical-align:top;font-size:13.5px;color:rgba(255,255,255,.78)}
+      #${ROOT_ID} .c5__body th{font-weight:600;color:rgba(255,255,255,.90);background:rgba(255,255,255,.02)}
+      #${ROOT_ID} .c5__body hr{border:0;height:1px;background:rgba(255,255,255,.10);margin:14px 0}
+      #${ROOT_ID} .v0__box{margin-top:14px}
+      #${ROOT_ID} .v0__cap{margin-top:10px;font-size:12.5px;color:rgba(255,255,255,.60)}
+      #${ROOT_ID} .v0__frame iframe{border-radius:16px}
 
       #${ROOT_ID} .qz__overlay{
-        position: fixed;
-        inset: 0;
-        background: rgba(3, 4, 9, .72);
-        backdrop-filter: blur(6px);
-        z-index: 9999;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
+        position:fixed;inset:0;background:rgba(3,4,9,.78);backdrop-filter:blur(8px);
+        z-index:9999;display:none;align-items:center;justify-content:center;padding:20px
       }
-      #${ROOT_ID} .qz__overlay[data-open="true"]{ display:flex; }
+      #${ROOT_ID} .qz__overlay[data-open="true"]{display:flex}
       #${ROOT_ID} .qz__dialog{
-        width: min(880px, 100%);
-        max-height: min(88vh, 920px);
-        overflow: auto;
-        border-radius: 22px;
-        background: #0d1017;
-        border: 1px solid rgba(255,255,255,.08);
-        box-shadow: 0 20px 60px rgba(0,0,0,.42);
+        width:min(980px,100%);max-height:min(90vh,960px);overflow:auto;border-radius:24px;
+        background:linear-gradient(180deg,#08111f 0%,#0a101a 100%);
+        border:1px solid rgba(255,255,255,.08);
+        box-shadow:0 20px 70px rgba(0,0,0,.46)
       }
       #${ROOT_ID} .qz__top{
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        display:flex;
-        align-items:flex-start;
-        justify-content:space-between;
-        gap: 16px;
-        padding: 18px 20px;
-        border-bottom: 1px solid rgba(255,255,255,.08);
-        background: rgba(13,16,23,.94);
-        backdrop-filter: blur(10px);
+        position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;
+        gap:16px;padding:22px 24px;border-bottom:1px solid rgba(255,255,255,.08);
+        background:rgba(7,12,20,.94);backdrop-filter:blur(12px)
       }
       #${ROOT_ID} .qz__eyebrow{
-        font-size: 11px;
-        line-height: 1;
-        letter-spacing: .14em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,.46);
-        margin-bottom: 8px;
+        font-size:11px;line-height:1;letter-spacing:.16em;text-transform:uppercase;
+        color:rgba(255,255,255,.44);margin-bottom:10px
       }
-      #${ROOT_ID} .qz__title{
-        font-size: 22px;
-        line-height: 1.15;
-        font-weight: 700;
-        color: #fff;
-      }
+      #${ROOT_ID} .qz__title{font-size:22px;line-height:1.12;font-weight:700;color:#fff}
       #${ROOT_ID} .qz__close{
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,.08);
-        background: rgba(255,255,255,.03);
-        color: #fff;
-        cursor: pointer;
-        flex: 0 0 auto;
+        width:44px;height:44px;border-radius:16px;border:1px solid rgba(255,255,255,.08);
+        background:rgba(255,255,255,.03);color:#fff;cursor:pointer;flex:0 0 auto
       }
-      #${ROOT_ID} .qz__close svg{ width: 18px; height: 18px; display:block; margin:auto; }
-      #${ROOT_ID} .qz__body{ padding: 20px; }
+      #${ROOT_ID} .qz__close svg{width:18px;height:18px;display:block;margin:auto}
+      #${ROOT_ID} .qz__body{padding:24px}
+      #${ROOT_ID} .qz__intro,#${ROOT_ID} .qz__resultShell,#${ROOT_ID} .qz__lock{
+        border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);
+        border-radius:22px;padding:20px
+      }
+      #${ROOT_ID} .qz__intro p,#${ROOT_ID} .qz__lock p{margin:0 0 10px 0;color:rgba(255,255,255,.78);line-height:1.6}
+      #${ROOT_ID} .qz__intro p:last-child,#${ROOT_ID} .qz__lock p:last-child{margin-bottom:0}
 
-      #${ROOT_ID} .qz__intro,
-      #${ROOT_ID} .qz__result{
-        border: 1px solid rgba(255,255,255,.08);
-        background: rgba(255,255,255,.03);
-        border-radius: 18px;
-        padding: 18px;
-      }
-      #${ROOT_ID} .qz__intro p,
-      #${ROOT_ID} .qz__result p{
-        margin: 0 0 10px 0;
-        color: rgba(255,255,255,.78);
-        line-height: 1.6;
-      }
-      #${ROOT_ID} .qz__grid{
-        display:grid;
-        gap: 14px;
-        margin-top: 16px;
-      }
+      #${ROOT_ID} .qz__grid{display:grid;gap:16px;margin-top:16px}
       #${ROOT_ID} .qz__card{
-        border: 1px solid rgba(255,255,255,.08);
-        background: rgba(255,255,255,.025);
-        border-radius: 18px;
-        padding: 16px;
+        border:1px solid rgba(255,255,255,.08);
+        background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));
+        border-radius:22px;padding:18px
       }
-      #${ROOT_ID} .qz__num{
-        font-size: 12px;
-        color: rgba(255,255,255,.52);
-        margin-bottom: 8px;
-      }
-      #${ROOT_ID} .qz__q{
-        font-size: 16px;
-        line-height: 1.45;
-        color: #fff;
-        font-weight: 600;
-        margin-bottom: 12px;
-      }
-      #${ROOT_ID} .qz__opts{
-        display:grid;
-        gap: 10px;
-      }
+      #${ROOT_ID} .qz__num{font-size:13px;color:rgba(255,255,255,.46);margin-bottom:12px}
+      #${ROOT_ID} .qz__q{font-size:18px;line-height:1.35;color:#fff;font-weight:700;margin-bottom:16px}
+      #${ROOT_ID} .qz__opts{display:grid;gap:12px}
       #${ROOT_ID} .qz__opt{
-        display:flex;
-        gap: 10px;
-        align-items:flex-start;
-        border: 1px solid rgba(255,255,255,.08);
-        background: rgba(255,255,255,.02);
-        border-radius: 14px;
-        padding: 12px 13px;
-        cursor:pointer;
+        position:relative;display:flex;gap:14px;align-items:center;
+        border:1px solid rgba(255,255,255,.08);
+        background:rgba(255,255,255,.02);
+        border-radius:18px;padding:16px 18px;cursor:pointer;
+        transition:border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease
+      }
+      #${ROOT_ID} .qz__opt:hover{
+        border-color:rgba(255,255,255,.16);
+        background:rgba(255,255,255,.04)
+      }
+      #${ROOT_ID} .qz__opt[data-selected="true"]{
+        border-color:rgba(255,255,255,.42);
+        background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.06));
+        box-shadow:0 0 0 1px rgba(255,255,255,.10) inset,0 10px 30px rgba(0,0,0,.18);
+        transform:translateY(-1px)
       }
       #${ROOT_ID} .qz__opt input{
-        margin-top: 3px;
-        accent-color: #ffffff;
+        position:absolute;opacity:0;pointer-events:none
+      }
+      #${ROOT_ID} .qz__radio{
+        width:24px;height:24px;border-radius:999px;flex:0 0 24px;
+        border:2px solid rgba(255,255,255,.48);
+        background:rgba(255,255,255,.05);
+        display:grid;place-items:center;
+        transition:border-color .18s ease, background .18s ease, box-shadow .18s ease
+      }
+      #${ROOT_ID} .qz__radio::after{
+        content:"";width:10px;height:10px;border-radius:999px;
+        background:transparent;transition:background .18s ease, transform .18s ease;
+        transform:scale(.7)
+      }
+      #${ROOT_ID} .qz__opt[data-selected="true"] .qz__radio{
+        border-color:#fff;background:#fff;box-shadow:0 0 0 6px rgba(255,255,255,.08)
+      }
+      #${ROOT_ID} .qz__opt[data-selected="true"] .qz__radio::after{
+        background:#0b1018;transform:scale(1)
       }
       #${ROOT_ID} .qz__opt span{
-        color: rgba(255,255,255,.84);
-        line-height: 1.45;
-        font-size: 14px;
+        color:rgba(255,255,255,.88);line-height:1.45;font-size:15px
       }
+      #${ROOT_ID} .qz__opt[data-selected="true"] span{color:#fff}
+
       #${ROOT_ID} .qz__bar{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap: 12px;
-        margin-top: 16px;
-        flex-wrap: wrap;
+        display:flex;align-items:center;justify-content:space-between;gap:12px;
+        margin-top:18px;flex-wrap:wrap
       }
-      #${ROOT_ID} .qz__meta{
-        color: rgba(255,255,255,.58);
-        font-size: 13px;
-      }
-      #${ROOT_ID} .qz__actions{
-        display:flex;
-        align-items:center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
+      #${ROOT_ID} .qz__meta{color:rgba(255,255,255,.58);font-size:13px}
+      #${ROOT_ID} .qz__actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
       #${ROOT_ID} .qz__alert{
-        margin-top: 14px;
-        border-radius: 14px;
-        padding: 12px 14px;
-        font-size: 14px;
-        line-height: 1.45;
+        margin-top:14px;border-radius:16px;padding:14px 16px;font-size:14px;line-height:1.5;
+        background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.90)
       }
-      #${ROOT_ID} .qz__alert[data-type="error"]{
-        background: rgba(255,255,255,.04);
-        border: 1px solid rgba(255,255,255,.08);
-        color: rgba(255,255,255,.88);
+
+      #${ROOT_ID} .qz__btn{
+        appearance:none;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);
+        color:#fff;border-radius:16px;padding:12px 18px;font-weight:600;cursor:pointer;
+        transition:transform .18s ease, background .18s ease, border-color .18s ease
       }
-      #${ROOT_ID} .qz__score{
-        display:inline-flex;
-        align-items:center;
-        gap: 8px;
-        padding: 8px 12px;
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,.08);
-        background: rgba(255,255,255,.03);
-        color: #fff;
-        font-size: 13px;
-        margin: 10px 0 14px 0;
+      #${ROOT_ID} .qz__btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.14)}
+      #${ROOT_ID} .qz__btn[data-primary="true"]{background:#fff;color:#0a0c11}
+
+      #${ROOT_ID} .qz__resultWrap{max-width:780px;margin:0 auto}
+      #${ROOT_ID} .qz__resultShell{
+        background:
+          radial-gradient(circle at top right, rgba(255,255,255,.06), transparent 36%),
+          linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02))
+      }
+      #${ROOT_ID} .qz__passedBadge{
+        display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;
+        border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:#fff;
+        font-size:14px;font-weight:600
+      }
+      #${ROOT_ID} .qz__passedBadge svg{width:18px;height:18px}
+      #${ROOT_ID} .qz__resultTitle{
+        margin:18px 0 8px 0;font-size:34px;line-height:1.08;font-weight:800;color:#fff
+      }
+      #${ROOT_ID} .qz__resultText{
+        color:rgba(255,255,255,.74);font-size:18px;line-height:1.6;margin:0
       }
       #${ROOT_ID} .qz__reward{
-        margin-top: 16px;
-        border: 1px solid rgba(255,255,255,.08);
-        background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-        border-radius: 18px;
-        padding: 16px;
+        margin-top:22px;border:1px solid rgba(255,255,255,.08);
+        background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
+        border-radius:22px;padding:22px
       }
       #${ROOT_ID} .qz__rewardTop{
-        display:flex;
-        align-items:center;
-        gap: 10px;
-        color:#fff;
-        font-weight: 700;
-        margin-bottom: 10px;
+        display:flex;align-items:center;gap:12px;color:#fff;font-weight:700;
+        font-size:24px;line-height:1.2;margin-bottom:12px
       }
-      #${ROOT_ID} .qz__rewardTop svg{ width:20px; height:20px; }
+      #${ROOT_ID} .qz__rewardTop svg{width:24px;height:24px}
+      #${ROOT_ID} .qz__rewardText{
+        color:rgba(255,255,255,.78);font-size:17px;line-height:1.6;margin:0
+      }
       #${ROOT_ID} .qz__codeWrap{
-        display:flex;
-        gap:10px;
-        align-items:center;
-        flex-wrap:wrap;
-        margin-top:12px;
+        display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px
       }
       #${ROOT_ID} .qz__code{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        min-width: 160px;
-        padding: 12px 16px;
-        border-radius: 14px;
-        border: 1px dashed rgba(255,255,255,.22);
-        background: rgba(255,255,255,.03);
-        font-size: 18px;
-        font-weight: 800;
-        letter-spacing: .06em;
-        color:#fff;
-        text-transform: uppercase;
+        display:inline-flex;align-items:center;justify-content:center;min-width:200px;
+        padding:16px 18px;border-radius:18px;border:1px dashed rgba(255,255,255,.24);
+        background:rgba(255,255,255,.03);font-size:20px;font-weight:800;letter-spacing:.06em;
+        color:#fff;text-transform:uppercase
       }
       #${ROOT_ID} .qz__subtle{
-        color: rgba(255,255,255,.62);
-        font-size: 13px;
-        line-height: 1.5;
-      }
-      #${ROOT_ID} .qz__btn{
-        appearance:none;
-        border: 1px solid rgba(255,255,255,.08);
-        background: rgba(255,255,255,.03);
-        color:#fff;
-        border-radius: 14px;
-        padding: 12px 16px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      #${ROOT_ID} .qz__btn[data-primary="true"]{
-        background: #fff;
-        color: #0a0c11;
+        color:rgba(255,255,255,.58);font-size:14px;line-height:1.6;margin-top:14px
       }
 
       @media (max-width: 767px){
-        #${ROOT_ID} .qz__dialog{
-          width: 100%;
-          max-height: 92vh;
-          border-radius: 18px;
-        }
-        #${ROOT_ID} .qz__top{
-          padding: 16px;
-        }
-        #${ROOT_ID} .qz__body{
-          padding: 16px;
-        }
-        #${ROOT_ID} .qz__title{
-          font-size: 20px;
-        }
-        #${ROOT_ID} .qz__q{
-          font-size: 15px;
-        }
-        #${ROOT_ID} .qz__opt{
-          padding: 11px 12px;
-        }
+        #${ROOT_ID} .qz__overlay{padding:12px}
+        #${ROOT_ID} .qz__dialog{width:100%;max-height:92vh;border-radius:18px}
+        #${ROOT_ID} .qz__top{padding:16px}
+        #${ROOT_ID} .qz__body{padding:16px}
+        #${ROOT_ID} .qz__title{font-size:20px}
+        #${ROOT_ID} .qz__card{padding:16px}
+        #${ROOT_ID} .qz__q{font-size:16px}
+        #${ROOT_ID} .qz__opt{padding:14px}
+        #${ROOT_ID} .qz__opt span{font-size:15px}
+        #${ROOT_ID} .qz__resultTitle{font-size:28px}
+        #${ROOT_ID} .qz__resultText{font-size:16px}
+        #${ROOT_ID} .qz__rewardTop{font-size:20px}
+        #${ROOT_ID} .qz__rewardText{font-size:16px}
+        #${ROOT_ID} .qz__code{min-width:100%;width:100%}
+        #${ROOT_ID} .qz__codeWrap > *{width:100%}
       }
     `;
     document.head.appendChild(st);
@@ -846,6 +725,7 @@
   }
 
   let _hashLock = false;
+
   function writeHashTopic(id) {
     try {
       _hashLock = true;
@@ -891,8 +771,7 @@
             title: t.title,
             desc: t.desc,
             html: t.html,
-            video: t.video ? toEmbedUrl(t.video) : "",
-            videoCap: t.videoCap || ""
+            video: t.video ? toEmbedUrl(t.video) : ""
           };
           flat.push(item);
           block.items.push(item);
@@ -919,8 +798,7 @@
             </div>
 
             <div class="t0__right">
-              <button class="g0__btn m0__only" type="button" data-bwp="openDrawer" aria-label="Open menu"
-                style="border-radius:14px;padding:10px 12px;width:auto;height:auto;">
+              <button class="g0__btn m0__only" type="button" data-bwp="openDrawer" aria-label="Open menu" style="border-radius:14px;padding:10px 12px;width:auto;height:auto;">
                 ${ICONS.menu}<span class="g0__label">Menu</span>
               </button>
 
@@ -937,8 +815,6 @@
                   <div class="p0__fill" data-bwp="progressFill"></div>
                 </div>
               </div>
-
-              ${EXIT_URL ? `<a class="g0__btn d0__only" href="${EXIT_URL}">Exit</a>` : ``}
             </div>
           </div>
         </div>
@@ -971,7 +847,6 @@
 
               <div class="v0__box" data-bwp="videoBox" style="display:none;">
                 <div class="v0__frame" data-bwp="videoFrame"></div>
-                <div class="v0__cap" data-bwp="videoCap"></div>
               </div>
 
               <div class="c4__line"></div>
@@ -1017,10 +892,21 @@
     `;
   }
 
+  function computeProgress(state, requiredIds) {
+    let done = 0;
+    requiredIds.forEach((id) => {
+      if (state.done[id]) done++;
+    });
+    const total = requiredIds.length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    return { done, total, pct };
+  }
+
   function getQuizStatus(state, requiredIds) {
     const prog = computeProgress(state, requiredIds);
     const unlocked = prog.pct >= 100;
     const passed = !!state.quizPassed;
+
     return {
       unlocked,
       passed,
@@ -1089,16 +975,6 @@
     );
   }
 
-  function computeProgress(state, requiredIds) {
-    let done = 0;
-    requiredIds.forEach((id) => {
-      if (state.done[id]) done++;
-    });
-    const total = requiredIds.length;
-    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-    return { done, total, pct };
-  }
-
   function showToast(root, txt) {
     const toast = qs(root, '[data-bwp="toast"]');
     const toastTxt = qs(root, '[data-bwp="toastTxt"]');
@@ -1139,16 +1015,14 @@
     return null;
   }
 
-  function renderVideo(root, title, videoUrl, videoCap) {
+  function renderVideo(root, title, videoUrl) {
     const vBox = qs(root, '[data-bwp="videoBox"]');
     const vFrame = qs(root, '[data-bwp="videoFrame"]');
-    const vCap = qs(root, '[data-bwp="videoCap"]');
 
     const embed = videoUrl ? toEmbedUrl(videoUrl) : "";
     if (!embed) {
       if (vBox) vBox.style.display = "none";
       if (vFrame) vFrame.innerHTML = "";
-      if (vCap) vCap.textContent = "";
       return;
     }
 
@@ -1168,12 +1042,10 @@
         </div>
       `;
     }
-    if (vCap) vCap.textContent = videoCap || "";
   }
 
   function renderIntro(root, ctx, startTargetId) {
     const { blocks, state, requiredIds } = ctx;
-
     const side = qs(root, '[data-bwp="sidebar"]');
     const drawerSide = qs(root, '[data-bwp="drawerSidebar"]');
 
@@ -1187,7 +1059,7 @@
     qs(root, '[data-bwp="desc"]').textContent = INTRO_SCREEN.desc;
     qs(root, '[data-bwp="body"]').innerHTML = INTRO_SCREEN.html;
 
-    renderVideo(root, INTRO_SCREEN.title, INTRO_SCREEN.video, INTRO_SCREEN.videoCap);
+    renderVideo(root, INTRO_SCREEN.title, INTRO_SCREEN.video);
 
     const btnPrev = qs(root, '[data-bwp="prev"]');
     const btnNext = qs(root, '[data-bwp="next"]');
@@ -1226,7 +1098,7 @@
     setActive(root, ctx, targetId, { silent: true });
   }
 
-  function bindInlineActions(root, ctx, item) {
+  function bindInlineActions(root, ctx) {
     const quizBtn = qs(root, '[data-bwp="openQuizInline"]');
     if (quizBtn) {
       quizBtn.onclick = () => {
@@ -1269,9 +1141,8 @@
     qs(root, '[data-bwp="desc"]').textContent = item.desc || "";
     qs(root, '[data-bwp="body"]').innerHTML = item.html || "";
 
-    renderVideo(root, item.title, item.video || "", item.videoCap || "");
-
-    bindInlineActions(root, ctx, item);
+    renderVideo(root, item.title, item.video || "");
+    bindInlineActions(root, ctx);
 
     const idx = flat.findIndex((x) => x.id === item.id);
     const prev = findPrevNavigable(flat, idx);
@@ -1427,28 +1298,43 @@
     }
   }
 
+  function syncQuizSelections(form) {
+    qsa(form, ".qz__opt").forEach((opt) => {
+      const input = qs(opt, 'input[type="radio"]');
+      opt.setAttribute("data-selected", input && input.checked ? "true" : "false");
+    });
+  }
+
   function getRewardHtml(state, score) {
     const best = Math.max(score || 0, Number(state.quizBest || 0));
     return `
-      <div class="qz__result">
-        <div class="qz__score">
-          ${ICONS.check}
-          <span>You passed the quiz${best ? ` · Best score ${best}%` : ""}</span>
-        </div>
-        <p><strong>Well done.</strong> You unlocked your Bullwaves Prime discount code.</p>
-        <div class="qz__reward">
-          <div class="qz__rewardTop">
-            ${ICONS.gift}
-            <span>Your reward is ready</span>
+      <div class="qz__resultWrap">
+        <div class="qz__resultShell">
+          <div class="qz__passedBadge">
+            ${ICONS.check}
+            <span>Passed · Best score ${best}%</span>
           </div>
-          <p>Use the code below to get <strong>15% OFF</strong> your next Bullwaves Prime challenge.</p>
-          <div class="qz__codeWrap">
-            <div class="qz__code">${safeText(REWARD_CODE)}</div>
-            <button class="qz__btn" type="button" data-bwp="copyRewardCode">Copy code</button>
-            <a class="qz__btn" data-primary="true" href="${REWARD_URL}" target="_blank" rel="noopener">Claim your discount</a>
-          </div>
-          <div class="qz__subtle" style="margin-top:12px;">
-            Code: <strong>${safeText(REWARD_CODE)}</strong> · Valid on Bullwaves Prime challenge checkout.
+
+          <h3 class="qz__resultTitle">Well done.</h3>
+          <p class="qz__resultText">You unlocked your Bullwaves Prime discount code. Use it on your next checkout to get <strong>15% OFF</strong>.</p>
+
+          <div class="qz__reward">
+            <div class="qz__rewardTop">
+              ${ICONS.gift}
+              <span>Your reward is ready</span>
+            </div>
+
+            <p class="qz__rewardText">Use the code below to claim your discount on Bullwaves Prime.</p>
+
+            <div class="qz__codeWrap">
+              <div class="qz__code">${safeText(REWARD_CODE)}</div>
+              <button class="qz__btn" type="button" data-bwp="copyRewardCode">Copy code</button>
+              <a class="qz__btn" data-primary="true" href="${REWARD_URL}" target="_blank" rel="noopener">Claim your discount</a>
+            </div>
+
+            <div class="qz__subtle">
+              Code: <strong>${safeText(REWARD_CODE)}</strong> · Valid on Bullwaves Prime challenge checkout.
+            </div>
           </div>
         </div>
       </div>
@@ -1466,7 +1352,7 @@
       </div>
 
       ${fail ? `
-        <div class="qz__alert" data-type="error">
+        <div class="qz__alert">
           You scored <strong>${fail.score}%</strong> (${fail.correct}/${QUIZ_QUESTIONS.length} correct). You need at least <strong>${PASSING_SCORE}%</strong> to unlock the discount. Review the lessons and try again.
         </div>
       ` : ``}
@@ -1479,8 +1365,9 @@
               <div class="qz__q">${safeText(item.q)}</div>
               <div class="qz__opts">
                 ${item.options.map((opt, optIdx) => `
-                  <label class="qz__opt">
+                  <label class="qz__opt" data-selected="false">
                     <input type="radio" name="q_${idx}" value="${optIdx}">
+                    <span class="qz__radio" aria-hidden="true"></span>
                     <span>${safeText(opt)}</span>
                   </label>
                 `).join("")}
@@ -1509,7 +1396,7 @@
     if (!quizStatus.unlocked) {
       const prog = computeProgress(ctx.state, ctx.requiredIds);
       wrap.innerHTML = `
-        <div class="qz__intro">
+        <div class="qz__lock">
           <p><strong>Quiz locked</strong></p>
           <p>You need to complete the full course before taking the final quiz.</p>
           <p>Current progress: <strong>${prog.pct}%</strong> (${prog.done}/${prog.total} topics completed).</p>
@@ -1526,6 +1413,12 @@
 
     const form = qs(root, '[data-bwp="quizForm"]');
     if (form) {
+      syncQuizSelections(form);
+
+      form.addEventListener("change", () => {
+        syncQuizSelections(form);
+      });
+
       form.addEventListener("submit", (e) => {
         e.preventDefault();
 
@@ -1594,9 +1487,11 @@
   function closeQuizModal(root, ctx) {
     const modal = qs(root, '[data-bwp="quizModal"]');
     if (!modal) return;
+
     if (!ctx.state.quizPassed && ctx.quizFeedback && !ctx.quizFeedback.passed) {
       ctx.quizFeedback = null;
     }
+
     if (modal.getAttribute("data-open") === "true") {
       modal.setAttribute("data-open", "false");
       modal.setAttribute("aria-hidden", "true");
@@ -1609,7 +1504,7 @@
     if (!root) return;
 
     renderShell(root);
-    injectMinorBodyStyles();
+    injectStyles();
 
     requestAnimationFrame(() => setNavOffset(root));
     setTimeout(() => setNavOffset(root), 60);
