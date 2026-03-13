@@ -1,6 +1,6 @@
 (() => {
   const ROOT_ID = "bwp__c7X9";
-  const STORAGE_KEY = `bwp_course_state_v4:${location.hostname}${location.pathname}:${ROOT_ID}`;
+  const STORAGE_KEY = `bwp_course_state_v5:${location.hostname}${location.pathname}:${ROOT_ID}`;
   const HASH_PREFIX = "bwp-";
   const BRAND_LOGO =
     "https://cdn.prod.website-files.com/66f2e0fef32885327272def5/67d1ad5a62ad06f120c0b82c_Frame%202147223939%201aaaa.png";
@@ -17,7 +17,8 @@
     x: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`,
     arrowL: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     arrowR: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    gift: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h16v11H4V9Zm0 0h16M12 9v11M12 9H8.7C7.21 9 6 7.79 6 6.3S7.21 3.6 8.7 3.6c2.15 0 3.3 2.08 3.3 5.4Zm0 0h3.3c1.49 0 2.7-1.21 2.7-2.7s-1.21-2.7-2.7-2.7c-2.15 0-3.3 2.08-3.3 5.4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+    gift: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h16v11H4V9Zm0 0h16M12 9v11M12 9H8.7C7.21 9 6 7.79 6 6.3S7.21 3.6 8.7 3.6c2.15 0 3.3 2.08 3.3 5.4Zm0 0h3.3c1.49 0 2.7-1.21 2.7-2.7s-1.21-2.7-2.7-2.7c-2.15 0-3.3 2.08-3.3 5.4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    warn: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5m0 3h.01M10.29 3.86l-7.4 12.82A2 2 0 0 0 4.62 20h14.76a2 2 0 0 0 1.73-3.32l-7.4-12.82a2 2 0 0 0-3.46 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
   };
 
   const INTRO_SCREEN = {
@@ -489,7 +490,7 @@
         : "0px";
 
     const vhUnit =
-      window.CSS && CSS.supports && CSS.supports("height: 100dvh)")
+      window.CSS && CSS.supports && CSS.supports("height: 100dvh")
         ? "100dvh"
         : "100vh";
 
@@ -532,7 +533,7 @@
   }
 
   function injectStyles() {
-    const id = "bwp__course_styles_v4";
+    const id = "bwp__course_styles_v5";
     if (document.getElementById(id)) return;
 
     const st = document.createElement("style");
@@ -544,7 +545,6 @@
       #${ROOT_ID} .c5__body th{font-weight:600;color:rgba(255,255,255,.90);background:rgba(255,255,255,.02)}
       #${ROOT_ID} .c5__body hr{border:0;height:1px;background:rgba(255,255,255,.10);margin:14px 0}
       #${ROOT_ID} .v0__box{margin-top:14px}
-      #${ROOT_ID} .v0__cap{margin-top:10px;font-size:12.5px;color:rgba(255,255,255,.60)}
       #${ROOT_ID} .v0__frame iframe{border-radius:16px}
 
       #${ROOT_ID} .qz__overlay{
@@ -639,9 +639,20 @@
       }
       #${ROOT_ID} .qz__meta{color:rgba(255,255,255,.58);font-size:13px}
       #${ROOT_ID} .qz__actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
       #${ROOT_ID} .qz__alert{
         margin-top:14px;border-radius:16px;padding:14px 16px;font-size:14px;line-height:1.5;
-        background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.90)
+        background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
+        border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.92)
+      }
+      #${ROOT_ID} .qz__alertRow{
+        display:flex;align-items:flex-start;gap:10px
+      }
+      #${ROOT_ID} .qz__alertIcon{
+        width:18px;height:18px;flex:0 0 18px;margin-top:1px;color:#fff
+      }
+      #${ROOT_ID} .qz__alertBottom{
+        margin-top:18px
       }
 
       #${ROOT_ID} .qz__btn{
@@ -1341,6 +1352,20 @@
     `;
   }
 
+  function getFailAlertHtml(fail) {
+    if (!fail) return "";
+    return `
+      <div class="qz__alert">
+        <div class="qz__alertRow">
+          <div class="qz__alertIcon">${ICONS.warn}</div>
+          <div>
+            You scored <strong>${fail.score}%</strong> (${fail.correct}/${QUIZ_QUESTIONS.length} correct). You need at least <strong>${PASSING_SCORE}%</strong> to unlock the discount. Review the lessons and try again.
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function renderQuizFormHtml(ctx) {
     const fail = ctx.quizFeedback && !ctx.quizFeedback.passed ? ctx.quizFeedback : null;
 
@@ -1351,11 +1376,7 @@
         <p>Attempts so far: <strong>${ctx.state.quizAttempts || 0}</strong>${ctx.state.quizBest ? ` · Best score: <strong>${ctx.state.quizBest}%</strong>` : ""}</p>
       </div>
 
-      ${fail ? `
-        <div class="qz__alert">
-          You scored <strong>${fail.score}%</strong> (${fail.correct}/${QUIZ_QUESTIONS.length} correct). You need at least <strong>${PASSING_SCORE}%</strong> to unlock the discount. Review the lessons and try again.
-        </div>
-      ` : ``}
+      ${getFailAlertHtml(fail)}
 
       <form data-bwp="quizForm">
         <div class="qz__grid">
@@ -1375,6 +1396,8 @@
             </div>
           `).join("")}
         </div>
+
+        ${fail ? `<div class="qz__alertBottom">${getFailAlertHtml(fail)}</div>` : ""}
 
         <div class="qz__bar">
           <div class="qz__meta">${QUIZ_QUESTIONS.length} questions · Passing score ${PASSING_SCORE}%</div>
