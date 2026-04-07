@@ -1,15 +1,17 @@
 /*!
- * Welo Reviews Widget — v1.4.0 (Theme Support: light / dark / auto)
+ * Welo Reviews Widget — v1.4.1
+ * Theme Support: light / dark / auto
+ *
  * Embed:
- *  <div
- *    data-welo-reviews
- *    data-company="Acme Inc"
- *    data-stars="4-5"
- *    data-language="US"
- *    data-theme="auto"
- *    data-welo-page="https://..."
- *  ></div>
- *  <script src="https://.../Full-Reviews.js" defer></script>
+ * <div
+ *   data-welo-reviews
+ *   data-company="Truswave"
+ *   data-stars="all"
+ *   data-language="US"
+ *   data-theme="auto"
+ *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
+ * ></div>
+ * <script src="https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data@main/widget/Full-Reviews.js" defer></script>
  */
 
 (function () {
@@ -43,19 +45,15 @@
     it: {
       headerTitle: "Guarda le nostre recensioni",
       openWeloPage: "Apri la Welo Page",
-
       newest: "Più recenti",
       oldest: "Più vecchie",
       withMedia: "Con allegati",
-
       noReviews: "Ancora nessuna recensione, scrivi tu la prima.",
       writeReview: "Scrivi una recensione",
       verified: "Verificata da Welo",
-
       verifiedTooltip:
-        "La recensione è stata verificata da Welo, Scopri il nostro processo di verifica:",
+        "La recensione è stata verificata da Welo. Scopri il nostro processo di verifica:",
       readMore: "Leggi di più",
-
       loadMore: "Carica di più",
       share: "Condividi",
       shareCopied: "Link copiato negli appunti",
@@ -73,23 +71,20 @@
       monthsAgo: "mesi fa",
       oneYearAgo: "un anno fa",
       yearsAgo: "anni fa",
+      widgetError: "Errore widget.",
     },
     en: {
       headerTitle: "See our reviews",
       openWeloPage: "Open the Welo Page",
-
       newest: "Newest",
       oldest: "Oldest",
       withMedia: "Only with media",
-
       noReviews: "No reviews yet, be the first to write one.",
       writeReview: "Write a review",
       verified: "Verified by Welo",
-
       verifiedTooltip:
-        "This review was verified by Welo, Learn about our verification process:",
+        "This review was verified by Welo. Learn about our verification process:",
       readMore: "Read more",
-
       loadMore: "Load more",
       share: "Share",
       shareCopied: "Link copied to clipboard",
@@ -107,6 +102,7 @@
       monthsAgo: "months ago",
       oneYearAgo: "1 year ago",
       yearsAgo: "years ago",
+      widgetError: "Widget error.",
     },
   };
 
@@ -122,6 +118,7 @@
 
   function getResolvedTheme(theme) {
     if (theme === "dark") return "dark";
+
     if (theme === "auto") {
       try {
         return window.matchMedia &&
@@ -132,6 +129,7 @@
         return "light";
       }
     }
+
     return "light";
   }
 
@@ -179,6 +177,7 @@
   /* ================= STYLE ================= */
   function injectInterFontOnce() {
     if (document.querySelector('link[data-welo-inter="1"]')) return;
+
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href =
@@ -891,7 +890,7 @@
     if (!existing) document.head.appendChild(style);
   }
 
-  /* ================= VERIFIED TOOLTIP: GLOBAL HANDLERS (ONCE) ================= */
+  /* ================= VERIFIED TOOLTIP HANDLERS ================= */
   function installVerifiedTooltipHandlersOnce() {
     if (window.__weloReviewsTooltipHandlersInstalled) return;
     window.__weloReviewsTooltipHandlersInstalled = true;
@@ -976,11 +975,11 @@
   /* ================= HELPERS ================= */
   function escapeHtml(str) {
     return String(str || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   function detectLocaleFromElement(el) {
@@ -990,11 +989,17 @@
     const langs = []
       .concat(navigator.languages || [])
       .concat([navigator.language || ""])
-      .map((l) => String(l || "").toLowerCase())
+      .map(function (l) {
+        return String(l || "").toLowerCase();
+      })
       .filter(Boolean);
 
-    const hasItalian = langs.some((l) => l.startsWith("it"));
-    const hasEnglish = langs.some((l) => l.startsWith("en"));
+    const hasItalian = langs.some(function (l) {
+      return l.startsWith("it");
+    });
+    const hasEnglish = langs.some(function (l) {
+      return l.startsWith("en");
+    });
 
     if (hasItalian) return "it";
     if (hasEnglish) return "en";
@@ -1012,8 +1017,8 @@
       .toLowerCase()
       .normalize("NFKD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\\s-]/g, "")
-      .replace(/\\s+/g, "-")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
   }
@@ -1022,7 +1027,7 @@
     if (!path) return null;
     if (String(path).startsWith("http")) return String(path);
 
-    const cleaned = String(path).replace(/^\\/+/, "");
+    const cleaned = String(path).replace(/^\/+/, "");
     const encoded = cleaned
       .split("/")
       .map(function (segment) {
@@ -1039,12 +1044,14 @@
 
     return String(raw)
       .split(",")
-      .map((s) => s.trim())
+      .map(function (s) {
+        return s.trim();
+      })
       .filter(Boolean)
-      .map((path) => {
+      .map(function (path) {
         const url = getPublicUrlFromPath(path);
-        const isVideo = /\\.(mp4|mov|webm|ogg)$/i.test(path);
-        return { url, type: isVideo ? "video" : "image" };
+        const isVideo = /\.(mp4|mov|webm|ogg)$/i.test(path);
+        return { url: url, type: isVideo ? "video" : "image" };
       });
   }
 
@@ -1054,8 +1061,11 @@
 
   function normalizeCountry(country) {
     if (!country) return "";
+
     const c = String(country).toLowerCase().trim();
+
     if (c === "italy" || c === "italia" || c === "it") return "Italy";
+
     if (
       c === "united states of america" ||
       c === "usa" ||
@@ -1064,20 +1074,26 @@
     ) {
       return "United States of America";
     }
-    if (c === "united kingdom" || c === "uk" || c === "gb") return "United Kingdom";
+
+    if (c === "united kingdom" || c === "uk" || c === "gb") {
+      return "United Kingdom";
+    }
+
     return country;
   }
 
   function preferredCountriesFromElement(el, locale) {
-    const raw =
-      (el.getAttribute("data-language") || el.getAttribute("data-lenguage") || "")
-        .trim()
-        .toUpperCase();
+    const raw = (
+      el.getAttribute("data-language") ||
+      el.getAttribute("data-lenguage") ||
+      ""
+    )
+      .trim()
+      .toUpperCase();
 
     if (raw === "US") return ["United States of America"];
     if (raw === "IT") return ["Italy"];
     if (raw === "UK" || raw === "GB") return ["United Kingdom"];
-
     if (raw && raw.length > 2) return [raw];
 
     if (locale === "it") return ["Italy"];
@@ -1087,7 +1103,12 @@
   function sortReviewsByPreferredCountryAndDate(reviews, preferredCountries, activeSort) {
     if (!Array.isArray(reviews)) return [];
 
-    const preferredSet = new Set((preferredCountries || []).map((c) => normalizeCountry(c)));
+    const preferredSet = new Set(
+      (preferredCountries || []).map(function (c) {
+        return normalizeCountry(c);
+      })
+    );
+
     const preferred = [];
     const other = [];
 
@@ -1112,7 +1133,7 @@
     if (!(dateObj instanceof Date) || isNaN(dateObj)) return "";
 
     const now = new Date();
-    let diffMs = now.getTime() - dateObj.getTime();
+    const diffMs = now.getTime() - dateObj.getTime();
     if (diffMs < 0) return T.justNow;
 
     const dayMs = 1000 * 60 * 60 * 24;
@@ -1123,10 +1144,10 @@
     const diffMonths = Math.floor(diffDays / 30);
     const diffYears = Math.floor(diffDays / 365);
 
-    if (diffDays < 7) return diffDays === 1 ? T.oneDayAgo : \`\${diffDays} \${T.daysAgo}\`;
-    if (diffWeeks < 4) return diffWeeks === 1 ? T.oneWeekAgo : \`\${diffWeeks} \${T.weeksAgo}\`;
-    if (diffMonths < 12) return diffMonths === 1 ? T.oneMonthAgo : \`\${diffMonths} \${T.monthsAgo}\`;
-    return diffYears === 1 ? T.oneYearAgo : \`\${diffYears} \${T.yearsAgo}\`;
+    if (diffDays < 7) return diffDays === 1 ? T.oneDayAgo : `${diffDays} ${T.daysAgo}`;
+    if (diffWeeks < 4) return diffWeeks === 1 ? T.oneWeekAgo : `${diffWeeks} ${T.weeksAgo}`;
+    if (diffMonths < 12) return diffMonths === 1 ? T.oneMonthAgo : `${diffMonths} ${T.monthsAgo}`;
+    return diffYears === 1 ? T.oneYearAgo : `${diffYears} ${T.yearsAgo}`;
   }
 
   function renderStarIcons(stars) {
@@ -1135,13 +1156,14 @@
 
     for (let i = 0; i < total; i++) {
       const filled = i < stars;
-      html += \`
-        <span class="welo-star \${filled ? "is-filled" : "is-empty"}" aria-hidden="true">
+
+      html += `
+        <span class="welo-star ${filled ? "is-filled" : "is-empty"}" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M11.998 2.5l2.78 5.633 6.217.904-4.498 4.385 1.062 6.191-5.561-2.924-5.56 2.924 1.061-6.191L3 9.037l6.218-.904L11.998 2.5z"></path>
           </svg>
         </span>
-      \`;
+      `;
     }
 
     return html;
@@ -1149,20 +1171,26 @@
 
   async function supabaseFetch(paramsObj) {
     const params = new URLSearchParams();
-    Object.keys(paramsObj).forEach((k) => params.set(k, paramsObj[k]));
 
-    const url = \`\${SUPABASE_URL}/rest/v1/\${TABLE_REVIEWS}?\${params.toString()}\`;
+    Object.keys(paramsObj).forEach(function (k) {
+      params.set(k, paramsObj[k]);
+    });
+
+    const url = `${SUPABASE_URL}/rest/v1/${TABLE_REVIEWS}?${params.toString()}`;
 
     const res = await fetch(url, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: "Bearer " + SUPABASE_ANON_KEY,
       },
+      cache: "no-store",
     });
 
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(\`Supabase error \${res.status}: \${text}\`);
+      const text = await res.text().catch(function () {
+        return "";
+      });
+      throw new Error(`Supabase error ${res.status}: ${text}`);
     }
 
     const data = await res.json();
@@ -1172,17 +1200,18 @@
   async function fetchReviewsForCompany(companyName) {
     const companyRaw = String(companyName || "").trim();
     const companySlug = makeSlug(companyRaw);
+    const companyRawSlugNormalized = companyRaw.replace(/\s+/g, "-").toLowerCase();
 
     let data = await supabaseFetch({
-      [FIELD_COMPANY]: \`ilike.\${companyRaw}\`,
-      [FIELD_STATUS]: \`eq.\${APPROVED_VALUE}\`,
+      [FIELD_COMPANY]: `ilike.${companyRaw}`,
+      [FIELD_STATUS]: `eq.${APPROVED_VALUE}`,
       select: "*",
     });
 
-    if (!data.length && companySlug && companySlug.toLowerCase() !== companyRaw.toLowerCase()) {
+    if (!data.length && companySlug && companySlug !== companyRawSlugNormalized) {
       data = await supabaseFetch({
-        [FIELD_COMPANY]: \`ilike.\${companySlug}\`,
-        [FIELD_STATUS]: \`eq.\${APPROVED_VALUE}\`,
+        [FIELD_COMPANY]: `ilike.${companySlug}`,
+        [FIELD_STATUS]: `eq.${APPROVED_VALUE}`,
         select: "*",
       });
     }
@@ -1196,22 +1225,27 @@
 
     if (!raw || raw === "all") return all;
 
-    const plus = raw.match(/^(\\d)\\s*\\+$/);
+    const plus = raw.match(/^(\d)\s*\+$/);
     if (plus) {
       const n = Number(plus[1]);
-      return all.filter((x) => x >= n);
+      return all.filter(function (x) {
+        return x >= n;
+      });
     }
 
-    const range = raw.match(/^(\\d)\\s*-\\s*(\\d)$/);
+    const range = raw.match(/^(\d)\s*-\s*(\d)$/);
     if (range) {
       const a = Number(range[1]);
       const b = Number(range[2]);
       const min = Math.min(a, b);
       const max = Math.max(a, b);
-      return all.filter((x) => x >= min && x <= max);
+
+      return all.filter(function (x) {
+        return x >= min && x <= max;
+      });
     }
 
-    const single = raw.match(/^(\\d)$/);
+    const single = raw.match(/^(\d)$/);
     if (single) {
       const n = Number(single[1]);
       if (n >= 1 && n <= 5) return [n];
@@ -1227,7 +1261,7 @@
     overlay.setAttribute("aria-hidden", "true");
     overlay.setAttribute("data-welo-lightbox", instanceId);
 
-    overlay.innerHTML = \`
+    overlay.innerHTML = `
       <div class="welo-review-lightbox-inner">
         <button class="welo-review-lightbox-close" type="button" aria-label="Close">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1243,7 +1277,7 @@
 
         <div class="welo-review-lightbox-counter"></div>
       </div>
-    \`;
+    `;
 
     document.body.appendChild(overlay);
 
@@ -1262,7 +1296,8 @@
     function updateNav() {
       const total = state.media.length;
       const current = state.index + 1;
-      counter.textContent = \`\${current} / \${total}\`;
+
+      counter.textContent = `${current} / ${total}`;
       counter.style.display = total > 1 ? "block" : "none";
       prevBtn.disabled = total <= 1;
       nextBtn.disabled = total <= 1;
@@ -1285,7 +1320,10 @@
         video.style.maxHeight = "80vh";
         video.style.objectFit = "contain";
         mediaContainer.appendChild(video);
-        if (!isMobile()) video.play().catch(() => {});
+
+        if (!isMobile()) {
+          video.play().catch(function () {});
+        }
       } else {
         const img = document.createElement("img");
         img.src = item.url;
@@ -1302,8 +1340,10 @@
 
     function open(mediaArray, startIndex) {
       if (!mediaArray || !mediaArray.length) return;
+
       state.media = mediaArray;
       state.index = Number(startIndex) || 0;
+
       renderMedia();
       overlay.classList.add("is-visible");
       document.body.style.overflow = "hidden";
@@ -1351,12 +1391,14 @@
       "touchmove",
       function (e) {
         if (!overlay.classList.contains("is-visible")) return;
-        if (!e.target.closest(".welo-review-lightbox-media-container")) e.preventDefault();
+        if (!e.target.closest(".welo-review-lightbox-media-container")) {
+          e.preventDefault();
+        }
       },
       { passive: false }
     );
 
-    return { open, close };
+    return { open: open, close: close };
   }
 
   /* ================= SHARE ================= */
@@ -1366,18 +1408,26 @@
     const baseUrl = window.location.href.split("#")[0];
 
     const shareTitle =
-      locale === "en" ? \`\${stars}★ review on Welo\` : \`Recensione da \${stars}★ su Welo\`;
+      locale === "en"
+        ? `${stars}★ review on Welo`
+        : `Recensione da ${stars}★ su Welo`;
 
     const shareText =
       locale === "en"
-        ? \`\${starLine}\${title}\\n\\n\${text}\\n\\nRead it on Welo: \`
-        : \`\${starLine}\${title}\\n\\n\${text}\\n\\nLeggi la recensione su Welo: \`;
+        ? `${starLine}${title}\n\n${text}\n\nRead it on Welo: `
+        : `${starLine}${title}\n\n${text}\n\nLeggi la recensione su Welo: `;
 
     try {
       if (navigator.share) {
-        await navigator.share({ title: shareTitle, text: shareText, url: baseUrl });
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: baseUrl,
+        });
       } else if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(\`\${shareTitle}\\n\\n\${shareText}\${baseUrl}\`);
+        await navigator.clipboard.writeText(
+          `${shareTitle}\n\n${shareText}${baseUrl}`
+        );
         alert(T.shareCopied);
       } else {
         window.prompt(T.copyLink, baseUrl);
@@ -1388,6 +1438,7 @@
   /* ================= MAIN ================= */
   function mountWidget(placeholderEl) {
     const company = (placeholderEl.getAttribute("data-company") || "").trim();
+
     if (!company) {
       console.warn("[Welo Reviews Widget] Missing data-company on:", placeholderEl);
       return;
@@ -1407,7 +1458,9 @@
         : "https://www.welobadge.com/recensioni-verificate";
 
     const writeReviewFallbackUrl =
-      locale === "en" ? "https://www.welobadge.com/en" : "https://www.welobadge.com";
+      locale === "en"
+        ? "https://www.welobadge.com/en"
+        : "https://www.welobadge.com";
 
     const weloPageUrl =
       (placeholderEl.getAttribute("data-welo-page") || "").trim() ||
@@ -1427,38 +1480,37 @@
     let ALL_REVIEWS = [];
     let CURRENT_REVIEWS = [];
     let visibleCount = 4;
-
     let activeSort = "newest";
     let attachmentsOnly = false;
 
-    placeholderEl.innerHTML = \`
-      <div class="welo-reviews-widget" data-welo-instance="\${instanceId}">
+    placeholderEl.innerHTML = `
+      <div class="welo-reviews-widget" data-welo-instance="${instanceId}">
         <div class="welo-header">
-          <div class="welo-header-title">\${escapeHtml(T.headerTitle)}</div>
+          <div class="welo-header-title">${escapeHtml(T.headerTitle)}</div>
           <a
             class="welo-open-page-btn"
-            href="\${escapeHtml(weloPageUrl || "#")}"
+            href="${escapeHtml(weloPageUrl || "#")}"
             target="_blank"
             rel="noopener noreferrer"
-            aria-disabled="\${weloPageUrl ? "false" : "true"}"
+            aria-disabled="${weloPageUrl ? "false" : "true"}"
           >
-            \${escapeHtml(T.openWeloPage)}
+            ${escapeHtml(T.openWeloPage)}
           </a>
         </div>
 
         <div class="reviews-controls">
           <div class="sort-pill-group">
-            <button class="sort-pill active" data-sort="newest">\${escapeHtml(T.newest)}</button>
-            <button class="sort-pill" data-sort="oldest">\${escapeHtml(T.oldest)}</button>
+            <button class="sort-pill active" data-sort="newest">${escapeHtml(T.newest)}</button>
+            <button class="sort-pill" data-sort="oldest">${escapeHtml(T.oldest)}</button>
             <button class="sort-pill sort-pill-attachments" data-attachments="false">
-              \${escapeHtml(T.withMedia)}
+              ${escapeHtml(T.withMedia)}
             </button>
           </div>
         </div>
 
         <div class="reviews-list"></div>
       </div>
-    \`;
+    `;
 
     const widgetRoot = placeholderEl.querySelector(".welo-reviews-widget");
     const listEl = placeholderEl.querySelector(".reviews-list");
@@ -1474,6 +1526,7 @@
 
     function initVideoThumbPreviews() {
       const videos = listEl.querySelectorAll(".review-media-video-thumb video");
+
       videos.forEach(function (video) {
         try {
           video.muted = true;
@@ -1488,8 +1541,9 @@
             } catch (_) {}
           };
 
-          if (video.readyState >= 2) showFrame();
-          else {
+          if (video.readyState >= 2) {
+            showFrame();
+          } else {
             video.addEventListener("loadeddata", showFrame, { once: true });
             video.addEventListener("loadedmetadata", showFrame, { once: true });
           }
@@ -1524,34 +1578,36 @@
 
       let activeFiltersHint = "";
       if (attachmentsOnly) {
-        activeFiltersHint = \`<div class="reviews-active-hint">\${escapeHtml(
+        activeFiltersHint = `<div class="reviews-active-hint">${escapeHtml(
           T.onlyMediaHint
-        )}</div>\`;
+        )}</div>`;
       }
 
       if (!data.length) {
         const emptyText = attachmentsOnly ? T.noMediaMatch : T.noReviews;
 
         const buttonHtml = weloPageUrl
-          ? \`
-            <a class="review-button" href="\${escapeHtml(weloPageUrl)}" target="_blank" rel="noopener noreferrer">
-              <img src="\${BUTTON_ICON}" alt="" />
-              \${escapeHtml(T.writeReview)}
+          ? `
+            <a class="review-button" href="${escapeHtml(
+              weloPageUrl
+            )}" target="_blank" rel="noopener noreferrer">
+              <img src="${BUTTON_ICON}" alt="" />
+              ${escapeHtml(T.writeReview)}
             </a>
-          \`
-          : \`
+          `
+          : `
             <button class="review-button" type="button" data-action="write-review">
-              <img src="\${BUTTON_ICON}" alt="" />
-              \${escapeHtml(T.writeReview)}
+              <img src="${BUTTON_ICON}" alt="" />
+              ${escapeHtml(T.writeReview)}
             </button>
-          \`;
+          `;
 
-        listEl.innerHTML = \`
+        listEl.innerHTML = `
           <div class="no-reviews-box">
-            <div class="no-reviews-text">\${escapeHtml(emptyText)}</div>
-            \${buttonHtml}
+            <div class="no-reviews-text">${escapeHtml(emptyText)}</div>
+            ${buttonHtml}
           </div>
-        \`;
+        `;
         return;
       }
 
@@ -1560,12 +1616,11 @@
       const cardsHtml = toShow
         .map(function (r) {
           const stars = Number(r["Da 1 a 5 stelle come lo valuti?"]) || 0;
-
           const rawDate = new Date(r["Submitted at"] || r.created_at || "");
           const relativeDate = formatRelativeTime(rawDate, locale);
-
           const starsHtml = renderStarIcons(stars);
           const media = parseMediaFromRow(r);
+
           let mediaHtml = "";
 
           if (media.length > 0) {
@@ -1582,26 +1637,26 @@
 
                 let inner = "";
                 if (item.type === "image") {
-                  inner = \`<img src="\${item.url}" alt="" loading="lazy" />\`;
+                  inner = `<img src="${item.url}" alt="" loading="lazy" />`;
                 } else {
                   inner =
-                    \`<div class="review-media-video-thumb">\` +
-                    \`<video src="\${item.url}" muted playsinline preload="metadata"></video>\` +
-                    \`</div>\` +
-                    \`<div class="review-media-play-icon"></div>\`;
+                    `<div class="review-media-video-thumb">` +
+                    `<video src="${item.url}" muted playsinline preload="metadata"></video>` +
+                    `</div>` +
+                    `<div class="review-media-play-icon"></div>`;
                 }
 
                 const zIndex = media.length - index;
 
-                return \`
-                  <div class="\${classes}" data-action="open-media" data-media="\${mediaAttr}" data-index="\${index}" style="z-index:\${zIndex};">
-                    \${inner}
+                return `
+                  <div class="${classes}" data-action="open-media" data-media="${mediaAttr}" data-index="${index}" style="z-index:${zIndex};">
+                    ${inner}
                   </div>
-                \`;
+                `;
               })
               .join("");
 
-            mediaHtml = \`<div class="review-media">\${thumbsHtml}</div>\`;
+            mediaHtml = `<div class="review-media">${thumbsHtml}</div>`;
           }
 
           const safeTitle = escapeHtml(r.Titolo || "");
@@ -1614,60 +1669,62 @@
               : "Verificata da Welo, passa il mouse per dettagli";
 
           const tooltipHtml =
-            \`<div class="review-verified-tooltip" role="tooltip">\` +
-            \`\${escapeHtml(T.verifiedTooltip)} \` +
-            \`<a href="\${escapeHtml(VERIFIED_PROCESS_URL)}" target="_blank" rel="noopener noreferrer">\` +
-            \`\${escapeHtml(T.readMore)}\` +
-            \`</a>\` +
-            \`</div>\`;
+            `<div class="review-verified-tooltip" role="tooltip">` +
+            `${escapeHtml(T.verifiedTooltip)} ` +
+            `<a href="${escapeHtml(
+              VERIFIED_PROCESS_URL
+            )}" target="_blank" rel="noopener noreferrer">` +
+            `${escapeHtml(T.readMore)}` +
+            `</a>` +
+            `</div>`;
 
-          return \`
+          return `
             <div class="review-card">
-              <div class="review-verified" role="button" tabindex="0" aria-label="\${escapeHtml(
+              <div class="review-verified" role="button" tabindex="0" aria-label="${escapeHtml(
                 tooltipAria
               )}">
-                <img src="\${VER_ICON}" alt="" />
-                <span>\${escapeHtml(T.verified)}</span>
-                \${tooltipHtml}
+                <img src="${VER_ICON}" alt="" />
+                <span>${escapeHtml(T.verified)}</span>
+                ${tooltipHtml}
               </div>
 
-              <div class="review-stars" aria-label="\${stars} out of 5 stars">\${starsHtml}</div>
+              <div class="review-stars" aria-label="${stars} out of 5 stars">${starsHtml}</div>
 
-              <div class="review-title">\${safeTitle}</div>
-              <div class="review-text">\${safeText}</div>
+              <div class="review-title">${safeTitle}</div>
+              <div class="review-text">${safeText}</div>
 
-              \${mediaHtml}
+              ${mediaHtml}
 
               <div class="review-footer">
-                <span class="review-author">\${safeAuthor}</span>
-                <span class="review-date">\${escapeHtml(relativeDate)}</span>
+                <span class="review-author">${safeAuthor}</span>
+                <span class="review-date">${escapeHtml(relativeDate)}</span>
               </div>
 
               <div class="review-actions">
-                <a class="review-report" href="\${REPORT_URL}" target="_blank" rel="noopener noreferrer">
-                  <img src="\${FLAG_ICON}" alt="" />
-                  <span>\${escapeHtml(T.report)}</span>
+                <a class="review-report" href="${REPORT_URL}" target="_blank" rel="noopener noreferrer">
+                  <img src="${FLAG_ICON}" alt="" />
+                  <span>${escapeHtml(T.report)}</span>
                 </a>
 
-                <a class="review-share" href="#" data-action="share" data-stars="\${stars}"
-                   data-title="\${encodeURIComponent(r.Titolo || "")}"
-                   data-text="\${encodeURIComponent(r.Testo || "")}">
-                  <img src="\${SHARE_ICON}" alt="" />
-                  <span>\${escapeHtml(T.share)}</span>
+                <a class="review-share" href="#" data-action="share" data-stars="${stars}"
+                   data-title="${encodeURIComponent(r.Titolo || "")}"
+                   data-text="${encodeURIComponent(r.Testo || "")}">
+                  <img src="${SHARE_ICON}" alt="" />
+                  <span>${escapeHtml(T.share)}</span>
                 </a>
               </div>
             </div>
-          \`;
+          `;
         })
         .join("");
 
       let loadMoreHtml = "";
       if (visibleCount < data.length) {
-        loadMoreHtml = \`
+        loadMoreHtml = `
           <button class="load-more-reviews" type="button" data-action="load-more">
-            \${escapeHtml(T.loadMore)}
+            ${escapeHtml(T.loadMore)}
           </button>
-        \`;
+        `;
       }
 
       listEl.innerHTML = activeFiltersHint + cardsHtml + loadMoreHtml;
@@ -1683,7 +1740,10 @@
       if (btn.classList.contains("sort-pill") && btn.hasAttribute("data-sort")) {
         widgetRoot
           .querySelectorAll('.sort-pill[data-sort]')
-          .forEach((b) => b.classList.remove("active"));
+          .forEach(function (b) {
+            b.classList.remove("active");
+          });
+
         btn.classList.add("active");
         activeSort = btn.getAttribute("data-sort") === "oldest" ? "oldest" : "newest";
         recomputeAndRender();
@@ -1707,6 +1767,7 @@
         const encoded = btn.getAttribute("data-media");
         const index = Number(btn.getAttribute("data-index")) || 0;
         if (!encoded) return;
+
         try {
           const media = JSON.parse(decodeURIComponent(encoded));
           lightbox.open(media, index);
@@ -1730,7 +1791,9 @@
           window.openWeloReviewPopup();
           return;
         }
-        const url = writeReviewFallbackUrl + "/?company=" + encodeURIComponent(company);
+
+        const url =
+          writeReviewFallbackUrl + "/?company=" + encodeURIComponent(company);
         window.open(url, "_blank", "noopener");
       }
     });
@@ -1745,15 +1808,22 @@
 
         widgetRoot
           .querySelectorAll('.sort-pill[data-sort]')
-          .forEach((b) => b.classList.remove("active"));
-        widgetRoot.querySelector('.sort-pill[data-sort="newest"]')?.classList.add("active");
-        widgetRoot.querySelector(".sort-pill-attachments")?.classList.remove("active");
+          .forEach(function (b) {
+            b.classList.remove("active");
+          });
+
+        const newestBtn = widgetRoot.querySelector('.sort-pill[data-sort="newest"]');
+        if (newestBtn) newestBtn.classList.add("active");
+
+        const attachmentsBtn = widgetRoot.querySelector(".sort-pill-attachments");
+        if (attachmentsBtn) attachmentsBtn.classList.remove("active");
 
         recomputeAndRender();
       } catch (err) {
         console.error("[Welo Reviews Widget] Load error:", err);
-        listEl.innerHTML =
-          '<div class="no-reviews-box"><div class="no-reviews-text">Widget error.</div></div>';
+        listEl.innerHTML = `<div class="no-reviews-box"><div class="no-reviews-text">${escapeHtml(
+          T.widgetError
+        )}</div></div>`;
       }
     }
 
