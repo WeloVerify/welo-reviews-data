@@ -1,3 +1,4 @@
+<script>
 (() => {
   const thisScript = document.currentScript;
 
@@ -7,11 +8,10 @@
 
     const companySlug = widgetDiv.getAttribute("data-welo") || "welo";
 
-    /* ✅ data-align (div -> script) */
     const align = String(
       widgetDiv.getAttribute("data-align") ||
-        thisScript?.getAttribute("data-align") ||
-        ""
+      thisScript?.getAttribute("data-align") ||
+      ""
     )
       .toLowerCase()
       .trim();
@@ -20,7 +20,6 @@
     if (align === "center" || align === "middle") widgetDiv.style.textAlign = "center";
     if (align === "right" || align === "end") widgetDiv.style.textAlign = "right";
 
-    /* --- URL JSON (RAW GITHUB, ZERO CACHE) --- */
     const dataUrl = `https://raw.githubusercontent.com/WeloVerify/welo-reviews-data/main/data/${companySlug}.json?ts=${Date.now()}`;
 
     const logoUrl =
@@ -30,15 +29,91 @@
 
     const weloPageUrl = `https://www.welobadge.com/en/welo-page/${companySlug}`;
 
-    /* ✅ FORMATTAZIONE UNIVERSALE (funziona su mobile e desktop) */
+    const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+
+    const TABLE_NAME = "lascia_una_recensione";
+    const STAR_FIELD = "Da 1 a 5 stelle come lo valuti?";
+    const APPROVED_STATUS = "Approved";
+
     function formatReviews(num) {
-      if (num < 10000) {
-        return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const value = Number(num) || 0;
+
+      if (value < 10000) {
+        return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       }
-      if (num < 1000000) {
-        return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1)}K`.replace(".0", "");
+      if (value < 1000000) {
+        return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}K`.replace(".0", "");
       }
-      return `${(num / 1000000).toFixed(1)}M`.replace(".0", "");
+      return `${(value / 1000000).toFixed(1)}M`.replace(".0", "");
+    }
+
+    function normalizeNumber(value) {
+      if (value === null || value === undefined) return null;
+      const cleaned = String(value).trim().replace(",", ".");
+      if (!cleaned) return null;
+      const num = parseFloat(cleaned);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function hasValidReviewsCount(value) {
+      const num = normalizeNumber(value);
+      return num !== null && num > 0;
+    }
+
+    function hasValidRating(value) {
+      const num = normalizeNumber(value);
+      return num !== null && num > 0 && num <= 5;
+    }
+
+    function computeSupabaseStats(rows) {
+      let total = 0;
+      let weighted = 0;
+
+      rows.forEach(function (row) {
+        const stars = Number(row[STAR_FIELD]) || 0;
+        if (stars >= 1 && stars <= 5) {
+          total += 1;
+          weighted += stars;
+        }
+      });
+
+      return {
+        reviews: total,
+        rating: total > 0 ? weighted / total : 0
+      };
+    }
+
+    async function fetchSupabaseStats() {
+      try {
+        const params = new URLSearchParams({
+          azienda: "eq." + companySlug,
+          status: "eq." + APPROVED_STATUS,
+          select: "*"
+        });
+
+        const response = await fetch(
+          SUPABASE_URL + "/rest/v1/" + TABLE_NAME + "?" + params.toString(),
+          {
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: "Bearer " + SUPABASE_ANON_KEY
+            },
+            cache: "no-store"
+          }
+        );
+
+        if (!response.ok) throw new Error("Supabase request failed");
+
+        let rows = await response.json();
+        if (!Array.isArray(rows)) rows = [];
+
+        return computeSupabaseStats(rows);
+      } catch (err) {
+        console.warn("Welo Widget: errore Supabase", err);
+        return { reviews: 0, rating: 0 };
+      }
     }
 
     let data;
@@ -51,7 +126,22 @@
       data = { reviews: 0, rating: 0 };
     }
 
-    const formattedReviews = formatReviews(data.reviews || 0);
+    let finalReviews = hasValidReviewsCount(data.reviews) ? Number(data.reviews) : 0;
+    let finalRating = hasValidRating(data.rating) ? Number(String(data.rating).replace(",", ".")) : 0;
+
+    if (!hasValidReviewsCount(data.reviews) || !hasValidRating(data.rating)) {
+      const supabaseStats = await fetchSupabaseStats();
+
+      if (!hasValidReviewsCount(data.reviews)) {
+        finalReviews = supabaseStats.reviews;
+      }
+
+      if (!hasValidRating(data.rating)) {
+        finalRating = supabaseStats.rating;
+      }
+    }
+
+    const formattedReviews = formatReviews(finalReviews);
 
     widgetDiv.innerHTML = `
       <a class="welo-badge-xr92" href="${weloPageUrl}" target="_blank" rel="noopener noreferrer">
@@ -60,7 +150,7 @@
         <img src="${logoUrl}" alt="Welo" class="welo-logo-xr92" />
         <strong>Welo</strong>
         <span class="welo-divider-xr92">|</span>
-        <strong>${(data.rating || 0).toFixed(1)}</strong>
+        <strong>${Number(finalRating || 0).toFixed(1)}</strong>
         <img src="${starUrl}" alt="Rating star" class="welo-star-xr92" />
       </a>
     `;
@@ -106,3 +196,4 @@
     document.head.appendChild(style);
   });
 })();
+</script>
