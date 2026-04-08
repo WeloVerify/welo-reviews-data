@@ -165,7 +165,15 @@
     return num !== null && num > 0 && num <= 5;
   }
 
-  function toTitleCase(str) {
+  function slugToWords(slug) {
+    return String(slug || "")
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function titleCase(str) {
     return String(str || "")
       .split(" ")
       .filter(Boolean)
@@ -175,12 +183,12 @@
       .join(" ");
   }
 
-  function getCompanyVariants(companySlug) {
-    const slug = String(companySlug || "").trim().toLowerCase();
-    const spaced = slug.replace(/-/g, " ").trim();
-    const title = toTitleCase(spaced);
+  function getCompanyCandidates(companySlug) {
+    const slug = String(companySlug || "").trim();
+    const spaced = slugToWords(slug);
+    const titled = titleCase(spaced);
 
-    return Array.from(new Set([slug, spaced, title].filter(Boolean)));
+    return Array.from(new Set([slug, spaced, titled].filter(Boolean)));
   }
 
   function computeSupabaseStats(rows) {
@@ -201,47 +209,46 @@
     };
   }
 
-  async function fetchSupabaseRowsForVariant(companyValue) {
-    const params = new URLSearchParams({
-      azienda: "ilike." + companyValue,
-      status: "eq." + APPROVED_STATUS,
-      select: STAR_FIELD
-    });
-
-    const response = await fetch(
-      SUPABASE_URL + "/rest/v1/" + TABLE_NAME + "?" + params.toString(),
-      {
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: "Bearer " + SUPABASE_ANON_KEY
-        },
-        cache: "no-store"
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Supabase request failed");
-    }
-
-    const rows = await response.json();
-    return Array.isArray(rows) ? rows : [];
-  }
-
   async function fetchSupabaseStats(companySlug) {
-    const variants = getCompanyVariants(companySlug);
+    const candidates = getCompanyCandidates(companySlug);
 
-    for (const variant of variants) {
-      try {
-        const rows = await fetchSupabaseRowsForVariant(variant);
-        if (rows.length) {
-          return computeSupabaseStats(rows);
+    try {
+      const orFilter = candidates
+        .map(function (value) {
+          return `azienda.ilike.${value}`;
+        })
+        .join(",");
+
+      const params = new URLSearchParams({
+        status: "eq." + APPROVED_STATUS,
+        select: "*",
+        or: "(" + orFilter + ")"
+      });
+
+      const response = await fetch(
+        SUPABASE_URL + "/rest/v1/" + TABLE_NAME + "?" + params.toString(),
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: "Bearer " + SUPABASE_ANON_KEY
+          },
+          cache: "no-store"
         }
-      } catch (err) {
-        console.warn("Welo Widget: errore Supabase su variante", variant, err);
-      }
-    }
+      );
 
-    return { reviews: 0, rating: 0 };
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        throw new Error("Supabase request failed: " + text);
+      }
+
+      let rows = await response.json();
+      if (!Array.isArray(rows)) rows = [];
+
+      return computeSupabaseStats(rows);
+    } catch (err) {
+      console.warn("Welo Widget: errore Supabase", err);
+      return { reviews: 0, rating: 0 };
+    }
   }
 
   async function fetchJsonData(companySlug) {
