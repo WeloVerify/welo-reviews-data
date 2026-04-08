@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v2.0.0
+ * Welo Reviews Widget — v2.0.1
  * Theme Support: light / dark / auto
  *
  * Embed:
