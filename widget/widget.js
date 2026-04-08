@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  const currentScript = document.currentScript;
+
   const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const SUPABASE_ANON_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
@@ -82,7 +84,7 @@
         margin: 0 1px;
       }
 
-      .welo-widget-error {
+      .welo-widget-status {
         font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
         font-size: 13px;
         color: #888;
@@ -130,9 +132,26 @@
 
   function normalizeNumber(value) {
     if (value === null || value === undefined) return null;
-    const cleaned = String(value).trim().replace(",", ".");
-    if (!cleaned) return null;
+
+    const raw = String(value).trim().toLowerCase();
+
+    if (
+      !raw ||
+      raw === "0" ||
+      raw === "0.0" ||
+      raw === "-" ||
+      raw === "n/a" ||
+      raw === "na" ||
+      raw === "none" ||
+      raw === "null" ||
+      raw === "undefined"
+    ) {
+      return null;
+    }
+
+    const cleaned = raw.replace(",", ".");
     const num = parseFloat(cleaned);
+
     return Number.isFinite(num) ? num : null;
   }
 
@@ -144,6 +163,24 @@
   function hasValidRating(value) {
     const num = normalizeNumber(value);
     return num !== null && num > 0 && num <= 5;
+  }
+
+  function toTitleCase(str) {
+    return String(str || "")
+      .split(" ")
+      .filter(Boolean)
+      .map(function (part) {
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+      })
+      .join(" ");
+  }
+
+  function getCompanyVariants(companySlug) {
+    const slug = String(companySlug || "").trim().toLowerCase();
+    const spaced = slug.replace(/-/g, " ").trim();
+    const title = toTitleCase(spaced);
+
+    return Array.from(new Set([slug, spaced, title].filter(Boolean)));
   }
 
   function computeSupabaseStats(rows) {
@@ -164,35 +201,47 @@
     };
   }
 
-  async function fetchSupabaseStats(companySlug) {
-    try {
-      const params = new URLSearchParams({
-        azienda: "eq." + companySlug,
-        status: "eq." + APPROVED_STATUS,
-        select: "*"
-      });
+  async function fetchSupabaseRowsForVariant(companyValue) {
+    const params = new URLSearchParams({
+      azienda: "ilike." + companyValue,
+      status: "eq." + APPROVED_STATUS,
+      select: STAR_FIELD
+    });
 
-      const response = await fetch(
-        SUPABASE_URL + "/rest/v1/" + TABLE_NAME + "?" + params.toString(),
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: "Bearer " + SUPABASE_ANON_KEY
-          },
-          cache: "no-store"
-        }
-      );
+    const response = await fetch(
+      SUPABASE_URL + "/rest/v1/" + TABLE_NAME + "?" + params.toString(),
+      {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: "Bearer " + SUPABASE_ANON_KEY
+        },
+        cache: "no-store"
+      }
+    );
 
-      if (!response.ok) throw new Error("Supabase request failed");
-
-      let rows = await response.json();
-      if (!Array.isArray(rows)) rows = [];
-
-      return computeSupabaseStats(rows);
-    } catch (err) {
-      console.warn("Welo Widget: errore Supabase", err);
-      return { reviews: 0, rating: 0 };
+    if (!response.ok) {
+      throw new Error("Supabase request failed");
     }
+
+    const rows = await response.json();
+    return Array.isArray(rows) ? rows : [];
+  }
+
+  async function fetchSupabaseStats(companySlug) {
+    const variants = getCompanyVariants(companySlug);
+
+    for (const variant of variants) {
+      try {
+        const rows = await fetchSupabaseRowsForVariant(variant);
+        if (rows.length) {
+          return computeSupabaseStats(rows);
+        }
+      } catch (err) {
+        console.warn("Welo Widget: errore Supabase su variante", variant, err);
+      }
+    }
+
+    return { reviews: 0, rating: 0 };
   }
 
   async function fetchJsonData(companySlug) {
@@ -211,7 +260,11 @@
   async function renderWidget(widgetDiv) {
     const companySlug = (widgetDiv.getAttribute("data-welo") || "welo").trim();
 
-    const align = String(widgetDiv.getAttribute("data-align") || "")
+    const align = String(
+      widgetDiv.getAttribute("data-align") ||
+      currentScript?.getAttribute("data-align") ||
+      ""
+    )
       .toLowerCase()
       .trim();
 
@@ -219,7 +272,7 @@
     if (align === "center" || align === "middle") widgetDiv.style.textAlign = "center";
     if (align === "right" || align === "end") widgetDiv.style.textAlign = "right";
 
-    widgetDiv.innerHTML = `<span class="welo-widget-error">Loading...</span>`;
+    widgetDiv.innerHTML = `<span class="welo-widget-status">Loading...</span>`;
 
     const weloPageUrl = `https://www.welobadge.com/en/welo-page/${companySlug}`;
 
@@ -231,14 +284,17 @@
         ? Number(String(data.rating).replace(",", "."))
         : 0;
 
-      if (!hasValidReviewsCount(data.reviews) || !hasValidRating(data.rating)) {
+      const needsReviewsFallback = !hasValidReviewsCount(data.reviews);
+      const needsRatingFallback = !hasValidRating(data.rating);
+
+      if (needsReviewsFallback || needsRatingFallback) {
         const supabaseStats = await fetchSupabaseStats(companySlug);
 
-        if (!hasValidReviewsCount(data.reviews)) {
+        if (needsReviewsFallback) {
           finalReviews = supabaseStats.reviews;
         }
 
-        if (!hasValidRating(data.rating)) {
+        if (needsRatingFallback) {
           finalRating = supabaseStats.rating;
         }
       }
@@ -258,7 +314,7 @@
       `;
     } catch (err) {
       console.error("Welo Widget render error:", err);
-      widgetDiv.innerHTML = `<span class="welo-widget-error">Widget unavailable</span>`;
+      widgetDiv.innerHTML = `<span class="welo-widget-status">Widget unavailable</span>`;
     }
   }
 
