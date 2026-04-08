@@ -1,3 +1,5 @@
+<div class="welo-widget" data-welo="truswave" data-align="left"></div>
+
 <script>
 (() => {
   "use strict";
@@ -47,14 +49,8 @@
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
       }
 
-      .welo-badge-xr92 strong {
-        font-weight: 700;
-      }
-
-      .welo-badge-xr92 img {
-        display: inline-block;
-        vertical-align: middle;
-      }
+      .welo-badge-xr92 strong { font-weight: 700; }
+      .welo-badge-xr92 img { display: inline-block; vertical-align: middle; }
 
       .welo-logo-xr92 {
         height: 15px;
@@ -85,13 +81,8 @@
           gap: 4px;
         }
 
-        .welo-logo-xr92 {
-          height: 13px;
-        }
-
-        .welo-star-xr92 {
-          height: 15px;
-        }
+        .welo-logo-xr92 { height: 13px; }
+        .welo-star-xr92 { height: 15px; }
       }
 
       @media (max-width: 480px) {
@@ -201,9 +192,7 @@
   async function renderWidget(widgetDiv) {
     const companySlug = widgetDiv.getAttribute("data-welo") || "welo";
 
-    const align = String(
-      widgetDiv.getAttribute("data-align") || ""
-    )
+    const align = String(widgetDiv.getAttribute("data-align") || "")
       .toLowerCase()
       .trim();
 
