@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v1.4.1
+ * Welo Reviews Widget — v1.5.0
  * Theme Support: light / dark / auto
  *
  * Embed:
@@ -11,7 +11,7 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
  * ></div>
- * <script src="https://cdn.jsdelivr.net/gh/WeloVerify/welo-reviews-data@main/widget/Full-Reviews.js" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js" defer></script>
  */
 
 (function () {
@@ -72,6 +72,7 @@
       oneYearAgo: "un anno fa",
       yearsAgo: "anni fa",
       widgetError: "Errore widget.",
+      loading: "Caricamento recensioni..."
     },
     en: {
       headerTitle: "See our reviews",
@@ -103,7 +104,8 @@
       oneYearAgo: "1 year ago",
       yearsAgo: "years ago",
       widgetError: "Widget error.",
-    },
+      loading: "Loading reviews..."
+    }
   };
 
   /* ================= THEME ================= */
@@ -192,9 +194,6 @@
     style.id = "welo-reviews-widget-styles";
 
     style.textContent = `
-/* ===================== */
-/* WELO REVIEWS WIDGET   */
-/* ===================== */
 .welo-reviews-widget,
 .welo-reviews-widget button,
 .welo-reviews-widget a,
@@ -206,18 +205,15 @@
 
 .welo-reviews-widget {
   text-align: left !important;
-
   --welo-header-title: #1b1b1b;
   --welo-text: #525252;
   --welo-text-strong: #1b1b1b;
   --welo-muted: #a1a1a1;
-
   --welo-surface: #ffffff;
   --welo-surface-2: #fafafa;
   --welo-border: #dbdbdb;
   --welo-border-soft: #e5e5e5;
   --welo-stroke-section: #eaeaea;
-
   --welo-pill-bg: #fafafa;
   --welo-pill-hover: #f0f0f0;
   --welo-pill-border: #e5e5e5;
@@ -225,20 +221,16 @@
   --welo-pill-active-bg: #1b1b1b;
   --welo-pill-active-text: #ffffff;
   --welo-pill-active-border: #1b1b1b;
-
   --welo-btn-bg: #ffffff;
   --welo-btn-hover: #efefef;
   --welo-btn-border: #d4d4d4;
   --welo-btn-text: #1b1b1b;
-
   --welo-tooltip-bg: #ffffff;
   --welo-tooltip-border: #e5e5e5;
   --welo-tooltip-text: #1b1b1b;
   --welo-tooltip-link: #1b1b1b;
-
   --welo-star-filled: #1b1b1b;
   --welo-star-empty: #d2d2d2;
-
   --welo-action-icon-filter: none;
   --welo-card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
@@ -248,13 +240,11 @@
   --welo-text: #d2d2d2;
   --welo-text-strong: #ffffff;
   --welo-muted: #b3b3b3;
-
   --welo-surface: #151515;
   --welo-surface-2: #151515;
   --welo-border: #272727;
   --welo-border-soft: #272727;
   --welo-stroke-section: #272727;
-
   --welo-pill-bg: #151515;
   --welo-pill-hover: #1c1c1c;
   --welo-pill-border: #272727;
@@ -262,25 +252,20 @@
   --welo-pill-active-bg: #232323;
   --welo-pill-active-text: #ffffff;
   --welo-pill-active-border: #2f2f2f;
-
   --welo-btn-bg: #151515;
   --welo-btn-hover: #1c1c1c;
   --welo-btn-border: #272727;
   --welo-btn-text: #ffffff;
-
   --welo-tooltip-bg: #151515;
   --welo-tooltip-border: #272727;
   --welo-tooltip-text: #ffffff;
   --welo-tooltip-link: #ffffff;
-
   --welo-star-filled: #ffffff;
   --welo-star-empty: rgba(255, 255, 255, 0.22);
-
   --welo-action-icon-filter: brightness(0) invert(1);
   --welo-card-shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.18);
 }
 
-/* HEADER */
 .welo-reviews-widget .welo-header {
   display: flex;
   flex-direction: column;
@@ -327,7 +312,6 @@
   pointer-events: none;
 }
 
-/* CONTROLS */
 .welo-reviews-widget .reviews-controls {
   display: flex;
   justify-content: flex-start !important;
@@ -385,7 +369,6 @@
   .welo-reviews-widget .sort-pill { white-space: nowrap; }
 }
 
-/* REVIEW CARD */
 .welo-reviews-widget .review-card {
   background: var(--welo-surface);
   border: 1px solid var(--welo-border);
@@ -404,7 +387,6 @@
   .welo-reviews-widget .review-card { padding: 16px; }
 }
 
-/* STARS */
 .welo-reviews-widget .review-stars {
   display: flex;
   gap: 3px;
@@ -433,7 +415,6 @@
   color: var(--welo-star-empty);
 }
 
-/* VERIFIED BADGE */
 .welo-reviews-widget .review-verified {
   position: absolute;
   top: 18px;
@@ -465,7 +446,6 @@
   .welo-reviews-widget .review-verified span { font-size: 13px; }
 }
 
-/* VERIFIED TOOLTIP */
 .welo-reviews-widget .review-verified-tooltip {
   position: absolute;
   top: calc(100% + 8px);
@@ -515,7 +495,6 @@
   pointer-events: auto;
 }
 
-/* TEXT */
 .welo-reviews-widget .review-title {
   font-size: 18px;
   font-weight: 500;
@@ -551,7 +530,6 @@
   color: var(--welo-muted);
 }
 
-/* ACTIONS */
 .welo-reviews-widget .review-actions {
   margin-top: 7px;
   display: flex;
@@ -582,7 +560,6 @@
   filter: var(--welo-action-icon-filter);
 }
 
-/* NO REVIEWS */
 .welo-reviews-widget .no-reviews-box {
   width: 100%;
   background: var(--welo-surface);
@@ -635,7 +612,6 @@
   }
 }
 
-/* LOAD MORE */
 .welo-reviews-widget .load-more-reviews {
   margin: 8px auto 0;
   display: flex;
@@ -658,7 +634,6 @@
 .welo-reviews-widget .load-more-reviews:hover { opacity: 0.9; background: var(--welo-btn-hover); }
 .welo-reviews-widget .load-more-reviews:active { transform: translateY(1px); }
 
-/* MEDIA THUMBS */
 .welo-reviews-widget .review-media {
   display: flex;
   align-items: center;
@@ -733,14 +708,12 @@
   background: #ffffff;
 }
 
-/* HINT */
 .welo-reviews-widget .reviews-active-hint {
   font-size: 13px;
   color: var(--welo-text);
   margin-bottom: 10px;
 }
 
-/* LIGHTBOX */
 .welo-review-lightbox-overlay {
   position: fixed;
   inset: 0;
@@ -1023,6 +996,21 @@
       .replace(/^-|-$/g, "");
   }
 
+  function getCompanyCandidates(input) {
+    const raw = String(input || "").trim();
+    const slug = makeSlug(raw);
+    const spaced = slug.replace(/-/g, " ").trim();
+    const titled = spaced
+      .split(" ")
+      .filter(Boolean)
+      .map(function (part) {
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+      })
+      .join(" ");
+
+    return Array.from(new Set([raw, slug, spaced, titled].filter(Boolean)));
+  }
+
   function getPublicUrlFromPath(path) {
     if (!path) return null;
     if (String(path).startsWith("http")) return String(path);
@@ -1198,25 +1186,43 @@
   }
 
   async function fetchReviewsForCompany(companyName) {
-    const companyRaw = String(companyName || "").trim();
-    const companySlug = makeSlug(companyRaw);
-    const companyRawSlugNormalized = companyRaw.replace(/\s+/g, "-").toLowerCase();
+    const candidates = getCompanyCandidates(companyName);
 
-    let data = await supabaseFetch({
-      [FIELD_COMPANY]: `ilike.${companyRaw}`,
-      [FIELD_STATUS]: `eq.${APPROVED_VALUE}`,
-      select: "*",
-    });
+    let data = [];
 
-    if (!data.length && companySlug && companySlug !== companyRawSlugNormalized) {
-      data = await supabaseFetch({
-        [FIELD_COMPANY]: `ilike.${companySlug}`,
-        [FIELD_STATUS]: `eq.${APPROVED_VALUE}`,
-        select: "*",
-      });
+    for (const candidate of candidates) {
+      try {
+        data = await supabaseFetch({
+          [FIELD_COMPANY]: `ilike.${candidate}`,
+          [FIELD_STATUS]: `eq.${APPROVED_VALUE}`,
+          select: "*",
+        });
+
+        if (data.length) return data;
+      } catch (err) {
+        console.warn("[Welo Reviews Widget] Candidate fetch failed:", candidate, err);
+      }
     }
 
-    return data;
+    try {
+      const orFilter = candidates
+        .map(function (candidate) {
+          return `${FIELD_COMPANY}.ilike.${candidate}`;
+        })
+        .join(",");
+
+      data = await supabaseFetch({
+        [FIELD_STATUS]: `eq.${APPROVED_VALUE}`,
+        select: "*",
+        or: `(${orFilter})`,
+      });
+
+      if (data.length) return data;
+    } catch (err) {
+      console.warn("[Welo Reviews Widget] OR fetch failed:", err);
+    }
+
+    return [];
   }
 
   function parseAllowedStars(spec) {
@@ -1508,7 +1514,11 @@
           </div>
         </div>
 
-        <div class="reviews-list"></div>
+        <div class="reviews-list">
+          <div class="no-reviews-box">
+            <div class="no-reviews-text">${escapeHtml(T.loading)}</div>
+          </div>
+        </div>
       </div>
     `;
 
@@ -1842,7 +1852,7 @@
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
   } else {
     boot();
   }
