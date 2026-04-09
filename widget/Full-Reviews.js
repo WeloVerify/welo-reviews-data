@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v3.0.0
+ * Welo Reviews Widget — v4.0.0
  *
  * Embed example:
  * <div
@@ -11,7 +11,7 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=3" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4" defer></script>
  */
 
 (function () {
@@ -255,8 +255,8 @@
   /* =========================================================
      GLOBAL GUARD
   ========================================================= */
-  if (window.__WELO_REVIEWS_WIDGET_V300__) return;
-  window.__WELO_REVIEWS_WIDGET_V300__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V400__) return;
+  window.__WELO_REVIEWS_WIDGET_V400__ = true;
 
   /* =========================================================
      THEME
@@ -272,6 +272,7 @@
 
   function getResolvedTheme(theme) {
     if (theme === "dark") return "dark";
+
     if (theme === "auto") {
       try {
         return window.matchMedia &&
@@ -282,11 +283,13 @@
         return "light";
       }
     }
+
     return "light";
   }
 
   function applyWidgetTheme(widgetRoot, themeValue) {
     if (!widgetRoot) return;
+
     const theme = normalizeThemeValue(themeValue);
     const resolved = getResolvedTheme(theme);
 
@@ -308,8 +311,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV300) return;
-    window.__weloReviewsAutoThemeInstalledV300 = true;
+    if (window.__weloReviewsAutoThemeInstalledV400) return;
+    window.__weloReviewsAutoThemeInstalledV400 = true;
 
     if (!window.matchMedia) return;
 
@@ -340,10 +343,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v300")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v400")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v300";
+    style.id = "welo-reviews-widget-styles-v400";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -399,8 +402,9 @@
   --welo-tooltip-border: #e8e8e8;
   --welo-tooltip-text: #5d5d5d;
   --welo-tooltip-link: #111111;
-  --welo-star-filled: #111111;
-  --welo-star-empty: #d5d5d5;
+  --welo-star-filled: #171717;
+  --welo-star-base-fill: #ffffff;
+  --welo-star-base-stroke: #cfcfcf;
   --welo-verified-icon-filter: none;
   --welo-action-icon-filter: none;
   --welo-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.028);
@@ -438,7 +442,8 @@
   --welo-tooltip-text: #ffffff;
   --welo-tooltip-link: #ffffff;
   --welo-star-filled: #ffffff;
-  --welo-star-empty: rgba(255,255,255,0.22);
+  --welo-star-base-fill: #121212;
+  --welo-star-base-stroke: #505050;
   --welo-verified-icon-filter: brightness(0) invert(1);
   --welo-action-icon-filter: brightness(0) invert(1);
   --welo-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
@@ -447,7 +452,7 @@
 
 .welo-reviews-widget .welo-summary {
   width: 100%;
-  padding: 6px 0 28px;
+  padding: 50px 0;
   border-bottom: 1px solid var(--welo-stroke-section);
   margin-bottom: 24px;
 }
@@ -455,52 +460,47 @@
 .welo-reviews-widget .welo-summary-topline {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 22px;
+  margin-bottom: 28px;
+  text-align: center;
 }
 
-.welo-reviews-widget .welo-summary-topline-text {
-  font-size: 15px;
-  line-height: 1.25;
+.welo-reviews-widget .welo-summary-topline-text,
+.welo-reviews-widget .welo-summary-brand-name {
+  font-size: 45px;
+  line-height: 1.05;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   color: var(--welo-text-strong);
 }
 
 .welo-reviews-widget .welo-summary-brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 28px;
+  justify-content: center;
+  gap: 10px;
 }
 
 .welo-reviews-widget .welo-summary-brand-logo {
-  width: 24px;
-  height: 24px;
+  width: 37px;
+  height: 37px;
   object-fit: contain;
   display: block;
-}
-
-.welo-reviews-widget .welo-summary-brand-name {
-  font-size: 15px;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--welo-text-strong);
 }
 
 .welo-reviews-widget .welo-summary-main {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 18px;
+  justify-content: center;
+  gap: 22px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 
 .welo-reviews-widget .welo-summary-score {
-  font-size: 76px;
+  font-size: 72px;
   line-height: 0.92;
   font-weight: 800;
   letter-spacing: -0.07em;
@@ -512,19 +512,20 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 7px;
+  gap: 9px;
   padding-top: 8px;
 }
 
 .welo-reviews-widget .welo-summary-stars {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 4px;
 }
 
 .welo-reviews-widget .welo-summary-star {
-  width: 22px;
-  height: 22px;
+  width: 27px;
+  height: 27px;
   display: block;
   flex-shrink: 0;
 }
@@ -539,20 +540,20 @@
 
 .welo-reviews-widget .welo-summary-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .welo-reviews-widget .welo-summary-write-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  padding: 13px 26px;
+  min-height: 56px;
+  padding: 15px 34px;
   border-radius: 999px;
   border: 1px solid var(--welo-btn-border);
   background: var(--welo-btn-bg);
   color: var(--welo-btn-text);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -692,24 +693,16 @@
 
 .welo-reviews-widget .review-star {
   display: inline-flex;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   line-height: 0;
   flex-shrink: 0;
 }
 
 .welo-reviews-widget .review-star svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: block;
-}
-
-.welo-reviews-widget .review-star.is-filled {
-  color: var(--welo-star-filled);
-}
-
-.welo-reviews-widget .review-star.is-empty {
-  color: var(--welo-star-empty);
 }
 
 .welo-reviews-widget .review-verified {
@@ -1111,8 +1104,18 @@
 }
 
 @media (max-width: 1024px) {
+  .welo-reviews-widget .welo-summary-topline-text,
+  .welo-reviews-widget .welo-summary-brand-name {
+    font-size: 40px;
+  }
+
+  .welo-reviews-widget .welo-summary-brand-logo {
+    width: 33px;
+    height: 33px;
+  }
+
   .welo-reviews-widget .welo-summary-score {
-    font-size: 68px;
+    font-size: 66px;
   }
 
   .welo-reviews-widget .welo-summary-meta {
@@ -1126,33 +1129,31 @@
   }
 
   .welo-reviews-widget .welo-summary {
-    padding: 2px 0 20px;
+    padding: 50px 0;
     margin-bottom: 18px;
   }
 
   .welo-reviews-widget .welo-summary-topline {
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 22px;
   }
 
-  .welo-reviews-widget .welo-summary-topline-text {
-    font-size: 14px;
+  .welo-reviews-widget .welo-summary-topline-text,
+  .welo-reviews-widget .welo-summary-brand-name {
+    font-size: 30px;
+    line-height: 1.06;
   }
 
   .welo-reviews-widget .welo-summary-brand-logo {
-    width: 22px;
-    height: 22px;
-  }
-
-  .welo-reviews-widget .welo-summary-brand-name {
-    font-size: 14px;
+    width: 24px;
+    height: 24px;
   }
 
   .welo-reviews-widget .welo-summary-main {
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 16px;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .welo-reviews-widget .welo-summary-score {
@@ -1166,8 +1167,8 @@
   }
 
   .welo-reviews-widget .welo-summary-star {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
   }
 
   .welo-reviews-widget .welo-summary-meta {
@@ -1177,12 +1178,13 @@
 
   .welo-reviews-widget .welo-summary-actions {
     width: 100%;
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .welo-reviews-widget .welo-summary-write-btn {
     width: 100%;
     min-height: 46px;
+    padding: 12px 22px;
     font-size: 14px;
   }
 
@@ -1226,8 +1228,8 @@
 
   .welo-reviews-widget .review-star,
   .welo-reviews-widget .review-star svg {
-    width: 17px;
-    height: 17px;
+    width: 18px;
+    height: 18px;
   }
 
   .welo-reviews-widget .review-verified {
@@ -1550,52 +1552,49 @@
     return T.basedOn + " " + count + " " + word;
   }
 
-  function buildAverageStar(percent, id) {
+  function buildStarIcon(percent, id, cssClass) {
     const width = Math.max(0, Math.min(100, percent));
+
     return `
-      <svg class="welo-summary-star" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <svg class="${cssClass}" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <clipPath id="${id}">
             <rect x="0" y="0" width="${width}%" height="100%"></rect>
           </clipPath>
         </defs>
+
         <path
-          d="M11.998 2.5l2.78 5.633 6.217.904-4.498 4.385 1.062 6.191-5.561-2.924-5.56 2.924 1.061-6.191L3 9.037l6.218-.904L11.998 2.5z"
-          fill="currentColor"
-          style="color:var(--welo-star-empty)"
-        />
+          d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+          style="fill:var(--welo-star-base-fill);stroke:var(--welo-star-base-stroke);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;"
+        ></path>
+
         <path
           clip-path="url(#${id})"
-          d="M11.998 2.5l2.78 5.633 6.217.904-4.498 4.385 1.062 6.191-5.561-2.924-5.56 2.924 1.061-6.191L3 9.037l6.218-.904L11.998 2.5z"
-          fill="currentColor"
-          style="color:var(--welo-star-filled)"
-        />
+          d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+          style="fill:var(--welo-star-filled);stroke:var(--welo-star-filled);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;"
+        ></path>
       </svg>
     `;
   }
 
-  function buildAverageStars(average, uidPrefix) {
+  function buildAverageStars(average, uidPrefix, cssClass) {
     return Array.from({ length: 5 })
       .map(function (_, index) {
         const fill = Math.max(0, Math.min(1, Number(average || 0) - index)) * 100;
-        return buildAverageStar(fill, uidPrefix + "-" + index);
+        return buildStarIcon(fill, uidPrefix + "-" + index, cssClass);
       })
       .join("");
   }
 
   function renderCardStars(stars) {
-    let html = "";
-    for (let i = 0; i < 5; i++) {
-      const filled = i < stars;
-      html += `
-        <span class="review-star ${filled ? "is-filled" : "is-empty"}" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M11.998 2.5l2.78 5.633 6.217.904-4.498 4.385 1.062 6.191-5.561-2.924-5.56 2.924 1.061-6.191L3 9.037l6.218-.904L11.998 2.5z"></path>
-          </svg>
-        </span>
-      `;
-    }
-    return html;
+    const uid = "welo-card-star-" + Math.random().toString(36).slice(2, 9);
+
+    return Array.from({ length: 5 })
+      .map(function (_, index) {
+        const fill = index < stars ? 100 : 0;
+        return buildStarIcon(fill, uid + "-" + index, "review-star");
+      })
+      .join("");
   }
 
   function sortReviewsByPreferredCountryAndDate(reviews, preferredCountries, activeSort) {
@@ -1653,7 +1652,9 @@
     const plus = raw.match(/^(\d)\+$/);
     if (plus) {
       const n = Number(plus[1]);
-      return all.filter(function (x) { return x >= n; });
+      return all.filter(function (x) {
+        return x >= n;
+      });
     }
 
     const range = raw.match(/^(\d)\s*-\s*(\d)$/);
@@ -1662,7 +1663,9 @@
       const b = Number(range[2]);
       const min = Math.min(a, b);
       const max = Math.max(a, b);
-      return all.filter(function (x) { return x >= min && x <= max; });
+      return all.filter(function (x) {
+        return x >= min && x <= max;
+      });
     }
 
     const single = raw.match(/^(\d)$/);
@@ -1685,6 +1688,7 @@
     if (locale === "it") {
       return "https://www.welobadge.com/welo-page/" + encodeURIComponent(slug);
     }
+
     return "https://www.welobadge.com/en/welo-page/" + encodeURIComponent(slug);
   }
 
@@ -1701,7 +1705,9 @@
     });
 
     if (!res.ok) {
-      const text = await res.text().catch(function () { return ""; });
+      const text = await res.text().catch(function () {
+        return "";
+      });
       throw new Error("Supabase error " + res.status + ": " + text);
     }
 
@@ -1726,8 +1732,14 @@
         const exactUrl =
           buildBaseRestUrl() +
           "?select=*" +
-          "&" + encodeURIComponent(FIELD_STATUS) + "=eq." + encodeURIComponent(status) +
-          "&" + encodeURIComponent(FIELD_COMPANY) + "=ilike." + encodeURIComponent(candidate);
+          "&" +
+          encodeURIComponent(FIELD_STATUS) +
+          "=eq." +
+          encodeURIComponent(status) +
+          "&" +
+          encodeURIComponent(FIELD_COMPANY) +
+          "=ilike." +
+          encodeURIComponent(candidate);
 
         try {
           const exact = await supabaseFetch(exactUrl);
@@ -1737,8 +1749,14 @@
         const wildcardUrl =
           buildBaseRestUrl() +
           "?select=*" +
-          "&" + encodeURIComponent(FIELD_STATUS) + "=eq." + encodeURIComponent(status) +
-          "&" + encodeURIComponent(FIELD_COMPANY) + "=ilike." + encodeURIComponent("*" + candidate + "*");
+          "&" +
+          encodeURIComponent(FIELD_STATUS) +
+          "=eq." +
+          encodeURIComponent(status) +
+          "&" +
+          encodeURIComponent(FIELD_COMPANY) +
+          "=ilike." +
+          encodeURIComponent("*" + candidate + "*");
 
         try {
           const wildcard = await supabaseFetch(wildcardUrl);
@@ -1813,7 +1831,7 @@
       }
 
       const total = state.media.length;
-      counter.textContent = (state.index + 1) + " / " + total;
+      counter.textContent = state.index + 1 + " / " + total;
       counter.style.display = total > 1 ? "block" : "none";
       prevBtn.disabled = total <= 1;
       nextBtn.disabled = total <= 1;
@@ -1864,15 +1882,15 @@
       if (e.key === "ArrowRight") nextBtn.click();
     });
 
-    return { open, close };
+    return { open: open, close: close };
   }
 
   /* =========================================================
      TOOLTIP HANDLERS
   ========================================================= */
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV300) return;
-    window.__weloReviewsTooltipHandlersInstalledV300 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV400) return;
+    window.__weloReviewsTooltipHandlersInstalledV400 = true;
 
     function closeAll() {
       document
@@ -1882,23 +1900,32 @@
         });
     }
 
-    document.addEventListener("pointerdown", function (e) {
-      const insideLink = e.target.closest(".welo-reviews-widget .welo-verified-tooltip a");
-      if (insideLink) return;
+    document.addEventListener(
+      "pointerdown",
+      function (e) {
+        const insideLink = e.target.closest(
+          ".welo-reviews-widget .welo-verified-tooltip a"
+        );
+        if (insideLink) return;
 
-      const trigger = e.target.closest(".welo-reviews-widget .review-verified");
-      if (!trigger) {
-        closeAll();
-        return;
-      }
+        const trigger = e.target.closest(".welo-reviews-widget .review-verified");
+        if (!trigger) {
+          closeAll();
+          return;
+        }
 
-      if (window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches) {
-        const wasOpen = trigger.classList.contains("is-tooltip-open");
-        closeAll();
-        if (!wasOpen) trigger.classList.add("is-tooltip-open");
-        e.preventDefault();
-      }
-    }, { passive: false });
+        if (
+          window.matchMedia &&
+          window.matchMedia("(hover: none), (pointer: coarse)").matches
+        ) {
+          const wasOpen = trigger.classList.contains("is-tooltip-open");
+          closeAll();
+          if (!wasOpen) trigger.classList.add("is-tooltip-open");
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
 
     document.addEventListener("keydown", function (e) {
       const active = document.activeElement;
@@ -1977,6 +2004,7 @@
     placeholderEl.__weloMounted = true;
 
     const company = String(placeholderEl.getAttribute("data-company") || "").trim();
+
     if (!company) {
       console.warn("[Welo Reviews Widget] Missing data-company.");
       return;
@@ -1984,9 +2012,13 @@
 
     const locale = detectLocaleFromElement(placeholderEl);
     const T = TEXTS[locale] || TEXTS.en;
-    const themeValue = normalizeThemeValue(placeholderEl.getAttribute("data-theme") || "light");
+    const themeValue = normalizeThemeValue(
+      placeholderEl.getAttribute("data-theme") || "light"
+    );
     const preferredCountries = preferredCountriesFromElement(placeholderEl, locale);
-    const allowedStarsSet = new Set(parseAllowedStars(placeholderEl.getAttribute("data-stars")));
+    const allowedStarsSet = new Set(
+      parseAllowedStars(placeholderEl.getAttribute("data-stars"))
+    );
     const weloPageUrl = getWeloPageUrl(placeholderEl, company, locale);
 
     const REPORT_URL =
@@ -2030,7 +2062,9 @@
           </div>
 
           <div class="welo-summary-actions">
-            <a class="welo-summary-write-btn" href="${escapeHtml(weloPageUrl)}" target="_blank" rel="noopener noreferrer">
+            <a class="welo-summary-write-btn" href="${escapeHtml(
+              weloPageUrl
+            )}" target="_blank" rel="noopener noreferrer">
               ${escapeHtml(T.writeReview)}
             </a>
           </div>
@@ -2038,9 +2072,15 @@
 
         <div class="reviews-controls">
           <div class="sort-pill-group">
-            <button class="sort-pill active" type="button" data-sort="newest">${escapeHtml(T.newest)}</button>
-            <button class="sort-pill" type="button" data-sort="oldest">${escapeHtml(T.oldest)}</button>
-            <button class="sort-pill sort-pill-attachments" type="button" data-attachments="true">${escapeHtml(T.withMedia)}</button>
+            <button class="sort-pill active" type="button" data-sort="newest">${escapeHtml(
+              T.newest
+            )}</button>
+            <button class="sort-pill" type="button" data-sort="oldest">${escapeHtml(
+              T.oldest
+            )}</button>
+            <button class="sort-pill sort-pill-attachments" type="button" data-attachments="true">${escapeHtml(
+              T.withMedia
+            )}</button>
           </div>
         </div>
 
@@ -2063,12 +2103,17 @@
     function updateSummary() {
       const uid = "welo-summary-star-" + Math.random().toString(36).slice(2, 9);
       summaryScoreEl.textContent = formatSummaryScore(STATS.average);
-      summaryStarsEl.innerHTML = buildAverageStars(STATS.average, uid);
+      summaryStarsEl.innerHTML = buildAverageStars(
+        STATS.average,
+        uid,
+        "welo-summary-star"
+      );
       summaryMetaEl.textContent = buildSummaryMetaText(STATS.total, locale);
     }
 
     function initVideoThumbPreviews() {
       const videos = listEl.querySelectorAll(".review-media-video-thumb video");
+
       videos.forEach(function (video) {
         try {
           video.muted = true;
@@ -2083,8 +2128,9 @@
             } catch (_) {}
           };
 
-          if (video.readyState >= 2) showFrame();
-          else {
+          if (video.readyState >= 2) {
+            showFrame();
+          } else {
             video.addEventListener("loadeddata", showFrame, { once: true });
             video.addEventListener("loadedmetadata", showFrame, { once: true });
           }
@@ -2117,10 +2163,13 @@
     function renderReviews() {
       if (!CURRENT_REVIEWS.length) {
         const text = attachmentsOnly ? T.noReviewsMedia : T.noReviews;
+
         listEl.innerHTML = `
           <div class="no-reviews-box">
             <div class="no-reviews-text">${escapeHtml(text)}</div>
-            <a class="review-button" href="${escapeHtml(weloPageUrl)}" target="_blank" rel="noopener noreferrer">
+            <a class="review-button" href="${escapeHtml(
+              weloPageUrl
+            )}" target="_blank" rel="noopener noreferrer">
               <img src="${BUTTON_ICON}" alt="">
               ${escapeHtml(T.writeReview)}
             </a>
@@ -2133,100 +2182,118 @@
         ? `<div class="reviews-active-hint">${escapeHtml(T.onlyMediaHint)}</div>`
         : "";
 
-      const cards = CURRENT_REVIEWS.slice(0, visibleCount).map(function (r) {
-        const stars = Number(r[FIELD_STARS]) || 0;
-        const title = String(r.Titolo || r.title || "");
-        const text = String(r.Testo || r.text || "");
-        const author = String(r["Nome e cognome"] || r.nome || r.name || "");
-        const date = new Date(r["Submitted at"] || r.created_at || r.createdAt || "");
-        const relativeDate = formatRelativeTime(date, locale);
-        const media = parseMediaFromRow(r);
+      const cards = CURRENT_REVIEWS.slice(0, visibleCount)
+        .map(function (r) {
+          const stars = Number(r[FIELD_STARS]) || 0;
+          const title = String(r.Titolo || r.title || "");
+          const text = String(r.Testo || r.text || "");
+          const author = String(r["Nome e cognome"] || r.nome || r.name || "");
+          const date = new Date(
+            r["Submitted at"] || r.created_at || r.createdAt || ""
+          );
+          const relativeDate = formatRelativeTime(date, locale);
+          const media = parseMediaFromRow(r);
 
-        let mediaHtml = "";
-        if (media.length) {
-          const encodedMedia = encodeURIComponent(JSON.stringify(media));
+          let mediaHtml = "";
+          if (media.length) {
+            const encodedMedia = encodeURIComponent(JSON.stringify(media));
 
-          mediaHtml = `
-            <div class="review-media">
-              ${media.map(function (item, index) {
-                const classes =
-                  "review-media-thumb " +
-                  (index === 0
-                    ? "review-media-thumb--main"
-                    : "review-media-thumb--secondary");
+            mediaHtml = `
+              <div class="review-media">
+                ${media
+                  .map(function (item, index) {
+                    const classes =
+                      "review-media-thumb " +
+                      (index === 0
+                        ? "review-media-thumb--main"
+                        : "review-media-thumb--secondary");
 
-                const inner =
-                  item.type === "video"
-                    ? `
-                      <div class="review-media-video-thumb">
-                        <video src="${escapeHtml(item.url)}" muted playsinline preload="metadata"></video>
+                    const inner =
+                      item.type === "video"
+                        ? `
+                          <div class="review-media-video-thumb">
+                            <video src="${escapeHtml(
+                              item.url
+                            )}" muted playsinline preload="metadata"></video>
+                          </div>
+                          <div class="review-media-play-icon"></div>
+                        `
+                        : `<img src="${escapeHtml(item.url)}" alt="" loading="lazy">`;
+
+                    return `
+                      <div
+                        class="${classes}"
+                        data-action="open-media"
+                        data-media="${encodedMedia}"
+                        data-index="${index}"
+                        style="z-index:${media.length - index};"
+                      >
+                        ${inner}
                       </div>
-                      <div class="review-media-play-icon"></div>
-                    `
-                    : `<img src="${escapeHtml(item.url)}" alt="" loading="lazy">`;
+                    `;
+                  })
+                  .join("")}
+              </div>
+            `;
+          }
 
-                return `
-                  <div
-                    class="${classes}"
-                    data-action="open-media"
-                    data-media="${encodedMedia}"
-                    data-index="${index}"
-                    style="z-index:${media.length - index};"
-                  >
-                    ${inner}
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          `;
-        }
+          return `
+            <div class="review-card">
+              <div class="review-verified" role="button" tabindex="0" aria-label="${escapeHtml(
+                T.verified
+              )}">
+                <img src="${VER_ICON}" alt="">
+                <span>${escapeHtml(T.verified)}</span>
+                <div class="welo-verified-tooltip" role="tooltip">
+                  ${escapeHtml(T.verifiedTooltip)}
+                  <a href="${escapeHtml(
+                    VERIFIED_PROCESS_URL
+                  )}" target="_blank" rel="noopener noreferrer">${escapeHtml(
+                    T.readMore
+                  )}</a>
+                </div>
+              </div>
 
-        return `
-          <div class="review-card">
-            <div class="review-verified" role="button" tabindex="0" aria-label="${escapeHtml(T.verified)}">
-              <img src="${VER_ICON}" alt="">
-              <span>${escapeHtml(T.verified)}</span>
-              <div class="welo-verified-tooltip" role="tooltip">
-                ${escapeHtml(T.verifiedTooltip)}
-                <a href="${escapeHtml(VERIFIED_PROCESS_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(T.readMore)}</a>
+              <div class="review-stars" aria-label="${stars} ${escapeHtml(
+            T.ariaStars
+          )}">
+                ${renderCardStars(stars)}
+              </div>
+
+              <div class="review-title">${escapeHtml(title)}</div>
+              <div class="review-text">${escapeHtml(text)}</div>
+
+              ${mediaHtml}
+
+              <div class="review-footer">
+                <span class="review-author">${escapeHtml(author)}</span>
+                <span class="review-date">${escapeHtml(relativeDate)}</span>
+              </div>
+
+              <div class="review-actions">
+                <a class="review-report" href="${escapeHtml(
+                  REPORT_URL
+                )}" target="_blank" rel="noopener noreferrer">
+                  <img src="${FLAG_ICON}" alt="">
+                  <span>${escapeHtml(T.report)}</span>
+                </a>
+
+                <a
+                  class="review-share"
+                  href="#"
+                  data-action="share"
+                  data-stars="${stars}"
+                  data-title="${encodeURIComponent(title)}"
+                  data-text="${encodeURIComponent(text)}"
+                >
+                  <img src="${SHARE_ICON}" alt="">
+                  <span>${escapeHtml(T.share)}</span>
+                </a>
               </div>
             </div>
-
-            <div class="review-stars" aria-label="${stars} ${escapeHtml(T.ariaStars)}">
-              ${renderCardStars(stars)}
-            </div>
-
-            <div class="review-title">${escapeHtml(title)}</div>
-            <div class="review-text">${escapeHtml(text)}</div>
-
-            ${mediaHtml}
-
-            <div class="review-footer">
-              <span class="review-author">${escapeHtml(author)}</span>
-              <span class="review-date">${escapeHtml(relativeDate)}</span>
-            </div>
-
-            <div class="review-actions">
-              <a class="review-report" href="${escapeHtml(REPORT_URL)}" target="_blank" rel="noopener noreferrer">
-                <img src="${FLAG_ICON}" alt="">
-                <span>${escapeHtml(T.report)}</span>
-              </a>
-
-              <a
-                class="review-share"
-                href="#"
-                data-action="share"
-                data-stars="${stars}"
-                data-title="${encodeURIComponent(title)}"
-                data-text="${encodeURIComponent(text)}"
-              >
-                <img src="${SHARE_ICON}" alt="">
-                <span>${escapeHtml(T.share)}</span>
-              </a>
-            </div>
-          </div>
-        `;
-      }).join("");
+          `;
+        })
+        .join("");
 
       const loadMore =
         visibleCount < CURRENT_REVIEWS.length
@@ -2250,7 +2317,8 @@
           btn.classList.remove("active");
         });
         target.classList.add("active");
-        activeSort = target.getAttribute("data-sort") === "oldest" ? "oldest" : "newest";
+        activeSort =
+          target.getAttribute("data-sort") === "oldest" ? "oldest" : "newest";
         recomputeAndRender();
         return;
       }
