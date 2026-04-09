@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v2.1.0
+ * Welo Reviews Widget — v3.0.0
  *
  * Embed example:
  * <div
@@ -11,7 +11,7 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=3" defer></script>
  */
 
 (function () {
@@ -36,12 +36,18 @@
   /* =========================================================
      ASSETS
   ========================================================= */
+  const BRAND_LOGO =
+    "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png";
+
   const BUTTON_ICON =
     "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/67cf055c4add3a04ada1cca4_Group%201597880572.png";
+
   const VER_ICON =
     "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/67c5867114795e1d6d4cc213_Vector.png";
+
   const FLAG_ICON =
     "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/68388cede00174b6fb950e50_solar_flag-outline.svg";
+
   const SHARE_ICON =
     "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/68388cef10c9406397f55734_Vector.svg";
 
@@ -50,6 +56,8 @@
   ========================================================= */
   const TEXTS = {
     it: {
+      summaryTopline: "Recensioni verificate da",
+      brandName: "Welo",
       writeReview: "Scrivi una recensione",
       newest: "Più recenti",
       oldest: "Più vecchie",
@@ -81,9 +89,14 @@
       basedOn: "Basato su",
       reviewSingular: "recensione",
       reviewPlural: "recensioni",
-      ariaStars: "su 5 stelle"
+      ariaStars: "su 5 stelle",
+      close: "Chiudi",
+      previous: "Precedente",
+      next: "Successiva"
     },
     en: {
+      summaryTopline: "Verified reviews by",
+      brandName: "Welo",
       writeReview: "Write a review",
       newest: "Newest",
       oldest: "Oldest",
@@ -115,15 +128,135 @@
       basedOn: "Based on",
       reviewSingular: "review",
       reviewPlural: "reviews",
-      ariaStars: "out of 5 stars"
+      ariaStars: "out of 5 stars",
+      close: "Close",
+      previous: "Previous",
+      next: "Next"
+    },
+    es: {
+      summaryTopline: "Reseñas verificadas por",
+      brandName: "Welo",
+      writeReview: "Escribir una reseña",
+      newest: "Más recientes",
+      oldest: "Más antiguas",
+      withMedia: "Con archivos",
+      noReviews: "Todavía no hay reseñas, sé el primero en escribir una.",
+      noReviewsMedia: "No hay reseñas con archivos que coincidan con los filtros.",
+      verified: "Verificada por Welo",
+      verifiedTooltip:
+        "Esta reseña fue verificada por Welo. Descubre nuestro proceso de verificación:",
+      readMore: "Leer más",
+      loadMore: "Cargar más",
+      share: "Compartir",
+      shareCopied: "Enlace copiado al portapapeles",
+      report: "Reportar",
+      onlyMediaHint: "Estás viendo solo reseñas con fotos o videos.",
+      copyLink: "Copia este enlace:",
+      justNow: "Ahora mismo",
+      today: "Hoy",
+      oneDayAgo: "hace 1 día",
+      daysAgo: "días",
+      oneWeekAgo: "hace 1 semana",
+      weeksAgo: "semanas",
+      oneMonthAgo: "hace 1 mes",
+      monthsAgo: "meses",
+      oneYearAgo: "hace 1 año",
+      yearsAgo: "años",
+      widgetError: "Error del widget.",
+      loading: "Cargando reseñas...",
+      basedOn: "Basado en",
+      reviewSingular: "reseña",
+      reviewPlural: "reseñas",
+      ariaStars: "de 5 estrellas",
+      close: "Cerrar",
+      previous: "Anterior",
+      next: "Siguiente"
+    },
+    fr: {
+      summaryTopline: "Avis vérifiés par",
+      brandName: "Welo",
+      writeReview: "Écrire un avis",
+      newest: "Plus récents",
+      oldest: "Plus anciens",
+      withMedia: "Avec médias",
+      noReviews: "Aucun avis pour le moment, soyez le premier à en écrire un.",
+      noReviewsMedia: "Aucun avis avec média ne correspond aux filtres.",
+      verified: "Vérifié par Welo",
+      verifiedTooltip:
+        "Cet avis a été vérifié par Welo. Découvrez notre processus de vérification :",
+      readMore: "En savoir plus",
+      loadMore: "Charger plus",
+      share: "Partager",
+      shareCopied: "Lien copié dans le presse-papiers",
+      report: "Signaler",
+      onlyMediaHint: "Vous voyez uniquement les avis avec photo ou vidéo.",
+      copyLink: "Copiez ce lien :",
+      justNow: "À l’instant",
+      today: "Aujourd’hui",
+      oneDayAgo: "il y a 1 jour",
+      daysAgo: "jours",
+      oneWeekAgo: "il y a 1 semaine",
+      weeksAgo: "semaines",
+      oneMonthAgo: "il y a 1 mois",
+      monthsAgo: "mois",
+      oneYearAgo: "il y a 1 an",
+      yearsAgo: "ans",
+      widgetError: "Erreur du widget.",
+      loading: "Chargement des avis...",
+      basedOn: "Basé sur",
+      reviewSingular: "avis",
+      reviewPlural: "avis",
+      ariaStars: "sur 5 étoiles",
+      close: "Fermer",
+      previous: "Précédent",
+      next: "Suivant"
+    },
+    de: {
+      summaryTopline: "Verifizierte Bewertungen von",
+      brandName: "Welo",
+      writeReview: "Bewertung schreiben",
+      newest: "Neueste",
+      oldest: "Älteste",
+      withMedia: "Mit Medien",
+      noReviews: "Noch keine Bewertungen, sei der Erste.",
+      noReviewsMedia: "Keine Bewertungen mit Medien passen zu den Filtern.",
+      verified: "Von Welo verifiziert",
+      verifiedTooltip:
+        "Diese Bewertung wurde von Welo verifiziert. Erfahre mehr über unseren Verifizierungsprozess:",
+      readMore: "Mehr erfahren",
+      loadMore: "Mehr laden",
+      share: "Teilen",
+      shareCopied: "Link in die Zwischenablage kopiert",
+      report: "Melden",
+      onlyMediaHint: "Es werden nur Bewertungen mit Fotos oder Videos angezeigt.",
+      copyLink: "Diesen Link kopieren:",
+      justNow: "Gerade eben",
+      today: "Heute",
+      oneDayAgo: "vor 1 Tag",
+      daysAgo: "Tagen",
+      oneWeekAgo: "vor 1 Woche",
+      weeksAgo: "Wochen",
+      oneMonthAgo: "vor 1 Monat",
+      monthsAgo: "Monaten",
+      oneYearAgo: "vor 1 Jahr",
+      yearsAgo: "Jahren",
+      widgetError: "Widget-Fehler.",
+      loading: "Bewertungen werden geladen...",
+      basedOn: "Basierend auf",
+      reviewSingular: "Bewertung",
+      reviewPlural: "Bewertungen",
+      ariaStars: "von 5 Sternen",
+      close: "Schließen",
+      previous: "Zurück",
+      next: "Weiter"
     }
   };
 
   /* =========================================================
-     GLOBAL GUARDS
+     GLOBAL GUARD
   ========================================================= */
-  if (window.__WELO_REVIEWS_WIDGET_V210__) return;
-  window.__WELO_REVIEWS_WIDGET_V210__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V300__) return;
+  window.__WELO_REVIEWS_WIDGET_V300__ = true;
 
   /* =========================================================
      THEME
@@ -154,18 +287,14 @@
 
   function applyWidgetTheme(widgetRoot, themeValue) {
     if (!widgetRoot) return;
-
     const theme = normalizeThemeValue(themeValue);
     const resolved = getResolvedTheme(theme);
 
     widgetRoot.setAttribute("data-theme", theme);
     widgetRoot.setAttribute("data-resolved-theme", resolved);
 
-    if (theme === "auto") {
-      AUTO_THEME_WIDGETS.add(widgetRoot);
-    } else {
-      AUTO_THEME_WIDGETS.delete(widgetRoot);
-    }
+    if (theme === "auto") AUTO_THEME_WIDGETS.add(widgetRoot);
+    else AUTO_THEME_WIDGETS.delete(widgetRoot);
   }
 
   function refreshAutoThemeWidgets() {
@@ -179,8 +308,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalled) return;
-    window.__weloReviewsAutoThemeInstalled = true;
+    if (window.__weloReviewsAutoThemeInstalledV300) return;
+    window.__weloReviewsAutoThemeInstalledV300 = true;
 
     if (!window.matchMedia) return;
 
@@ -211,10 +340,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v210")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v300")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v210";
+    style.id = "welo-reviews-widget-styles-v300";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -276,6 +405,7 @@
   --welo-action-icon-filter: none;
   --welo-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.028);
   --welo-card-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.06);
+  padding-inline: 0;
 }
 
 .welo-reviews-widget[data-resolved-theme="dark"] {
@@ -317,57 +447,63 @@
 
 .welo-reviews-widget .welo-summary {
   width: 100%;
-  padding: 8px 0 26px;
+  padding: 6px 0 28px;
   border-bottom: 1px solid var(--welo-stroke-section);
+  margin-bottom: 24px;
+}
+
+.welo-reviews-widget .welo-summary-topline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
   margin-bottom: 22px;
 }
 
-.welo-reviews-widget .welo-summary-verified {
-  position: relative;
+.welo-reviews-widget .welo-summary-topline-text {
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--welo-text-strong);
+}
+
+.welo-reviews-widget .welo-summary-brand {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  padding: 9px 13px;
-  border-radius: 999px;
-  background: var(--welo-btn-secondary-bg);
-  border: 1px solid var(--welo-btn-secondary-border);
-  margin-bottom: 18px;
+  min-height: 28px;
 }
 
-.welo-reviews-widget .welo-summary-verified img {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
+.welo-reviews-widget .welo-summary-brand-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
   display: block;
-  filter: var(--welo-verified-icon-filter);
 }
 
-.welo-reviews-widget .welo-summary-verified span {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--welo-text-strong);
+.welo-reviews-widget .welo-summary-brand-name {
+  font-size: 15px;
   line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--welo-text-strong);
 }
 
 .welo-reviews-widget .welo-summary-main {
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  align-items: center;
+  justify-content: flex-end;
   gap: 18px;
   flex-wrap: wrap;
   margin-bottom: 18px;
 }
 
 .welo-reviews-widget .welo-summary-score {
-  font-size: 92px;
+  font-size: 76px;
   line-height: 0.92;
-  font-weight: 700;
-  letter-spacing: -0.08em;
+  font-weight: 800;
+  letter-spacing: -0.07em;
   color: var(--welo-header-title);
 }
 
@@ -376,8 +512,8 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 8px;
-  padding-bottom: 12px;
+  gap: 7px;
+  padding-top: 8px;
 }
 
 .welo-reviews-widget .welo-summary-stars {
@@ -387,8 +523,8 @@
 }
 
 .welo-reviews-widget .welo-summary-star {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   display: block;
   flex-shrink: 0;
 }
@@ -403,7 +539,7 @@
 
 .welo-reviews-widget .welo-summary-actions {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .welo-reviews-widget .welo-summary-write-btn {
@@ -411,7 +547,7 @@
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 13px 18px;
+  padding: 13px 26px;
   border-radius: 999px;
   border: 1px solid var(--welo-btn-border);
   background: var(--welo-btn-bg);
@@ -459,7 +595,6 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .welo-reviews-widget .welo-summary-verified:hover .welo-verified-tooltip,
   .welo-reviews-widget .review-verified:hover .welo-verified-tooltip {
     opacity: 1;
     transform: translateY(0);
@@ -467,7 +602,6 @@
   }
 }
 
-.welo-reviews-widget .welo-summary-verified.is-tooltip-open .welo-verified-tooltip,
 .welo-reviews-widget .review-verified.is-tooltip-open .welo-verified-tooltip {
   opacity: 1;
   transform: translateY(0);
@@ -615,7 +749,7 @@
 .welo-reviews-widget .review-title {
   font-size: 18px;
   line-height: 1.3;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--welo-text-strong);
   margin-bottom: 10px;
@@ -641,7 +775,7 @@
 
 .welo-reviews-widget .review-author {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--welo-text-strong);
   letter-spacing: -0.01em;
 }
@@ -976,53 +1110,74 @@
   z-index: 40;
 }
 
+@media (max-width: 1024px) {
+  .welo-reviews-widget .welo-summary-score {
+    font-size: 68px;
+  }
+
+  .welo-reviews-widget .welo-summary-meta {
+    font-size: 17px;
+  }
+}
+
 @media (max-width: 767px) {
+  .welo-reviews-widget {
+    padding-inline: 18px;
+  }
+
   .welo-reviews-widget .welo-summary {
     padding: 2px 0 20px;
     margin-bottom: 18px;
   }
 
-  .welo-reviews-widget .welo-summary-verified {
-    margin-bottom: 14px;
-    padding: 8px 11px;
+  .welo-reviews-widget .welo-summary-topline {
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
-  .welo-reviews-widget .welo-summary-verified img {
-    width: 15px;
-    height: 15px;
+  .welo-reviews-widget .welo-summary-topline-text {
+    font-size: 14px;
   }
 
-  .welo-reviews-widget .welo-summary-verified span {
-    font-size: 12px;
+  .welo-reviews-widget .welo-summary-brand-logo {
+    width: 22px;
+    height: 22px;
+  }
+
+  .welo-reviews-widget .welo-summary-brand-name {
+    font-size: 14px;
   }
 
   .welo-reviews-widget .welo-summary-main {
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 14px;
     align-items: center;
+    justify-content: flex-start;
   }
 
   .welo-reviews-widget .welo-summary-score {
-    font-size: 70px;
+    font-size: 58px;
   }
 
   .welo-reviews-widget .welo-summary-side {
-    align-items: center;
-    padding-bottom: 0;
+    align-items: flex-start;
+    padding-top: 0;
+    gap: 6px;
   }
 
   .welo-reviews-widget .welo-summary-star {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
   .welo-reviews-widget .welo-summary-meta {
-    font-size: 15px;
-    text-align: center;
+    font-size: 14px;
+    line-height: 1.25;
   }
 
   .welo-reviews-widget .welo-summary-actions {
     width: 100%;
+    justify-content: flex-start;
   }
 
   .welo-reviews-widget .welo-summary-write-btn {
@@ -1166,7 +1321,7 @@
   }
 
   /* =========================================================
-     UTILS
+     HELPERS
   ========================================================= */
   function escapeHtml(str) {
     return String(str == null ? "" : str)
@@ -1185,29 +1340,46 @@
     }
   }
 
+  function safeDecode(value) {
+    try {
+      return decodeURIComponent(value);
+    } catch (_) {
+      return value || "";
+    }
+  }
+
+  function normalizeLocale(input) {
+    const v = String(input || "").trim().toLowerCase();
+
+    if (v === "it" || v === "it-it" || v === "italian" || v === "italiano") return "it";
+    if (v === "en" || v === "en-us" || v === "en-gb" || v === "english" || v === "inglese") return "en";
+    if (v === "es" || v === "es-es" || v === "spanish" || v === "espanol" || v === "español") return "es";
+    if (v === "fr" || v === "fr-fr" || v === "french" || v === "francese" || v === "français") return "fr";
+    if (v === "de" || v === "de-de" || v === "german" || v === "tedesco" || v === "deutsch") return "de";
+    if (v === "auto") return "auto";
+
+    return "";
+  }
+
   function detectLocaleFromElement(el) {
-    const explicit = String(el.getAttribute("data-locale") || "")
-      .trim()
-      .toLowerCase();
+    const explicit =
+      normalizeLocale(el.getAttribute("data-locale")) ||
+      normalizeLocale(el.getAttribute("data-lang")) ||
+      normalizeLocale(el.getAttribute("data-widget-language"));
 
-    if (explicit === "it" || explicit === "en") return explicit;
+    if (explicit && explicit !== "auto") return explicit;
 
-    const htmlLang = String(document.documentElement.lang || "")
-      .trim()
-      .toLowerCase();
+    const htmlLang = normalizeLocale(document.documentElement.lang || "");
+    if (htmlLang && htmlLang !== "auto") return htmlLang;
 
-    if (htmlLang.startsWith("it")) return "it";
-    if (htmlLang.startsWith("en")) return "en";
-
-    const langs = []
+    const navLangs = []
       .concat(navigator.languages || [])
       .concat([navigator.language || ""])
-      .map(function (l) {
-        return String(l || "").toLowerCase();
-      })
+      .map(normalizeLocale)
       .filter(Boolean);
 
-    if (langs.some(function (l) { return l.startsWith("it"); })) return "it";
+    if (navLangs.length && navLangs[0] !== "auto") return navLangs[0];
+
     return "en";
   }
 
@@ -1349,7 +1521,15 @@
   }
 
   function formatReviewCount(value, locale) {
-    return new Intl.NumberFormat(locale === "it" ? "it-IT" : "en-US").format(
+    const localeMap = {
+      it: "it-IT",
+      en: "en-US",
+      es: "es-ES",
+      fr: "fr-FR",
+      de: "de-DE"
+    };
+
+    return new Intl.NumberFormat(localeMap[locale] || "en-US").format(
       Number(value || 0)
     );
   }
@@ -1502,10 +1682,10 @@
     if (direct) return direct;
 
     const slug = makeSlug(company);
-    if (locale === "en") {
-      return "https://www.welobadge.com/en/welo-page/" + encodeURIComponent(slug);
+    if (locale === "it") {
+      return "https://www.welobadge.com/welo-page/" + encodeURIComponent(slug);
     }
-    return "https://www.welobadge.com/welo-page/" + encodeURIComponent(slug);
+    return "https://www.welobadge.com/en/welo-page/" + encodeURIComponent(slug);
   }
 
   /* =========================================================
@@ -1542,6 +1722,7 @@
 
       for (let i = 0; i < candidates.length; i++) {
         const candidate = candidates[i];
+
         const exactUrl =
           buildBaseRestUrl() +
           "?select=*" +
@@ -1572,7 +1753,7 @@
   /* =========================================================
      LIGHTBOX
   ========================================================= */
-  function createLightbox(instanceId) {
+  function createLightbox(instanceId, T) {
     const overlay = document.createElement("div");
     overlay.className = "welo-review-lightbox-overlay";
     overlay.setAttribute("aria-hidden", "true");
@@ -1580,15 +1761,15 @@
 
     overlay.innerHTML = `
       <div class="welo-review-lightbox-inner">
-        <button class="welo-review-lightbox-close" type="button" aria-label="Close">
+        <button class="welo-review-lightbox-close" type="button" aria-label="${escapeHtml(T.close)}">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
 
-        <button class="welo-review-lightbox-nav welo-review-lightbox-prev" type="button" aria-label="Previous">‹</button>
+        <button class="welo-review-lightbox-nav welo-review-lightbox-prev" type="button" aria-label="${escapeHtml(T.previous)}">‹</button>
         <div class="welo-review-lightbox-media-container"></div>
-        <button class="welo-review-lightbox-nav welo-review-lightbox-next" type="button" aria-label="Next">›</button>
+        <button class="welo-review-lightbox-nav welo-review-lightbox-next" type="button" aria-label="${escapeHtml(T.next)}">›</button>
         <div class="welo-review-lightbox-counter"></div>
       </div>
     `;
@@ -1659,6 +1840,7 @@
     }
 
     closeBtn.addEventListener("click", close);
+
     overlay.addEventListener("click", function (e) {
       if (e.target === overlay) close();
     });
@@ -1689,12 +1871,12 @@
      TOOLTIP HANDLERS
   ========================================================= */
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV210) return;
-    window.__weloReviewsTooltipHandlersInstalledV210 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV300) return;
+    window.__weloReviewsTooltipHandlersInstalledV300 = true;
 
     function closeAll() {
       document
-        .querySelectorAll(".welo-reviews-widget .review-verified.is-tooltip-open, .welo-reviews-widget .welo-summary-verified.is-tooltip-open")
+        .querySelectorAll(".welo-reviews-widget .review-verified.is-tooltip-open")
         .forEach(function (el) {
           el.classList.remove("is-tooltip-open");
         });
@@ -1704,7 +1886,7 @@
       const insideLink = e.target.closest(".welo-reviews-widget .welo-verified-tooltip a");
       if (insideLink) return;
 
-      const trigger = e.target.closest(".welo-reviews-widget .review-verified, .welo-reviews-widget .welo-summary-verified");
+      const trigger = e.target.closest(".welo-reviews-widget .review-verified");
       if (!trigger) {
         closeAll();
         return;
@@ -1722,10 +1904,7 @@
       const active = document.activeElement;
       if (!active) return;
       if (!active.classList) return;
-      if (
-        !active.classList.contains("review-verified") &&
-        !active.classList.contains("welo-summary-verified")
-      ) return;
+      if (!active.classList.contains("review-verified")) return;
 
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -1745,14 +1924,27 @@
   async function shareReview(locale, stars, title, text) {
     const T = TEXTS[locale];
     const baseUrl = window.location.href.split("#")[0];
+
     const shareTitle =
       locale === "it"
         ? "Recensione da " + stars + "★ su Welo"
+        : locale === "es"
+        ? "Reseña de " + stars + "★ en Welo"
+        : locale === "fr"
+        ? "Avis de " + stars + "★ sur Welo"
+        : locale === "de"
+        ? stars + "★ Bewertung auf Welo"
         : stars + "★ review on Welo";
 
     const shareText =
       locale === "it"
         ? title + "\n\n" + text + "\n\nLeggi la recensione su Welo:"
+        : locale === "es"
+        ? title + "\n\n" + text + "\n\nLee la reseña en Welo:"
+        : locale === "fr"
+        ? title + "\n\n" + text + "\n\nLire l’avis sur Welo :"
+        : locale === "de"
+        ? title + "\n\n" + text + "\n\nBewertung auf Welo lesen:"
         : title + "\n\n" + text + "\n\nRead the review on Welo:";
 
     try {
@@ -1791,24 +1983,24 @@
     }
 
     const locale = detectLocaleFromElement(placeholderEl);
-    const T = TEXTS[locale];
+    const T = TEXTS[locale] || TEXTS.en;
     const themeValue = normalizeThemeValue(placeholderEl.getAttribute("data-theme") || "light");
     const preferredCountries = preferredCountriesFromElement(placeholderEl, locale);
     const allowedStarsSet = new Set(parseAllowedStars(placeholderEl.getAttribute("data-stars")));
     const weloPageUrl = getWeloPageUrl(placeholderEl, company, locale);
 
     const REPORT_URL =
-      locale === "en"
-        ? "https://www.welobadge.com/en/contact-us"
-        : "https://www.welobadge.com/contattaci";
+      locale === "it"
+        ? "https://www.welobadge.com/contattaci"
+        : "https://www.welobadge.com/en/contact-us";
 
     const VERIFIED_PROCESS_URL =
-      locale === "en"
-        ? "https://www.welobadge.com/en/verified-reviews"
-        : "https://www.welobadge.com/recensioni-verificate";
+      locale === "it"
+        ? "https://www.welobadge.com/recensioni-verificate"
+        : "https://www.welobadge.com/en/verified-reviews";
 
     const instanceId = "welo_" + Math.random().toString(36).slice(2, 10);
-    const lightbox = createLightbox(instanceId);
+    const lightbox = createLightbox(instanceId, T);
 
     let ALL_REVIEWS = [];
     let CURRENT_REVIEWS = [];
@@ -1821,13 +2013,12 @@
     placeholderEl.innerHTML = `
       <div class="welo-reviews-widget" data-welo-instance="${instanceId}">
         <div class="welo-summary">
-          <div class="welo-summary-verified" role="button" tabindex="0" aria-label="${escapeHtml(T.verified)}">
-            <img src="${VER_ICON}" alt="">
-            <span>${escapeHtml(T.verified)}</span>
-            <div class="welo-verified-tooltip" role="tooltip">
-              ${escapeHtml(T.verifiedTooltip)}
-              <a href="${escapeHtml(VERIFIED_PROCESS_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(T.readMore)}</a>
-            </div>
+          <div class="welo-summary-topline">
+            <span class="welo-summary-topline-text">${escapeHtml(T.summaryTopline)}</span>
+            <span class="welo-summary-brand">
+              <img class="welo-summary-brand-logo" src="${escapeHtml(BRAND_LOGO)}" alt="${escapeHtml(T.brandName)}">
+              <span class="welo-summary-brand-name">${escapeHtml(T.brandName)}</span>
+            </span>
           </div>
 
           <div class="welo-summary-main">
@@ -2082,7 +2273,7 @@
       if (action === "open-media") {
         const encoded = target.getAttribute("data-media");
         const index = Number(target.getAttribute("data-index")) || 0;
-        const media = safeJsonParse(decodeURIComponent(encoded || ""), []);
+        const media = safeJsonParse(safeDecode(encoded || ""), []);
         if (media.length) lightbox.open(media, index);
         return;
       }
@@ -2090,8 +2281,8 @@
       if (action === "share") {
         e.preventDefault();
         const stars = Number(target.getAttribute("data-stars")) || 0;
-        const title = decodeURIComponent(target.getAttribute("data-title") || "");
-        const text = decodeURIComponent(target.getAttribute("data-text") || "");
+        const title = safeDecode(target.getAttribute("data-title") || "");
+        const text = safeDecode(target.getAttribute("data-text") || "");
         shareReview(locale, stars, title, text);
       }
     });
