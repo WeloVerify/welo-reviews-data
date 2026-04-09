@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v4.1.0
+ * Welo Reviews Widget — v4.2.0
  *
  * Embed example:
  * <div
@@ -11,7 +11,7 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.1" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2" defer></script>
  */
 
 (function () {
@@ -138,8 +138,8 @@
   /* =========================================================
      GLOBAL GUARD
   ========================================================= */
-  if (window.__WELO_REVIEWS_WIDGET_V410__) return;
-  window.__WELO_REVIEWS_WIDGET_V410__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V420__) return;
+  window.__WELO_REVIEWS_WIDGET_V420__ = true;
 
   /* =========================================================
      THEME
@@ -194,8 +194,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV410) return;
-    window.__weloReviewsAutoThemeInstalledV410 = true;
+    if (window.__weloReviewsAutoThemeInstalledV420) return;
+    window.__weloReviewsAutoThemeInstalledV420 = true;
 
     if (!window.matchMedia) return;
 
@@ -226,10 +226,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v410")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v420")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v410";
+    style.id = "welo-reviews-widget-styles-v420";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -259,88 +259,80 @@
   width: 100%;
   text-align: left !important;
   overflow-x: clip;
-  --welo-header-title: #111111;
-  --welo-text: #5d5d5d;
-  --welo-text-strong: #111111;
-  --welo-muted: #8d8d8d;
-  --welo-surface: #ffffff;
-  --welo-surface-2: #fafafa;
-  --welo-border: #e6e6e6;
-  --welo-border-soft: #efefef;
-  --welo-stroke-section: #ececec;
-  --welo-pill-bg: #ffffff;
-  --welo-pill-hover: #f7f7f7;
-  --welo-pill-border: #e4e4e4;
-  --welo-pill-text: #111111;
-  --welo-pill-active-bg: #1b1b1b;
-  --welo-pill-active-text: #ffffff;
-  --welo-pill-active-border: #1b1b1b;
-  --welo-btn-bg: #111111;
-  --welo-btn-hover: #1e1e1e;
-  --welo-btn-border: #111111;
+  --review-bg: #ffffff;
+  --review-surface: #fafafa;
+  --review-border: #e8e8e8;
+  --review-border-strong: #dcdcdc;
+  --review-text: #111111;
+  --review-text-soft: #5d5d5d;
+  --review-text-muted: #8f8f8f;
+  --review-black: #171717;
+  --review-shadow: 0 2px 10px rgba(0, 0, 0, 0.025);
+  --review-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.045);
+  --review-radius-card: 14px;
+
+  --welo-btn-bg: #171717;
+  --welo-btn-hover: #242424;
+  --welo-btn-border: #171717;
   --welo-btn-text: #ffffff;
   --welo-btn-secondary-bg: #ffffff;
   --welo-btn-secondary-hover: #fafafa;
-  --welo-btn-secondary-border: #e3e3e3;
+  --welo-btn-secondary-border: #e8e8e8;
   --welo-btn-secondary-text: #111111;
+
   --welo-tooltip-bg: #ffffff;
   --welo-tooltip-border: #e8e8e8;
   --welo-tooltip-text: #5d5d5d;
   --welo-tooltip-link: #111111;
+
   --welo-star-filled: #171717;
   --welo-star-base-fill: #ffffff;
   --welo-star-base-stroke: #cfcfcf;
+
   --welo-verified-icon-filter: none;
   --welo-action-icon-filter: none;
   --welo-brand-logo-filter: none;
-  --welo-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.028);
-  --welo-card-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.06);
-  padding-inline: 0;
 }
 
 .welo-reviews-widget[data-resolved-theme="dark"] {
-  --welo-header-title: #ffffff;
-  --welo-text: #d2d2d2;
-  --welo-text-strong: #ffffff;
-  --welo-muted: #b2b2b2;
-  --welo-surface: #121212;
-  --welo-surface-2: #171717;
-  --welo-border: #272727;
-  --welo-border-soft: #2a2a2a;
-  --welo-stroke-section: #262626;
-  --welo-pill-bg: #121212;
-  --welo-pill-hover: #1a1a1a;
-  --welo-pill-border: #2b2b2b;
-  --welo-pill-text: #ffffff;
-  --welo-pill-active-bg: #232323;
-  --welo-pill-active-text: #ffffff;
-  --welo-pill-active-border: #313131;
+  --review-bg: #111111;
+  --review-surface: #171717;
+  --review-border: #2a2a2a;
+  --review-border-strong: #343434;
+  --review-text: #ffffff;
+  --review-text-soft: #d1d1d1;
+  --review-text-muted: #a3a3a3;
+  --review-black: #ffffff;
+  --review-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
+  --review-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.22);
+
   --welo-btn-bg: #ffffff;
-  --welo-btn-hover: #ededed;
+  --welo-btn-hover: #ececec;
   --welo-btn-border: #ffffff;
   --welo-btn-text: #111111;
-  --welo-btn-secondary-bg: #121212;
-  --welo-btn-secondary-hover: #1b1b1b;
+  --welo-btn-secondary-bg: #171717;
+  --welo-btn-secondary-hover: #1d1d1d;
   --welo-btn-secondary-border: #2a2a2a;
   --welo-btn-secondary-text: #ffffff;
-  --welo-tooltip-bg: #151515;
+
+  --welo-tooltip-bg: #161616;
   --welo-tooltip-border: #2b2b2b;
-  --welo-tooltip-text: #ffffff;
+  --welo-tooltip-text: #d7d7d7;
   --welo-tooltip-link: #ffffff;
+
   --welo-star-filled: #ffffff;
-  --welo-star-base-fill: #121212;
-  --welo-star-base-stroke: #505050;
+  --welo-star-base-fill: #111111;
+  --welo-star-base-stroke: #555555;
+
   --welo-verified-icon-filter: brightness(0) invert(1);
   --welo-action-icon-filter: brightness(0) invert(1);
   --welo-brand-logo-filter: brightness(0) invert(1);
-  --welo-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
-  --welo-card-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
 .welo-reviews-widget .welo-summary {
   width: 100%;
   padding: 50px 0;
-  border-bottom: 1px solid var(--welo-stroke-section);
+  border-bottom: 1px solid var(--review-border);
   margin-bottom: 24px;
 }
 
@@ -348,7 +340,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 28px;
   text-align: center;
@@ -356,23 +348,23 @@
 
 .welo-reviews-widget .welo-summary-topline-text,
 .welo-reviews-widget .welo-summary-brand-name {
-  font-size: 22px;
-  line-height: 1.08;
+  font-size: 34px;
+  line-height: 1.04;
   font-weight: 600;
-  letter-spacing: -0.03em;
-  color: var(--welo-text-strong);
+  letter-spacing: -0.04em;
+  color: var(--review-text);
 }
 
 .welo-reviews-widget .welo-summary-brand {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .welo-reviews-widget .welo-summary-brand-logo {
-  width: 19px;
-  height: 19px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   display: block;
   filter: var(--welo-brand-logo-filter);
@@ -392,7 +384,7 @@
   line-height: 0.92;
   font-weight: 800;
   letter-spacing: -0.07em;
-  color: var(--welo-header-title);
+  color: var(--review-text);
 }
 
 .welo-reviews-widget .welo-summary-side {
@@ -422,7 +414,7 @@
   font-size: 18px;
   line-height: 1.2;
   font-weight: 700;
-  color: var(--welo-text-strong);
+  color: var(--review-text);
   letter-spacing: -0.02em;
 }
 
@@ -457,94 +449,69 @@
   transform: translateY(1px);
 }
 
-.welo-reviews-widget .welo-verified-tooltip {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  left: auto;
-  width: min(360px, calc(100vw - 40px));
-  background: var(--welo-tooltip-bg);
-  border: 1px solid var(--welo-tooltip-border);
-  border-radius: 12px;
-  padding: 12px 13px;
-  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.08);
-  font-size: 13px;
-  line-height: 1.48;
-  color: var(--welo-tooltip-text);
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.18s ease;
-  z-index: 30;
-}
-
-.welo-reviews-widget .welo-verified-tooltip a {
-  color: var(--welo-tooltip-link);
-  text-decoration: underline;
-  font-weight: 600;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .welo-reviews-widget .review-verified:hover .welo-verified-tooltip {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
-}
-
-.welo-reviews-widget .review-verified.is-tooltip-open .welo-verified-tooltip {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
 .welo-reviews-widget .reviews-controls {
   display: flex;
-  align-items: center;
   justify-content: flex-start;
-  gap: 10px;
+  align-items: flex-start;
   flex-wrap: wrap;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 5;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
 .welo-reviews-widget .sort-pill-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   flex-wrap: wrap;
   min-width: 0;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.welo-reviews-widget .sort-pill-group::before,
+.welo-reviews-widget .sort-pill-group::after,
+.welo-reviews-widget .sort-pill::before,
+.welo-reviews-widget .sort-pill::after {
+  display: none !important;
+  content: none !important;
 }
 
 .welo-reviews-widget .sort-pill {
   appearance: none;
   -webkit-appearance: none;
-  border: 1px solid var(--welo-pill-border);
-  background: var(--welo-pill-bg);
-  color: var(--welo-pill-text);
-  min-height: 48px;
-  padding: 0 24px;
-  border-radius: 18px;
-  font-size: 17px;
+  background-image: none !important;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--review-border);
+  background: var(--review-bg) !important;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  color: var(--review-text);
   cursor: pointer;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.1s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.12s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 5px;
+  min-width: 44px;
   white-space: nowrap;
+  box-shadow: none !important;
+  outline: none !important;
   flex: 0 0 auto;
+  margin: 0;
   position: relative;
-  pointer-events: auto;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
 .welo-reviews-widget .sort-pill:hover {
-  background: var(--welo-pill-hover);
+  background: var(--review-surface) !important;
+  border-color: var(--review-border-strong);
 }
 
 .welo-reviews-widget .sort-pill:active {
@@ -552,24 +519,31 @@
 }
 
 .welo-reviews-widget .sort-pill.active {
-  background: var(--welo-pill-active-bg);
-  color: var(--welo-pill-active-text);
-  border-color: var(--welo-pill-active-border);
+  background: var(--review-black) !important;
+  color: #ffffff !important;
+  border-color: var(--review-black) !important;
+  box-shadow: none !important;
+}
+
+.welo-reviews-widget[data-resolved-theme="dark"] .sort-pill.active {
+  color: #111111 !important;
 }
 
 .welo-reviews-widget .review-card {
-  background: var(--welo-surface);
-  border: 1px solid var(--welo-border);
-  border-radius: 16px;
-  padding: 20px;
+  background: var(--review-bg);
+  border: 1px solid var(--review-border);
+  border-radius: var(--review-radius-card);
+  padding: 20px 20px 10px;
   margin-bottom: 18px;
   position: relative;
   transition: border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
-  box-shadow: var(--welo-card-shadow);
+  box-shadow: var(--review-shadow);
+  overflow: visible;
 }
 
 .welo-reviews-widget .review-card:hover {
-  box-shadow: var(--welo-card-shadow-hover);
+  border-color: var(--review-border-strong);
+  box-shadow: var(--review-shadow-hover);
 }
 
 .welo-reviews-widget .review-stars {
@@ -577,7 +551,7 @@
   align-items: center;
   gap: 4px;
   margin-bottom: 14px;
-  padding-right: 190px;
+  padding-right: 180px;
 }
 
 .welo-reviews-widget .review-star {
@@ -624,16 +598,65 @@
   font-size: 13px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--welo-text-strong);
+  color: var(--review-text);
   line-height: 1;
+}
+
+.welo-reviews-widget .welo-verified-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(360px, 82vw);
+  background: var(--welo-tooltip-bg);
+  border: 1px solid var(--welo-tooltip-border);
+  border-radius: 12px;
+  padding: 12px 13px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+  line-height: 1.48;
+  color: var(--welo-tooltip-text);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 30;
+}
+
+.welo-reviews-widget .welo-verified-tooltip::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 14px;
+}
+
+.welo-reviews-widget .welo-verified-tooltip a {
+  color: var(--welo-tooltip-link);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .welo-reviews-widget .review-verified:hover .welo-verified-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+.welo-reviews-widget .review-verified.is-tooltip-open .welo-verified-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .welo-reviews-widget .review-title {
   font-size: 18px;
   line-height: 1.3;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
-  color: var(--welo-text-strong);
+  color: var(--review-text);
   margin-bottom: 10px;
   padding-right: 210px;
   word-break: break-word;
@@ -641,7 +664,7 @@
 
 .welo-reviews-widget .review-text {
   font-size: 15px;
-  color: var(--welo-text);
+  color: var(--review-text-soft);
   line-height: 1.68;
   margin-bottom: 16px;
   white-space: pre-line;
@@ -653,12 +676,47 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
+.welo-reviews-widget .review-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.welo-reviews-widget .review-avatar {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #111111;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  border: 1px solid rgba(17, 17, 17, 0.04);
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.welo-reviews-widget .review-user-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  min-width: 0;
 }
 
 .welo-reviews-widget .review-author {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  color: var(--welo-text-strong);
+  color: var(--review-text);
   letter-spacing: -0.01em;
 }
 
@@ -667,7 +725,7 @@
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: var(--welo-muted);
+  color: var(--review-text-muted);
 }
 
 .welo-reviews-widget .review-date::before {
@@ -678,9 +736,9 @@
 }
 
 .welo-reviews-widget .review-actions {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--welo-border-soft);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--review-border);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -692,12 +750,12 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 34px;
-  padding: 6px 8px;
+  min-height: 26px;
+  padding: 2px 6px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--welo-muted);
+  color: var(--review-text-muted);
   cursor: pointer;
   text-decoration: none;
   transition: background-color 0.18s ease, color 0.18s ease, opacity 0.18s ease;
@@ -705,32 +763,33 @@
 
 .welo-reviews-widget .review-report:hover,
 .welo-reviews-widget .review-share:hover {
-  background: var(--welo-surface-2);
-  color: var(--welo-text-strong);
+  background: var(--review-surface);
+  color: var(--review-text);
+  opacity: 1;
 }
 
 .welo-reviews-widget .review-report img,
 .welo-reviews-widget .review-share img {
   width: 14px;
   height: 14px;
-  opacity: 0.8;
+  opacity: 0.78;
   flex-shrink: 0;
   filter: var(--welo-action-icon-filter);
 }
 
 .welo-reviews-widget .no-reviews-box {
   width: 100%;
-  background: var(--welo-surface);
-  border: 1px solid var(--welo-border);
+  background: var(--review-bg);
+  border: 1px solid var(--review-border);
   padding: 44px 20px;
-  border-radius: 16px;
+  border-radius: 14px;
   text-align: center;
-  box-shadow: var(--welo-card-shadow);
+  box-shadow: var(--review-shadow);
 }
 
 .welo-reviews-widget .no-reviews-text {
   font-size: 16px;
-  color: var(--welo-text-strong);
+  color: var(--review-text);
   margin-bottom: 20px;
   line-height: 1.5;
 }
@@ -787,10 +846,12 @@
   letter-spacing: -0.01em;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.1s ease, background-color 0.2s ease;
+  box-shadow: none;
 }
 
 .welo-reviews-widget .load-more-reviews:hover {
   background: var(--welo-btn-hover);
+  opacity: 0.96;
 }
 
 .welo-reviews-widget .load-more-reviews:active {
@@ -810,11 +871,12 @@
   height: 84px;
   border-radius: 18px;
   overflow: hidden;
-  border: 1px solid var(--welo-border);
+  border: 1px solid var(--review-border);
   background: #050505;
   cursor: pointer;
   flex-shrink: 0;
   transition: border-color 0.2s ease;
+  transform-origin: center center;
 }
 
 .welo-reviews-widget .review-media-thumb + .review-media-thumb {
@@ -829,6 +891,11 @@
 .welo-reviews-widget .review-media-thumb--secondary {
   transform: none;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border-color: var(--review-border);
+}
+
+.welo-reviews-widget .review-media-thumb:hover {
+  border-color: var(--review-border-strong);
 }
 
 .welo-reviews-widget .review-media-thumb img,
@@ -875,7 +942,7 @@
 
 .welo-reviews-widget .reviews-active-hint {
   font-size: 13px;
-  color: var(--welo-text);
+  color: var(--review-text-soft);
   margin-bottom: 12px;
   padding-left: 2px;
 }
@@ -993,6 +1060,16 @@
 }
 
 @media (max-width: 1024px) {
+  .welo-reviews-widget .welo-summary-topline-text,
+  .welo-reviews-widget .welo-summary-brand-name {
+    font-size: 30px;
+  }
+
+  .welo-reviews-widget .welo-summary-brand-logo {
+    width: 24px;
+    height: 24px;
+  }
+
   .welo-reviews-widget .welo-summary-score {
     font-size: 66px;
   }
@@ -1068,20 +1145,32 @@
   }
 
   .welo-reviews-widget .reviews-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
     margin-bottom: 16px;
   }
 
   .welo-reviews-widget .sort-pill-group {
+    display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
     width: 100%;
-    padding-bottom: 4px;
+    max-width: 100%;
+    padding: 0 0 4px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    touch-action: pan-x;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 6px;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
+    touch-action: pan-y pinch-zoom;
   }
 
   .welo-reviews-widget .sort-pill-group::-webkit-scrollbar {
@@ -1089,14 +1178,17 @@
   }
 
   .welo-reviews-widget .sort-pill {
-    min-height: 42px;
-    padding: 0 18px;
-    font-size: 15px;
-    border-radius: 16px;
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 7px 12px;
+    font-size: 12px;
+    gap: 5px;
+    min-width: 44px;
   }
 
   .welo-reviews-widget .review-card {
     padding: 16px;
+    border-radius: 14px;
     margin-bottom: 14px;
   }
 
@@ -1119,6 +1211,7 @@
     width: fit-content;
     max-width: 100%;
     padding: 8px 11px;
+    z-index: 10;
   }
 
   .welo-reviews-widget .review-verified img {
@@ -1140,6 +1233,25 @@
     font-size: 14px;
     line-height: 1.62;
     margin-bottom: 14px;
+  }
+
+  .welo-reviews-widget .review-user {
+    gap: 10px;
+  }
+
+  .welo-reviews-widget .review-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: 11px;
+  }
+
+  .welo-reviews-widget .review-author {
+    font-size: 14px;
+  }
+
+  .welo-reviews-widget .review-date {
+    font-size: 13px;
   }
 
   .welo-reviews-widget .review-media {
@@ -1197,10 +1309,13 @@
   }
 
   .welo-reviews-widget .welo-verified-tooltip {
-    right: 0;
-    left: auto;
+    top: calc(100% + 8px);
+    left: 0;
+    right: auto;
     width: min(300px, calc(100vw - 56px));
-    font-size: 12px;
+    border-radius: 12px;
+    padding: 12px 13px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
   }
 }
     `;
@@ -1210,6 +1325,16 @@
   /* =========================================================
      HELPERS
   ========================================================= */
+  const AVATAR_PALETTE = [
+    "#F3D58B",
+    "#F6C7D3",
+    "#D8C8FF",
+    "#CDE7FF",
+    "#D8F1C6",
+    "#FFD8B3",
+    "#E7E7E7"
+  ];
+
   function escapeHtml(str) {
     return String(str == null ? "" : str)
       .replace(/&/g, "&amp;")
@@ -1273,8 +1398,8 @@
       .toLowerCase()
       .normalize("NFKD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\\s-]/g, "")
+      .replace(/\\s+/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
   }
@@ -1296,9 +1421,9 @@
 
   function getPublicUrlFromPath(path) {
     if (!path) return null;
-    if (/^https?:\/\//i.test(String(path))) return String(path);
+    if (/^https?:\\/\\//i.test(String(path))) return String(path);
 
-    const cleaned = String(path).replace(/^\/+/, "");
+    const cleaned = String(path).replace(/^\\/+/, "");
     const encoded = cleaned
       .split("/")
       .map(function (segment) {
@@ -1327,7 +1452,7 @@
       .filter(Boolean)
       .map(function (path) {
         const url = getPublicUrlFromPath(path);
-        const isVideo = /\.(mp4|mov|webm|ogg|m4v)$/i.test(path);
+        const isVideo = /\\.(mp4|mov|webm|ogg|m4v)$/i.test(path);
         return {
           url: url,
           type: isVideo ? "video" : "image"
@@ -1434,11 +1559,11 @@
   function buildStarIcon(percent, id, cssClass) {
     const width = Math.max(0, Math.min(100, percent));
 
-    return `
-      <svg class="${cssClass}" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    return \`
+      <svg class="\${cssClass}" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id="${id}">
-            <rect x="0" y="0" width="${width}%" height="100%"></rect>
+          <clipPath id="\${id}">
+            <rect x="0" y="0" width="\${width}%" height="100%"></rect>
           </clipPath>
         </defs>
 
@@ -1448,12 +1573,12 @@
         ></path>
 
         <path
-          clip-path="url(#${id})"
+          clip-path="url(#\${id})"
           d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
           style="fill:var(--welo-star-filled);stroke:var(--welo-star-filled);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;"
         ></path>
       </svg>
-    `;
+    \`;
   }
 
   function buildAverageStars(average, uidPrefix, cssClass) {
@@ -1528,7 +1653,7 @@
 
     if (!raw || raw === "all") return all;
 
-    const plus = raw.match(/^(\d)\+$/);
+    const plus = raw.match(/^(\\d)\\+$/);
     if (plus) {
       const n = Number(plus[1]);
       return all.filter(function (x) {
@@ -1536,7 +1661,7 @@
       });
     }
 
-    const range = raw.match(/^(\d)\s*-\s*(\d)$/);
+    const range = raw.match(/^(\\d)\\s*-\\s*(\\d)$/);
     if (range) {
       const a = Number(range[1]);
       const b = Number(range[2]);
@@ -1547,7 +1672,7 @@
       });
     }
 
-    const single = raw.match(/^(\d)$/);
+    const single = raw.match(/^(\\d)$/);
     if (single) {
       const n = Number(single[1]);
       if (n >= 1 && n <= 5) return [n];
@@ -1569,6 +1694,37 @@
     }
 
     return "https://www.welobadge.com/en/welo-page/" + encodeURIComponent(slug);
+  }
+
+  function hashString(value) {
+    const str = String(value || "");
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
+  function getAvatarColor(name) {
+    return AVATAR_PALETTE[hashString(name) % AVATAR_PALETTE.length];
+  }
+
+  function getInitials(name) {
+    const clean = String(name || "").trim().replace(/\\s+/g, " ");
+    if (!clean) return "U";
+
+    const parts = clean.split(" ").filter(Boolean);
+
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+
+    if (parts[0].length >= 2) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+
+    return parts[0].charAt(0).toUpperCase();
   }
 
   /* =========================================================
@@ -1656,20 +1812,20 @@
     overlay.setAttribute("aria-hidden", "true");
     overlay.setAttribute("data-welo-lightbox", instanceId);
 
-    overlay.innerHTML = `
+    overlay.innerHTML = \`
       <div class="welo-review-lightbox-inner">
-        <button class="welo-review-lightbox-close" type="button" aria-label="${escapeHtml(T.close)}">
+        <button class="welo-review-lightbox-close" type="button" aria-label="\${escapeHtml(T.close)}">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
 
-        <button class="welo-review-lightbox-nav welo-review-lightbox-prev" type="button" aria-label="${escapeHtml(T.previous)}">‹</button>
+        <button class="welo-review-lightbox-nav welo-review-lightbox-prev" type="button" aria-label="\${escapeHtml(T.previous)}">‹</button>
         <div class="welo-review-lightbox-media-container"></div>
-        <button class="welo-review-lightbox-nav welo-review-lightbox-next" type="button" aria-label="${escapeHtml(T.next)}">›</button>
+        <button class="welo-review-lightbox-nav welo-review-lightbox-next" type="button" aria-label="\${escapeHtml(T.next)}">›</button>
         <div class="welo-review-lightbox-counter"></div>
       </div>
-    `;
+    \`;
 
     document.body.appendChild(overlay);
 
@@ -1768,8 +1924,8 @@
      TOOLTIP HANDLERS
   ========================================================= */
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV410) return;
-    window.__weloReviewsTooltipHandlersInstalledV410 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV420) return;
+    window.__weloReviewsTooltipHandlersInstalledV420 = true;
 
     function closeAll() {
       document
@@ -1838,8 +1994,8 @@
 
     const shareText =
       locale === "it"
-        ? title + "\n\n" + text + "\n\nLeggi la recensione su Welo:"
-        : title + "\n\n" + text + "\n\nRead the review on Welo:";
+        ? title + "\\n\\n" + text + "\\n\\nLeggi la recensione su Welo:"
+        : title + "\\n\\n" + text + "\\n\\nRead the review on Welo:";
 
     try {
       if (navigator.share) {
@@ -1851,7 +2007,7 @@
         return;
       }
 
-      const fallbackText = shareTitle + "\n\n" + shareText + "\n" + baseUrl;
+      const fallbackText = shareTitle + "\\n\\n" + shareText + "\\n" + baseUrl;
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(fallbackText);
@@ -1909,14 +2065,14 @@
     let visibleCount = 4;
 
     placeholderEl.classList.add("welo-reviews-widget-shell");
-    placeholderEl.innerHTML = `
-      <div class="welo-reviews-widget" data-welo-instance="${instanceId}">
+    placeholderEl.innerHTML = \`
+      <div class="welo-reviews-widget" data-welo-instance="\${instanceId}">
         <div class="welo-summary">
           <div class="welo-summary-topline">
-            <span class="welo-summary-topline-text">${escapeHtml(T.summaryTopline)}</span>
+            <span class="welo-summary-topline-text">\${escapeHtml(T.summaryTopline)}</span>
             <span class="welo-summary-brand">
-              <img class="welo-summary-brand-logo" src="${escapeHtml(BRAND_LOGO)}" alt="${escapeHtml(T.brandName)}">
-              <span class="welo-summary-brand-name">${escapeHtml(T.brandName)}</span>
+              <img class="welo-summary-brand-logo" src="\${escapeHtml(BRAND_LOGO)}" alt="\${escapeHtml(T.brandName)}">
+              <span class="welo-summary-brand-name">\${escapeHtml(T.brandName)}</span>
             </span>
           </div>
 
@@ -1924,28 +2080,28 @@
             <div class="welo-summary-score">0.0</div>
             <div class="welo-summary-side">
               <div class="welo-summary-stars"></div>
-              <div class="welo-summary-meta">${escapeHtml(T.basedOn)} 0 ${escapeHtml(T.reviewPlural)}</div>
+              <div class="welo-summary-meta">\${escapeHtml(T.basedOn)} 0 \${escapeHtml(T.reviewPlural)}</div>
             </div>
           </div>
 
           <div class="welo-summary-actions">
-            <a class="welo-summary-write-btn" href="${escapeHtml(
+            <a class="welo-summary-write-btn" href="\${escapeHtml(
               weloPageUrl
             )}" target="_blank" rel="noopener noreferrer">
-              ${escapeHtml(T.writeReview)}
+              \${escapeHtml(T.writeReview)}
             </a>
           </div>
         </div>
 
         <div class="reviews-controls">
           <div class="sort-pill-group">
-            <button class="sort-pill active" type="button" data-sort="newest">${escapeHtml(
+            <button class="sort-pill active" type="button" data-sort="newest">\${escapeHtml(
               T.newest
             )}</button>
-            <button class="sort-pill" type="button" data-sort="oldest">${escapeHtml(
+            <button class="sort-pill" type="button" data-sort="oldest">\${escapeHtml(
               T.oldest
             )}</button>
-            <button class="sort-pill sort-pill-attachments" type="button" data-attachments="true">${escapeHtml(
+            <button class="sort-pill sort-pill-attachments" type="button" data-attachments="true">\${escapeHtml(
               T.withMedia
             )}</button>
           </div>
@@ -1953,11 +2109,11 @@
 
         <div class="reviews-list">
           <div class="no-reviews-box">
-            <div class="no-reviews-text">${escapeHtml(T.loading)}</div>
+            <div class="no-reviews-text">\${escapeHtml(T.loading)}</div>
           </div>
         </div>
       </div>
-    `;
+    \`;
 
     const widgetRoot = placeholderEl.querySelector(".welo-reviews-widget");
     const listEl = placeholderEl.querySelector(".reviews-list");
@@ -2031,22 +2187,22 @@
       if (!CURRENT_REVIEWS.length) {
         const text = attachmentsOnly ? T.noReviewsMedia : T.noReviews;
 
-        listEl.innerHTML = `
+        listEl.innerHTML = \`
           <div class="no-reviews-box">
-            <div class="no-reviews-text">${escapeHtml(text)}</div>
-            <a class="review-button" href="${escapeHtml(
+            <div class="no-reviews-text">\${escapeHtml(text)}</div>
+            <a class="review-button" href="\${escapeHtml(
               weloPageUrl
             )}" target="_blank" rel="noopener noreferrer">
-              <img src="${BUTTON_ICON}" alt="">
-              ${escapeHtml(T.writeReview)}
+              <img src="\${BUTTON_ICON}" alt="">
+              \${escapeHtml(T.writeReview)}
             </a>
           </div>
-        `;
+        \`;
         return;
       }
 
       const hint = attachmentsOnly
-        ? `<div class="reviews-active-hint">${escapeHtml(T.onlyMediaHint)}</div>`
+        ? \`<div class="reviews-active-hint">\${escapeHtml(T.onlyMediaHint)}</div>\`
         : "";
 
       const cards = CURRENT_REVIEWS.slice(0, visibleCount)
@@ -2060,14 +2216,16 @@
           );
           const relativeDate = formatRelativeTime(date, locale);
           const media = parseMediaFromRow(r);
+          const initials = escapeHtml(getInitials(author));
+          const avatarColor = escapeHtml(getAvatarColor(author));
 
           let mediaHtml = "";
           if (media.length) {
             const encodedMedia = encodeURIComponent(JSON.stringify(media));
 
-            mediaHtml = `
+            mediaHtml = \`
               <div class="review-media">
-                ${media
+                \${media
                   .map(function (item, index) {
                     const classes =
                       "review-media-thumb " +
@@ -2077,98 +2235,103 @@
 
                     const inner =
                       item.type === "video"
-                        ? `
+                        ? \`
                           <div class="review-media-video-thumb">
-                            <video src="${escapeHtml(
+                            <video src="\${escapeHtml(
                               item.url
                             )}" muted playsinline preload="metadata"></video>
                           </div>
                           <div class="review-media-play-icon"></div>
-                        `
-                        : `<img src="${escapeHtml(item.url)}" alt="" loading="lazy">`;
+                        \`
+                        : \`<img src="\${escapeHtml(item.url)}" alt="" loading="lazy">\`;
 
-                    return `
+                    return \`
                       <div
-                        class="${classes}"
+                        class="\${classes}"
                         data-action="open-media"
-                        data-media="${encodedMedia}"
-                        data-index="${index}"
-                        style="z-index:${media.length - index};"
+                        data-media="\${encodedMedia}"
+                        data-index="\${index}"
+                        style="z-index:\${media.length - index};"
                       >
-                        ${inner}
+                        \${inner}
                       </div>
-                    `;
+                    \`;
                   })
                   .join("")}
               </div>
-            `;
+            \`;
           }
 
-          return `
+          return \`
             <div class="review-card">
-              <div class="review-verified" role="button" tabindex="0" aria-label="${escapeHtml(
+              <div class="review-verified" role="button" tabindex="0" aria-label="\${escapeHtml(
                 T.verified
               )}">
-                <img src="${VER_ICON}" alt="">
-                <span>${escapeHtml(T.verified)}</span>
+                <img src="\${VER_ICON}" alt="">
+                <span>\${escapeHtml(T.verified)}</span>
                 <div class="welo-verified-tooltip" role="tooltip">
-                  ${escapeHtml(T.verifiedTooltip)}
-                  <a href="${escapeHtml(
+                  \${escapeHtml(T.verifiedTooltip)}
+                  <a href="\${escapeHtml(
                     VERIFIED_PROCESS_URL
-                  )}" target="_blank" rel="noopener noreferrer">${escapeHtml(
+                  )}" target="_blank" rel="noopener noreferrer">\${escapeHtml(
                     T.readMore
                   )}</a>
                 </div>
               </div>
 
-              <div class="review-stars" aria-label="${stars} ${escapeHtml(
+              <div class="review-stars" aria-label="\${stars} \${escapeHtml(
             T.ariaStars
           )}">
-                ${renderCardStars(stars)}
+                \${renderCardStars(stars)}
               </div>
 
-              <div class="review-title">${escapeHtml(title)}</div>
-              <div class="review-text">${escapeHtml(text)}</div>
+              <div class="review-title">\${escapeHtml(title)}</div>
+              <div class="review-text">\${escapeHtml(text)}</div>
 
-              ${mediaHtml}
+              \${mediaHtml}
 
               <div class="review-footer">
-                <span class="review-author">${escapeHtml(author)}</span>
-                <span class="review-date">${escapeHtml(relativeDate)}</span>
+                <div class="review-user">
+                  <div class="review-avatar" aria-hidden="true" style="background:\${avatarColor};">\${initials}</div>
+                  <div class="review-user-meta">
+                    <span class="review-author">\${escapeHtml(author)}</span>
+                    <span class="review-date">\${escapeHtml(relativeDate)}</span>
+                  </div>
+                </div>
               </div>
 
               <div class="review-actions">
-                <a class="review-report" href="${escapeHtml(
+                <a class="review-report" href="\${escapeHtml(
                   REPORT_URL
                 )}" target="_blank" rel="noopener noreferrer">
-                  <img src="${FLAG_ICON}" alt="">
-                  <span>${escapeHtml(T.report)}</span>
+                  <img src="\${FLAG_ICON}" alt="">
+                  <span>\${escapeHtml(T.report)}</span>
                 </a>
 
                 <a
                   class="review-share"
                   href="#"
                   data-action="share"
-                  data-stars="${stars}"
-                  data-title="${encodeURIComponent(title)}"
-                  data-text="${encodeURIComponent(text)}"
+                  data-stars="\${stars}"
+                  data-title="\${encodeURIComponent(title)}"
+                  data-text="\${encodeURIComponent(text)}"
                 >
-                  <img src="${SHARE_ICON}" alt="">
-                  <span>${escapeHtml(T.share)}</span>
+                  <img src="\${SHARE_ICON}" alt="">
+                  <span>\${escapeHtml(T.share)}</span>
                 </a>
               </div>
             </div>
-          `;
+          \`;
         })
         .join("");
 
       const loadMore =
         visibleCount < CURRENT_REVIEWS.length
-          ? `
+          ? \`
             <button class="load-more-reviews" type="button" data-action="load-more">
-              ${escapeHtml(T.loadMore)}
+              \${escapeHtml(T.loadMore)}
             </button>
-          `
+          \`
           : "";
 
       listEl.innerHTML = hint + cards + loadMore;
@@ -2231,11 +2394,11 @@
         recomputeAndRender();
       } catch (err) {
         console.error("[Welo Reviews Widget] Load error:", err);
-        listEl.innerHTML = `
+        listEl.innerHTML = \`
           <div class="no-reviews-box">
-            <div class="no-reviews-text">${escapeHtml(T.widgetError)}</div>
+            <div class="no-reviews-text">\${escapeHtml(T.widgetError)}</div>
           </div>
-        `;
+        \`;
       }
     }
 
