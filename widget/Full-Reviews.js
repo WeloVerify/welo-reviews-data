@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v4.2.1
+ * Welo Reviews Widget — v4.2.2
  *
  * Embed example:
  * <div
@@ -11,7 +11,7 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.1" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.2" defer></script>
  */
 
 (function () {
@@ -138,8 +138,8 @@
   /* =========================================================
      GUARD
   ========================================================= */
-  if (window.__WELO_REVIEWS_WIDGET_V421__) return;
-  window.__WELO_REVIEWS_WIDGET_V421__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V422__) return;
+  window.__WELO_REVIEWS_WIDGET_V422__ = true;
 
   /* =========================================================
      THEME
@@ -194,8 +194,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV421) return;
-    window.__weloReviewsAutoThemeInstalledV421 = true;
+    if (window.__weloReviewsAutoThemeInstalledV422) return;
+    window.__weloReviewsAutoThemeInstalledV422 = true;
 
     if (!window.matchMedia) return;
 
@@ -226,10 +226,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v421")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v422")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v421";
+    style.id = "welo-reviews-widget-styles-v422";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -532,6 +532,7 @@
 
 .welo-reviews-widget .reviews-list {
   display: block;
+  padding-bottom: 90px;
 }
 
 .welo-reviews-widget .review-card {
@@ -1065,6 +1066,14 @@
 }
 
 @media (max-width: 1024px) {
+  .welo-reviews-widget {
+    padding-inline: 24px;
+  }
+
+  .welo-reviews-widget .reviews-list {
+    padding-bottom: 90px;
+  }
+
   .welo-reviews-widget .welo-summary-topline-text,
   .welo-reviews-widget .welo-summary-brand-name {
     font-size: 30px;
@@ -1087,6 +1096,10 @@
 @media (max-width: 767px) {
   .welo-reviews-widget {
     padding-inline: 18px;
+  }
+
+  .welo-reviews-widget .reviews-list {
+    padding-bottom: 90px;
   }
 
   .welo-reviews-widget .welo-summary {
@@ -1279,7 +1292,7 @@
   }
 
   .welo-reviews-widget .load-more-reviews {
-    margin: 12px auto 80px;
+    margin: 12px auto 0;
   }
 
   .welo-review-lightbox-inner {
@@ -1929,8 +1942,8 @@
      TOOLTIP HANDLERS
   ========================================================= */
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV421) return;
-    window.__weloReviewsTooltipHandlersInstalledV421 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV422) return;
+    window.__weloReviewsTooltipHandlersInstalledV422 = true;
 
     function closeAll() {
       document
