@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v4.0.0
+ * Welo Reviews Widget — v4.1.0
  *
  * Embed example:
  * <div
@@ -11,7 +11,7 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.1" defer></script>
  */
 
 (function () {
@@ -132,131 +132,14 @@
       close: "Close",
       previous: "Previous",
       next: "Next"
-    },
-    es: {
-      summaryTopline: "Reseñas verificadas por",
-      brandName: "Welo",
-      writeReview: "Escribir una reseña",
-      newest: "Más recientes",
-      oldest: "Más antiguas",
-      withMedia: "Con archivos",
-      noReviews: "Todavía no hay reseñas, sé el primero en escribir una.",
-      noReviewsMedia: "No hay reseñas con archivos que coincidan con los filtros.",
-      verified: "Verificada por Welo",
-      verifiedTooltip:
-        "Esta reseña fue verificada por Welo. Descubre nuestro proceso de verificación:",
-      readMore: "Leer más",
-      loadMore: "Cargar más",
-      share: "Compartir",
-      shareCopied: "Enlace copiado al portapapeles",
-      report: "Reportar",
-      onlyMediaHint: "Estás viendo solo reseñas con fotos o videos.",
-      copyLink: "Copia este enlace:",
-      justNow: "Ahora mismo",
-      today: "Hoy",
-      oneDayAgo: "hace 1 día",
-      daysAgo: "días",
-      oneWeekAgo: "hace 1 semana",
-      weeksAgo: "semanas",
-      oneMonthAgo: "hace 1 mes",
-      monthsAgo: "meses",
-      oneYearAgo: "hace 1 año",
-      yearsAgo: "años",
-      widgetError: "Error del widget.",
-      loading: "Cargando reseñas...",
-      basedOn: "Basado en",
-      reviewSingular: "reseña",
-      reviewPlural: "reseñas",
-      ariaStars: "de 5 estrellas",
-      close: "Cerrar",
-      previous: "Anterior",
-      next: "Siguiente"
-    },
-    fr: {
-      summaryTopline: "Avis vérifiés par",
-      brandName: "Welo",
-      writeReview: "Écrire un avis",
-      newest: "Plus récents",
-      oldest: "Plus anciens",
-      withMedia: "Avec médias",
-      noReviews: "Aucun avis pour le moment, soyez le premier à en écrire un.",
-      noReviewsMedia: "Aucun avis avec média ne correspond aux filtres.",
-      verified: "Vérifié par Welo",
-      verifiedTooltip:
-        "Cet avis a été vérifié par Welo. Découvrez notre processus de vérification :",
-      readMore: "En savoir plus",
-      loadMore: "Charger plus",
-      share: "Partager",
-      shareCopied: "Lien copié dans le presse-papiers",
-      report: "Signaler",
-      onlyMediaHint: "Vous voyez uniquement les avis avec photo ou vidéo.",
-      copyLink: "Copiez ce lien :",
-      justNow: "À l’instant",
-      today: "Aujourd’hui",
-      oneDayAgo: "il y a 1 jour",
-      daysAgo: "jours",
-      oneWeekAgo: "il y a 1 semaine",
-      weeksAgo: "semaines",
-      oneMonthAgo: "il y a 1 mois",
-      monthsAgo: "mois",
-      oneYearAgo: "il y a 1 an",
-      yearsAgo: "ans",
-      widgetError: "Erreur du widget.",
-      loading: "Chargement des avis...",
-      basedOn: "Basé sur",
-      reviewSingular: "avis",
-      reviewPlural: "avis",
-      ariaStars: "sur 5 étoiles",
-      close: "Fermer",
-      previous: "Précédent",
-      next: "Suivant"
-    },
-    de: {
-      summaryTopline: "Verifizierte Bewertungen von",
-      brandName: "Welo",
-      writeReview: "Bewertung schreiben",
-      newest: "Neueste",
-      oldest: "Älteste",
-      withMedia: "Mit Medien",
-      noReviews: "Noch keine Bewertungen, sei der Erste.",
-      noReviewsMedia: "Keine Bewertungen mit Medien passen zu den Filtern.",
-      verified: "Von Welo verifiziert",
-      verifiedTooltip:
-        "Diese Bewertung wurde von Welo verifiziert. Erfahre mehr über unseren Verifizierungsprozess:",
-      readMore: "Mehr erfahren",
-      loadMore: "Mehr laden",
-      share: "Teilen",
-      shareCopied: "Link in die Zwischenablage kopiert",
-      report: "Melden",
-      onlyMediaHint: "Es werden nur Bewertungen mit Fotos oder Videos angezeigt.",
-      copyLink: "Diesen Link kopieren:",
-      justNow: "Gerade eben",
-      today: "Heute",
-      oneDayAgo: "vor 1 Tag",
-      daysAgo: "Tagen",
-      oneWeekAgo: "vor 1 Woche",
-      weeksAgo: "Wochen",
-      oneMonthAgo: "vor 1 Monat",
-      monthsAgo: "Monaten",
-      oneYearAgo: "vor 1 Jahr",
-      yearsAgo: "Jahren",
-      widgetError: "Widget-Fehler.",
-      loading: "Bewertungen werden geladen...",
-      basedOn: "Basierend auf",
-      reviewSingular: "Bewertung",
-      reviewPlural: "Bewertungen",
-      ariaStars: "von 5 Sternen",
-      close: "Schließen",
-      previous: "Zurück",
-      next: "Weiter"
     }
   };
 
   /* =========================================================
      GLOBAL GUARD
   ========================================================= */
-  if (window.__WELO_REVIEWS_WIDGET_V400__) return;
-  window.__WELO_REVIEWS_WIDGET_V400__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V410__) return;
+  window.__WELO_REVIEWS_WIDGET_V410__ = true;
 
   /* =========================================================
      THEME
@@ -311,8 +194,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV400) return;
-    window.__weloReviewsAutoThemeInstalledV400 = true;
+    if (window.__weloReviewsAutoThemeInstalledV410) return;
+    window.__weloReviewsAutoThemeInstalledV410 = true;
 
     if (!window.matchMedia) return;
 
@@ -343,10 +226,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v400")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v410")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v400";
+    style.id = "welo-reviews-widget-styles-v410";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -369,11 +252,13 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  overflow-x: clip;
 }
 
 .welo-reviews-widget {
   width: 100%;
   text-align: left !important;
+  overflow-x: clip;
   --welo-header-title: #111111;
   --welo-text: #5d5d5d;
   --welo-text-strong: #111111;
@@ -407,6 +292,7 @@
   --welo-star-base-stroke: #cfcfcf;
   --welo-verified-icon-filter: none;
   --welo-action-icon-filter: none;
+  --welo-brand-logo-filter: none;
   --welo-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.028);
   --welo-card-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.06);
   padding-inline: 0;
@@ -446,6 +332,7 @@
   --welo-star-base-stroke: #505050;
   --welo-verified-icon-filter: brightness(0) invert(1);
   --welo-action-icon-filter: brightness(0) invert(1);
+  --welo-brand-logo-filter: brightness(0) invert(1);
   --welo-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
   --welo-card-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
@@ -461,7 +348,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 28px;
   text-align: center;
@@ -469,10 +356,10 @@
 
 .welo-reviews-widget .welo-summary-topline-text,
 .welo-reviews-widget .welo-summary-brand-name {
-  font-size: 45px;
-  line-height: 1.05;
+  font-size: 22px;
+  line-height: 1.08;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   color: var(--welo-text-strong);
 }
 
@@ -480,14 +367,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .welo-reviews-widget .welo-summary-brand-logo {
-  width: 37px;
-  height: 37px;
+  width: 19px;
+  height: 19px;
   object-fit: contain;
   display: block;
+  filter: var(--welo-brand-logo-filter);
 }
 
 .welo-reviews-widget .welo-summary-main {
@@ -572,8 +460,9 @@
 .welo-reviews-widget .welo-verified-tooltip {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
-  width: min(360px, 82vw);
+  right: 0;
+  left: auto;
+  width: min(360px, calc(100vw - 40px));
   background: var(--welo-tooltip-bg);
   border: 1px solid var(--welo-tooltip-border);
   border-radius: 12px;
@@ -1104,16 +993,6 @@
 }
 
 @media (max-width: 1024px) {
-  .welo-reviews-widget .welo-summary-topline-text,
-  .welo-reviews-widget .welo-summary-brand-name {
-    font-size: 40px;
-  }
-
-  .welo-reviews-widget .welo-summary-brand-logo {
-    width: 33px;
-    height: 33px;
-  }
-
   .welo-reviews-widget .welo-summary-score {
     font-size: 66px;
   }
@@ -1134,19 +1013,19 @@
   }
 
   .welo-reviews-widget .welo-summary-topline {
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 22px;
   }
 
   .welo-reviews-widget .welo-summary-topline-text,
   .welo-reviews-widget .welo-summary-brand-name {
-    font-size: 30px;
-    line-height: 1.06;
+    font-size: 19px;
+    line-height: 1.08;
   }
 
   .welo-reviews-widget .welo-summary-brand-logo {
-    width: 24px;
-    height: 24px;
+    width: 17px;
+    height: 17px;
   }
 
   .welo-reviews-widget .welo-summary-main {
@@ -1282,6 +1161,10 @@
     width: 100%;
   }
 
+  .welo-reviews-widget .load-more-reviews {
+    margin: 12px auto 80px;
+  }
+
   .welo-review-lightbox-inner {
     padding: 18px 20px;
   }
@@ -1314,6 +1197,8 @@
   }
 
   .welo-reviews-widget .welo-verified-tooltip {
+    right: 0;
+    left: auto;
     width: min(300px, calc(100vw - 56px));
     font-size: 12px;
   }
@@ -1355,9 +1240,6 @@
 
     if (v === "it" || v === "it-it" || v === "italian" || v === "italiano") return "it";
     if (v === "en" || v === "en-us" || v === "en-gb" || v === "english" || v === "inglese") return "en";
-    if (v === "es" || v === "es-es" || v === "spanish" || v === "espanol" || v === "español") return "es";
-    if (v === "fr" || v === "fr-fr" || v === "french" || v === "francese" || v === "français") return "fr";
-    if (v === "de" || v === "de-de" || v === "german" || v === "tedesco" || v === "deutsch") return "de";
     if (v === "auto") return "auto";
 
     return "";
@@ -1525,10 +1407,7 @@
   function formatReviewCount(value, locale) {
     const localeMap = {
       it: "it-IT",
-      en: "en-US",
-      es: "es-ES",
-      fr: "fr-FR",
-      de: "de-DE"
+      en: "en-US"
     };
 
     return new Intl.NumberFormat(localeMap[locale] || "en-US").format(
@@ -1889,8 +1768,8 @@
      TOOLTIP HANDLERS
   ========================================================= */
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV400) return;
-    window.__weloReviewsTooltipHandlersInstalledV400 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV410) return;
+    window.__weloReviewsTooltipHandlersInstalledV410 = true;
 
     function closeAll() {
       document
@@ -1955,23 +1834,11 @@
     const shareTitle =
       locale === "it"
         ? "Recensione da " + stars + "★ su Welo"
-        : locale === "es"
-        ? "Reseña de " + stars + "★ en Welo"
-        : locale === "fr"
-        ? "Avis de " + stars + "★ sur Welo"
-        : locale === "de"
-        ? stars + "★ Bewertung auf Welo"
         : stars + "★ review on Welo";
 
     const shareText =
       locale === "it"
         ? title + "\n\n" + text + "\n\nLeggi la recensione su Welo:"
-        : locale === "es"
-        ? title + "\n\n" + text + "\n\nLee la reseña en Welo:"
-        : locale === "fr"
-        ? title + "\n\n" + text + "\n\nLire l’avis sur Welo :"
-        : locale === "de"
-        ? title + "\n\n" + text + "\n\nBewertung auf Welo lesen:"
         : title + "\n\n" + text + "\n\nRead the review on Welo:";
 
     try {
