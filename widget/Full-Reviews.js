@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v4.2.0
+ * Welo Reviews Widget — v4.2.1
  *
  * Embed example:
  * <div
@@ -11,7 +11,7 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.1" defer></script>
  */
 
 (function () {
@@ -136,10 +136,10 @@
   };
 
   /* =========================================================
-     GLOBAL GUARD
+     GUARD
   ========================================================= */
-  if (window.__WELO_REVIEWS_WIDGET_V420__) return;
-  window.__WELO_REVIEWS_WIDGET_V420__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V421__) return;
+  window.__WELO_REVIEWS_WIDGET_V421__ = true;
 
   /* =========================================================
      THEME
@@ -194,8 +194,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV420) return;
-    window.__weloReviewsAutoThemeInstalledV420 = true;
+    if (window.__weloReviewsAutoThemeInstalledV421) return;
+    window.__weloReviewsAutoThemeInstalledV421 = true;
 
     if (!window.matchMedia) return;
 
@@ -226,10 +226,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v420")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v421")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v420";
+    style.id = "welo-reviews-widget-styles-v421";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -259,6 +259,7 @@
   width: 100%;
   text-align: left !important;
   overflow-x: clip;
+
   --review-bg: #ffffff;
   --review-surface: #fafafa;
   --review-border: #e8e8e8;
@@ -527,6 +528,10 @@
 
 .welo-reviews-widget[data-resolved-theme="dark"] .sort-pill.active {
   color: #111111 !important;
+}
+
+.welo-reviews-widget .reviews-list {
+  display: block;
 }
 
 .welo-reviews-widget .review-card {
@@ -1398,8 +1403,8 @@
       .toLowerCase()
       .normalize("NFKD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\\s-]/g, "")
-      .replace(/\\s+/g, "-")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
   }
@@ -1421,9 +1426,9 @@
 
   function getPublicUrlFromPath(path) {
     if (!path) return null;
-    if (/^https?:\\/\\//i.test(String(path))) return String(path);
+    if (/^https?:\/\//i.test(String(path))) return String(path);
 
-    const cleaned = String(path).replace(/^\\/+/, "");
+    const cleaned = String(path).replace(/^\/+/, "");
     const encoded = cleaned
       .split("/")
       .map(function (segment) {
@@ -1452,7 +1457,7 @@
       .filter(Boolean)
       .map(function (path) {
         const url = getPublicUrlFromPath(path);
-        const isVideo = /\\.(mp4|mov|webm|ogg|m4v)$/i.test(path);
+        const isVideo = /\.(mp4|mov|webm|ogg|m4v)$/i.test(path);
         return {
           url: url,
           type: isVideo ? "video" : "image"
@@ -1559,11 +1564,11 @@
   function buildStarIcon(percent, id, cssClass) {
     const width = Math.max(0, Math.min(100, percent));
 
-    return \`
-      <svg class="\${cssClass}" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    return `
+      <svg class="${cssClass}" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id="\${id}">
-            <rect x="0" y="0" width="\${width}%" height="100%"></rect>
+          <clipPath id="${id}">
+            <rect x="0" y="0" width="${width}%" height="100%"></rect>
           </clipPath>
         </defs>
 
@@ -1573,12 +1578,12 @@
         ></path>
 
         <path
-          clip-path="url(#\${id})"
+          clip-path="url(#${id})"
           d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
           style="fill:var(--welo-star-filled);stroke:var(--welo-star-filled);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;"
         ></path>
       </svg>
-    \`;
+    `;
   }
 
   function buildAverageStars(average, uidPrefix, cssClass) {
@@ -1653,7 +1658,7 @@
 
     if (!raw || raw === "all") return all;
 
-    const plus = raw.match(/^(\\d)\\+$/);
+    const plus = raw.match(/^(\d)\+$/);
     if (plus) {
       const n = Number(plus[1]);
       return all.filter(function (x) {
@@ -1661,7 +1666,7 @@
       });
     }
 
-    const range = raw.match(/^(\\d)\\s*-\\s*(\\d)$/);
+    const range = raw.match(/^(\d)\s*-\s*(\d)$/);
     if (range) {
       const a = Number(range[1]);
       const b = Number(range[2]);
@@ -1672,7 +1677,7 @@
       });
     }
 
-    const single = raw.match(/^(\\d)$/);
+    const single = raw.match(/^(\d)$/);
     if (single) {
       const n = Number(single[1]);
       if (n >= 1 && n <= 5) return [n];
@@ -1711,7 +1716,7 @@
   }
 
   function getInitials(name) {
-    const clean = String(name || "").trim().replace(/\\s+/g, " ");
+    const clean = String(name || "").trim().replace(/\s+/g, " ");
     if (!clean) return "U";
 
     const parts = clean.split(" ").filter(Boolean);
@@ -1812,20 +1817,20 @@
     overlay.setAttribute("aria-hidden", "true");
     overlay.setAttribute("data-welo-lightbox", instanceId);
 
-    overlay.innerHTML = \`
+    overlay.innerHTML = `
       <div class="welo-review-lightbox-inner">
-        <button class="welo-review-lightbox-close" type="button" aria-label="\${escapeHtml(T.close)}">
+        <button class="welo-review-lightbox-close" type="button" aria-label="${escapeHtml(T.close)}">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
 
-        <button class="welo-review-lightbox-nav welo-review-lightbox-prev" type="button" aria-label="\${escapeHtml(T.previous)}">‹</button>
+        <button class="welo-review-lightbox-nav welo-review-lightbox-prev" type="button" aria-label="${escapeHtml(T.previous)}">‹</button>
         <div class="welo-review-lightbox-media-container"></div>
-        <button class="welo-review-lightbox-nav welo-review-lightbox-next" type="button" aria-label="\${escapeHtml(T.next)}">›</button>
+        <button class="welo-review-lightbox-nav welo-review-lightbox-next" type="button" aria-label="${escapeHtml(T.next)}">›</button>
         <div class="welo-review-lightbox-counter"></div>
       </div>
-    \`;
+    `;
 
     document.body.appendChild(overlay);
 
@@ -1924,8 +1929,8 @@
      TOOLTIP HANDLERS
   ========================================================= */
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV420) return;
-    window.__weloReviewsTooltipHandlersInstalledV420 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV421) return;
+    window.__weloReviewsTooltipHandlersInstalledV421 = true;
 
     function closeAll() {
       document
@@ -1994,8 +1999,8 @@
 
     const shareText =
       locale === "it"
-        ? title + "\\n\\n" + text + "\\n\\nLeggi la recensione su Welo:"
-        : title + "\\n\\n" + text + "\\n\\nRead the review on Welo:";
+        ? title + "\n\n" + text + "\n\nLeggi la recensione su Welo:"
+        : title + "\n\n" + text + "\n\nRead the review on Welo:";
 
     try {
       if (navigator.share) {
@@ -2007,7 +2012,7 @@
         return;
       }
 
-      const fallbackText = shareTitle + "\\n\\n" + shareText + "\\n" + baseUrl;
+      const fallbackText = shareTitle + "\n\n" + shareText + "\n" + baseUrl;
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(fallbackText);
@@ -2065,14 +2070,14 @@
     let visibleCount = 4;
 
     placeholderEl.classList.add("welo-reviews-widget-shell");
-    placeholderEl.innerHTML = \`
-      <div class="welo-reviews-widget" data-welo-instance="\${instanceId}">
+    placeholderEl.innerHTML = `
+      <div class="welo-reviews-widget" data-welo-instance="${instanceId}">
         <div class="welo-summary">
           <div class="welo-summary-topline">
-            <span class="welo-summary-topline-text">\${escapeHtml(T.summaryTopline)}</span>
+            <span class="welo-summary-topline-text">${escapeHtml(T.summaryTopline)}</span>
             <span class="welo-summary-brand">
-              <img class="welo-summary-brand-logo" src="\${escapeHtml(BRAND_LOGO)}" alt="\${escapeHtml(T.brandName)}">
-              <span class="welo-summary-brand-name">\${escapeHtml(T.brandName)}</span>
+              <img class="welo-summary-brand-logo" src="${escapeHtml(BRAND_LOGO)}" alt="${escapeHtml(T.brandName)}">
+              <span class="welo-summary-brand-name">${escapeHtml(T.brandName)}</span>
             </span>
           </div>
 
@@ -2080,28 +2085,28 @@
             <div class="welo-summary-score">0.0</div>
             <div class="welo-summary-side">
               <div class="welo-summary-stars"></div>
-              <div class="welo-summary-meta">\${escapeHtml(T.basedOn)} 0 \${escapeHtml(T.reviewPlural)}</div>
+              <div class="welo-summary-meta">${escapeHtml(T.basedOn)} 0 ${escapeHtml(T.reviewPlural)}</div>
             </div>
           </div>
 
           <div class="welo-summary-actions">
-            <a class="welo-summary-write-btn" href="\${escapeHtml(
+            <a class="welo-summary-write-btn" href="${escapeHtml(
               weloPageUrl
             )}" target="_blank" rel="noopener noreferrer">
-              \${escapeHtml(T.writeReview)}
+              ${escapeHtml(T.writeReview)}
             </a>
           </div>
         </div>
 
         <div class="reviews-controls">
           <div class="sort-pill-group">
-            <button class="sort-pill active" type="button" data-sort="newest">\${escapeHtml(
+            <button class="sort-pill active" type="button" data-sort="newest">${escapeHtml(
               T.newest
             )}</button>
-            <button class="sort-pill" type="button" data-sort="oldest">\${escapeHtml(
+            <button class="sort-pill" type="button" data-sort="oldest">${escapeHtml(
               T.oldest
             )}</button>
-            <button class="sort-pill sort-pill-attachments" type="button" data-attachments="true">\${escapeHtml(
+            <button class="sort-pill sort-pill-attachments" type="button" data-attachments="true">${escapeHtml(
               T.withMedia
             )}</button>
           </div>
@@ -2109,11 +2114,11 @@
 
         <div class="reviews-list">
           <div class="no-reviews-box">
-            <div class="no-reviews-text">\${escapeHtml(T.loading)}</div>
+            <div class="no-reviews-text">${escapeHtml(T.loading)}</div>
           </div>
         </div>
       </div>
-    \`;
+    `;
 
     const widgetRoot = placeholderEl.querySelector(".welo-reviews-widget");
     const listEl = placeholderEl.querySelector(".reviews-list");
@@ -2187,22 +2192,22 @@
       if (!CURRENT_REVIEWS.length) {
         const text = attachmentsOnly ? T.noReviewsMedia : T.noReviews;
 
-        listEl.innerHTML = \`
+        listEl.innerHTML = `
           <div class="no-reviews-box">
-            <div class="no-reviews-text">\${escapeHtml(text)}</div>
-            <a class="review-button" href="\${escapeHtml(
+            <div class="no-reviews-text">${escapeHtml(text)}</div>
+            <a class="review-button" href="${escapeHtml(
               weloPageUrl
             )}" target="_blank" rel="noopener noreferrer">
-              <img src="\${BUTTON_ICON}" alt="">
-              \${escapeHtml(T.writeReview)}
+              <img src="${BUTTON_ICON}" alt="">
+              ${escapeHtml(T.writeReview)}
             </a>
           </div>
-        \`;
+        `;
         return;
       }
 
       const hint = attachmentsOnly
-        ? \`<div class="reviews-active-hint">\${escapeHtml(T.onlyMediaHint)}</div>\`
+        ? `<div class="reviews-active-hint">${escapeHtml(T.onlyMediaHint)}</div>`
         : "";
 
       const cards = CURRENT_REVIEWS.slice(0, visibleCount)
@@ -2223,9 +2228,9 @@
           if (media.length) {
             const encodedMedia = encodeURIComponent(JSON.stringify(media));
 
-            mediaHtml = \`
+            mediaHtml = `
               <div class="review-media">
-                \${media
+                ${media
                   .map(function (item, index) {
                     const classes =
                       "review-media-thumb " +
@@ -2235,103 +2240,103 @@
 
                     const inner =
                       item.type === "video"
-                        ? \`
+                        ? `
                           <div class="review-media-video-thumb">
-                            <video src="\${escapeHtml(
+                            <video src="${escapeHtml(
                               item.url
                             )}" muted playsinline preload="metadata"></video>
                           </div>
                           <div class="review-media-play-icon"></div>
-                        \`
-                        : \`<img src="\${escapeHtml(item.url)}" alt="" loading="lazy">\`;
+                        `
+                        : `<img src="${escapeHtml(item.url)}" alt="" loading="lazy">`;
 
-                    return \`
+                    return `
                       <div
-                        class="\${classes}"
+                        class="${classes}"
                         data-action="open-media"
-                        data-media="\${encodedMedia}"
-                        data-index="\${index}"
-                        style="z-index:\${media.length - index};"
+                        data-media="${encodedMedia}"
+                        data-index="${index}"
+                        style="z-index:${media.length - index};"
                       >
-                        \${inner}
+                        ${inner}
                       </div>
-                    \`;
+                    `;
                   })
                   .join("")}
               </div>
-            \`;
+            `;
           }
 
-          return \`
+          return `
             <div class="review-card">
-              <div class="review-verified" role="button" tabindex="0" aria-label="\${escapeHtml(
+              <div class="review-verified" role="button" tabindex="0" aria-label="${escapeHtml(
                 T.verified
               )}">
-                <img src="\${VER_ICON}" alt="">
-                <span>\${escapeHtml(T.verified)}</span>
+                <img src="${VER_ICON}" alt="">
+                <span>${escapeHtml(T.verified)}</span>
                 <div class="welo-verified-tooltip" role="tooltip">
-                  \${escapeHtml(T.verifiedTooltip)}
-                  <a href="\${escapeHtml(
+                  ${escapeHtml(T.verifiedTooltip)}
+                  <a href="${escapeHtml(
                     VERIFIED_PROCESS_URL
-                  )}" target="_blank" rel="noopener noreferrer">\${escapeHtml(
+                  )}" target="_blank" rel="noopener noreferrer">${escapeHtml(
                     T.readMore
                   )}</a>
                 </div>
               </div>
 
-              <div class="review-stars" aria-label="\${stars} \${escapeHtml(
+              <div class="review-stars" aria-label="${stars} ${escapeHtml(
             T.ariaStars
           )}">
-                \${renderCardStars(stars)}
+                ${renderCardStars(stars)}
               </div>
 
-              <div class="review-title">\${escapeHtml(title)}</div>
-              <div class="review-text">\${escapeHtml(text)}</div>
+              <div class="review-title">${escapeHtml(title)}</div>
+              <div class="review-text">${escapeHtml(text)}</div>
 
-              \${mediaHtml}
+              ${mediaHtml}
 
               <div class="review-footer">
                 <div class="review-user">
-                  <div class="review-avatar" aria-hidden="true" style="background:\${avatarColor};">\${initials}</div>
+                  <div class="review-avatar" aria-hidden="true" style="background:${avatarColor};">${initials}</div>
                   <div class="review-user-meta">
-                    <span class="review-author">\${escapeHtml(author)}</span>
-                    <span class="review-date">\${escapeHtml(relativeDate)}</span>
+                    <span class="review-author">${escapeHtml(author)}</span>
+                    <span class="review-date">${escapeHtml(relativeDate)}</span>
                   </div>
                 </div>
               </div>
 
               <div class="review-actions">
-                <a class="review-report" href="\${escapeHtml(
+                <a class="review-report" href="${escapeHtml(
                   REPORT_URL
                 )}" target="_blank" rel="noopener noreferrer">
-                  <img src="\${FLAG_ICON}" alt="">
-                  <span>\${escapeHtml(T.report)}</span>
+                  <img src="${FLAG_ICON}" alt="">
+                  <span>${escapeHtml(T.report)}</span>
                 </a>
 
                 <a
                   class="review-share"
                   href="#"
                   data-action="share"
-                  data-stars="\${stars}"
-                  data-title="\${encodeURIComponent(title)}"
-                  data-text="\${encodeURIComponent(text)}"
+                  data-stars="${stars}"
+                  data-title="${encodeURIComponent(title)}"
+                  data-text="${encodeURIComponent(text)}"
                 >
-                  <img src="\${SHARE_ICON}" alt="">
-                  <span>\${escapeHtml(T.share)}</span>
+                  <img src="${SHARE_ICON}" alt="">
+                  <span>${escapeHtml(T.share)}</span>
                 </a>
               </div>
             </div>
-          \`;
+          `;
         })
         .join("");
 
       const loadMore =
         visibleCount < CURRENT_REVIEWS.length
-          ? \`
+          ? `
             <button class="load-more-reviews" type="button" data-action="load-more">
-              \${escapeHtml(T.loadMore)}
+              ${escapeHtml(T.loadMore)}
             </button>
-          \`
+          `
           : "";
 
       listEl.innerHTML = hint + cards + loadMore;
@@ -2394,11 +2399,11 @@
         recomputeAndRender();
       } catch (err) {
         console.error("[Welo Reviews Widget] Load error:", err);
-        listEl.innerHTML = \`
+        listEl.innerHTML = `
           <div class="no-reviews-box">
-            <div class="no-reviews-text">\${escapeHtml(T.widgetError)}</div>
+            <div class="no-reviews-text">${escapeHtml(T.widgetError)}</div>
           </div>
-        \`;
+        `;
       }
     }
 
