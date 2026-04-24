@@ -1,238 +1,61 @@
-<div id="welo-review-overlay" class="welo-rv-overlay" aria-hidden="true">
-  <div class="welo-rv-modal" role="dialog" aria-modal="true" aria-labelledby="welo-rv-step1-title">
-    <button class="welo-rv-close" type="button" aria-label="Close">×</button>
+/*
+ * Welo Review Popup Form SDK
+ * ------------------------------------------------------------------
+ * Uso:
+ *   <script
+ *     src="https://weloverify.github.io/welo-reviews-data/widget/welo-popup-form.js?v=3"
+ *     data-company="Welo Badge"
+ *     defer>
+ *   </script>
+ *
+ * - Immagini: Supabase Storage (bucket `reviews-proof`)
+ * - Video:    Mux Direct Upload via Edge Function `create-mux-upload`
+ * - Nessuna API key Mux esposta lato client.
+ * ------------------------------------------------------------------
+ */
 
-    <div class="welo-rv-step is-active" data-step="1">
-      <h2 class="welo-rv-title" id="welo-rv-step1-title"></h2>
-      <p class="welo-rv-subtitle" id="welo-rv-step1-sub"></p>
+(function () {
+  "use strict";
 
-      <div class="welo-rv-stars-picker" id="welo-rv-stars-picker" aria-label="Rating selector">
-        <button type="button" data-value="1" aria-label="1 star">
-          <svg class="welo-rv-star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-            <path
-              class="welo-rv-star-bg"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#ffffff"
-              stroke="#cfcfcf"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-            <path
-              class="welo-rv-star-fill"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#171717"
-              stroke="#171717"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </svg>
-        </button>
+  // ------------------------------------------------------------------
+  // 0. Guard anti-doppio-caricamento
+  // ------------------------------------------------------------------
+  if (window.__WELO_REVIEW_POPUP_LOADED__) return;
+  window.__WELO_REVIEW_POPUP_LOADED__ = true;
 
-        <button type="button" data-value="2" aria-label="2 stars">
-          <svg class="welo-rv-star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-            <path
-              class="welo-rv-star-bg"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#ffffff"
-              stroke="#cfcfcf"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-            <path
-              class="welo-rv-star-fill"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#171717"
-              stroke="#171717"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </svg>
-        </button>
+  // ------------------------------------------------------------------
+  // 1. Leggi data-company dallo script tag (prima di qualunque async).
+  //    `document.currentScript` va catturato subito, qui.
+  // ------------------------------------------------------------------
+  function findScriptEl() {
+    if (document.currentScript) return document.currentScript;
+    var scripts = document.querySelectorAll('script[src*="welo-popup-form"]');
+    return scripts[scripts.length - 1] || null;
+  }
 
-        <button type="button" data-value="3" aria-label="3 stars">
-          <svg class="welo-rv-star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-            <path
-              class="welo-rv-star-bg"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#ffffff"
-              stroke="#cfcfcf"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-            <path
-              class="welo-rv-star-fill"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#171717"
-              stroke="#171717"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </svg>
-        </button>
+  var SCRIPT_EL = findScriptEl();
+  var DATA_COMPANY = SCRIPT_EL
+    ? (SCRIPT_EL.getAttribute("data-company") || "").trim()
+    : "";
 
-        <button type="button" data-value="4" aria-label="4 stars">
-          <svg class="welo-rv-star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-            <path
-              class="welo-rv-star-bg"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#ffffff"
-              stroke="#cfcfcf"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-            <path
-              class="welo-rv-star-fill"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#171717"
-              stroke="#171717"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </svg>
-        </button>
+  // ------------------------------------------------------------------
+  // 2. Costanti
+  // ------------------------------------------------------------------
+  var SUPABASE_URL_POPUP = "https://ufqvcojyfsnscuddadnw.supabase.co";
+  var SUPABASE_ANON_KEY_POPUP =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+  var CREATE_MUX_UPLOAD_URL =
+    SUPABASE_URL_POPUP + "/functions/v1/create-mux-upload";
+  var SUPABASE_LIB_URL =
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/umd/supabase.js";
 
-        <button type="button" data-value="5" aria-label="5 stars">
-          <svg class="welo-rv-star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-            <path
-              class="welo-rv-star-bg"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#ffffff"
-              stroke="#cfcfcf"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-            <path
-              class="welo-rv-star-fill"
-              d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-              fill="#171717"
-              stroke="#171717"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </svg>
-        </button>
-      </div>
+  var STYLE_EL_ID = "welo-popup-form-styles";
+  var OVERLAY_EL_ID = "welo-review-overlay";
 
-      <p class="welo-rv-hint" id="welo-rv-rating-hint"></p>
-    </div>
-
-    <div class="welo-rv-step" data-step="2">
-      <h2 class="welo-rv-title" id="welo-rv-step2-title"></h2>
-
-      <div class="welo-rv-group">
-        <label class="welo-rv-label" for="welo-rv-title-input" id="welo-rv-title-label"></label>
-        <input id="welo-rv-title-input" type="text" maxlength="200" class="welo-rv-input" />
-      </div>
-
-      <div class="welo-rv-group">
-        <label class="welo-rv-label" for="welo-rv-text-input" id="welo-rv-text-label"></label>
-        <textarea id="welo-rv-text-input" maxlength="2000" class="welo-rv-textarea"></textarea>
-      </div>
-
-      <div class="welo-rv-upload welo-rv-upload-desktop">
-        <div class="welo-rv-upload-header">
-          <span class="welo-rv-upload-title" id="welo-rv-upload-title"></span>
-          <span class="welo-rv-upload-badge">Optional</span>
-        </div>
-        <p class="welo-rv-upload-hint" id="welo-rv-upload-hint"></p>
-
-        <div class="welo-rv-dropzone" id="welo-rv-dropzone-desktop">
-          <div class="welo-rv-dropzone-content">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14,2 14,8 20,8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10,9 9,9 8,9"></polyline>
-            </svg>
-            <span id="welo-rv-dropzone-text-desktop"></span>
-            <span class="welo-rv-dropzone-browse" id="welo-rv-upload-btn-label-desktop"></span>
-          </div>
-          <input id="welo-rv-file-input-desktop" type="file" accept="image/*,video/*" multiple style="display:none;" />
-        </div>
-
-        <div id="welo-rv-preview-desktop" class="welo-rv-preview"></div>
-      </div>
-    </div>
-
-    <div class="welo-rv-step" data-step="3">
-      <h2 class="welo-rv-title" id="welo-rv-step3-title"></h2>
-
-      <div class="welo-rv-upload">
-        <div class="welo-rv-upload-header">
-          <span class="welo-rv-upload-title" id="welo-rv-upload-title-mobile"></span>
-          <span class="welo-rv-upload-badge">Optional</span>
-        </div>
-        <p class="welo-rv-upload-hint" id="welo-rv-upload-hint-mobile"></p>
-
-        <div class="welo-rv-dropzone" id="welo-rv-dropzone-mobile">
-          <div class="welo-rv-dropzone-content">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14,2 14,8 20,8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10,9 9,9 8,9"></polyline>
-            </svg>
-            <span id="welo-rv-dropzone-text-mobile"></span>
-            <span class="welo-rv-dropzone-browse" id="welo-rv-upload-btn-label-mobile"></span>
-          </div>
-          <input id="welo-rv-file-input-mobile" type="file" accept="image/*,video/*" multiple style="display:none;" />
-        </div>
-
-        <div id="welo-rv-preview-mobile" class="welo-rv-preview"></div>
-      </div>
-    </div>
-
-    <div class="welo-rv-step" data-step="4">
-      <h2 class="welo-rv-title" id="welo-rv-step4-title"></h2>
-
-      <div class="welo-rv-group">
-        <label class="welo-rv-label" for="welo-rv-email-input" id="welo-rv-email-label"></label>
-        <input id="welo-rv-email-input" type="email" maxlength="255" class="welo-rv-input" />
-      </div>
-
-      <div class="welo-rv-group">
-        <label class="welo-rv-label" for="welo-rv-name-input" id="welo-rv-name-label"></label>
-        <input id="welo-rv-name-input" type="text" maxlength="255" class="welo-rv-input" />
-      </div>
-
-      <div class="welo-rv-checkbox">
-        <input type="checkbox" id="welo-rv-accept" />
-        <label for="welo-rv-accept" id="welo-rv-accept-label"></label>
-      </div>
-    </div>
-
-    <div class="welo-rv-step" data-step="5">
-      <h2 class="welo-rv-title" id="welo-rv-thankyou-title"></h2>
-      <p class="welo-rv-subtitle" id="welo-rv-thankyou-text"></p>
-    </div>
-
-    <div id="welo-rv-error" class="welo-rv-error"></div>
-
-    <div id="welo-rv-loading" class="welo-rv-loading" aria-hidden="true">
-      <span class="welo-rv-spinner"></span>
-      <span id="welo-rv-loading-text"></span>
-    </div>
-
-    <div class="welo-rv-footer">
-      <button type="button" id="welo-rv-back-btn" class="welo-rv-btn-secondary"></button>
-      <button type="button" id="welo-rv-next-btn" class="welo-rv-btn-primary"></button>
-    </div>
-  </div>
-</div>
-
-<style>
+  // ------------------------------------------------------------------
+  // 3. CSS (iniettato via <style> in <head>)
+  // ------------------------------------------------------------------
+  var CSS_CONTENT = `
   #welo-review-overlay,
   #welo-review-overlay * {
     box-sizing: border-box;
@@ -325,14 +148,14 @@
     display: block;
   }
 
-.welo-rv-stars-picker {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  gap: 6px;
-  margin: 12px 0 8px;
-}
+  .welo-rv-stars-picker {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 6px;
+    margin: 12px 0 8px;
+  }
 
   .welo-rv-stars-picker button {
     appearance: none;
@@ -775,26 +598,232 @@
       min-width: 120px;
     }
   }
-</style>
+  `;
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
+  // ------------------------------------------------------------------
+  // 4. HTML (iniettato via insertAdjacentHTML in <body>)
+  //    I tag <style>/<script> originali sono esclusi: CSS viene iniettato
+  //    via injectStyles(), lo script non serve (siamo gia' in JS).
+  // ------------------------------------------------------------------
+  var STAR_SVG =
+    '<svg class="welo-rv-star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">' +
+      '<path class="welo-rv-star-bg" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" fill="#ffffff" stroke="#cfcfcf" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>' +
+      '<path class="welo-rv-star-fill" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" fill="#171717" stroke="#171717" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>' +
+    '</svg>';
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const SUPABASE_URL_POPUP = "https://ufqvcojyfsnscuddadnw.supabase.co";
-    const SUPABASE_ANON_KEY_POPUP =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+  var UPLOAD_ICON_SVG =
+    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+      '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' +
+      '<polyline points="14,2 14,8 20,8"></polyline>' +
+      '<line x1="16" y1="13" x2="8" y2="13"></line>' +
+      '<line x1="16" y1="17" x2="8" y2="17"></line>' +
+      '<polyline points="10,9 9,9 8,9"></polyline>' +
+    '</svg>';
 
-    // Endpoint Edge Function per creare Mux Direct Upload
-    const CREATE_MUX_UPLOAD_URL = SUPABASE_URL_POPUP + "/functions/v1/create-mux-upload";
+  function buildStarButton(value, label) {
+    return (
+      '<button type="button" data-value="' + value + '" aria-label="' + label + '">' +
+        STAR_SVG +
+      '</button>'
+    );
+  }
 
-    const { createClient } = supabase;
-    const supabasePopup = createClient(SUPABASE_URL_POPUP, SUPABASE_ANON_KEY_POPUP);
+  var HTML_CONTENT =
+    '<div id="welo-review-overlay" class="welo-rv-overlay" aria-hidden="true">' +
+      '<div class="welo-rv-modal" role="dialog" aria-modal="true" aria-labelledby="welo-rv-step1-title">' +
+        '<button class="welo-rv-close" type="button" aria-label="Close">&times;</button>' +
 
-    let COMPANY_SLUG_POPUP = `{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`.trim();
-    const LOCALE_POPUP = window.location.pathname.startsWith("/en") ? "en" : "it";
+        '<div class="welo-rv-step is-active" data-step="1">' +
+          '<h2 class="welo-rv-title" id="welo-rv-step1-title"></h2>' +
+          '<p class="welo-rv-subtitle" id="welo-rv-step1-sub"></p>' +
+          '<div class="welo-rv-stars-picker" id="welo-rv-stars-picker" aria-label="Rating selector">' +
+            buildStarButton(1, "1 star") +
+            buildStarButton(2, "2 stars") +
+            buildStarButton(3, "3 stars") +
+            buildStarButton(4, "4 stars") +
+            buildStarButton(5, "5 stars") +
+          '</div>' +
+          '<p class="welo-rv-hint" id="welo-rv-rating-hint"></p>' +
+        '</div>' +
 
-    const STRINGS_BY_LOCALE = {
+        '<div class="welo-rv-step" data-step="2">' +
+          '<h2 class="welo-rv-title" id="welo-rv-step2-title"></h2>' +
+          '<div class="welo-rv-group">' +
+            '<label class="welo-rv-label" for="welo-rv-title-input" id="welo-rv-title-label"></label>' +
+            '<input id="welo-rv-title-input" type="text" maxlength="200" class="welo-rv-input" />' +
+          '</div>' +
+          '<div class="welo-rv-group">' +
+            '<label class="welo-rv-label" for="welo-rv-text-input" id="welo-rv-text-label"></label>' +
+            '<textarea id="welo-rv-text-input" maxlength="2000" class="welo-rv-textarea"></textarea>' +
+          '</div>' +
+          '<div class="welo-rv-upload welo-rv-upload-desktop">' +
+            '<div class="welo-rv-upload-header">' +
+              '<span class="welo-rv-upload-title" id="welo-rv-upload-title"></span>' +
+              '<span class="welo-rv-upload-badge">Optional</span>' +
+            '</div>' +
+            '<p class="welo-rv-upload-hint" id="welo-rv-upload-hint"></p>' +
+            '<div class="welo-rv-dropzone" id="welo-rv-dropzone-desktop">' +
+              '<div class="welo-rv-dropzone-content">' +
+                UPLOAD_ICON_SVG +
+                '<span id="welo-rv-dropzone-text-desktop"></span>' +
+                '<span class="welo-rv-dropzone-browse" id="welo-rv-upload-btn-label-desktop"></span>' +
+              '</div>' +
+              '<input id="welo-rv-file-input-desktop" type="file" accept="image/*,video/*" multiple style="display:none;" />' +
+            '</div>' +
+            '<div id="welo-rv-preview-desktop" class="welo-rv-preview"></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="welo-rv-step" data-step="3">' +
+          '<h2 class="welo-rv-title" id="welo-rv-step3-title"></h2>' +
+          '<div class="welo-rv-upload">' +
+            '<div class="welo-rv-upload-header">' +
+              '<span class="welo-rv-upload-title" id="welo-rv-upload-title-mobile"></span>' +
+              '<span class="welo-rv-upload-badge">Optional</span>' +
+            '</div>' +
+            '<p class="welo-rv-upload-hint" id="welo-rv-upload-hint-mobile"></p>' +
+            '<div class="welo-rv-dropzone" id="welo-rv-dropzone-mobile">' +
+              '<div class="welo-rv-dropzone-content">' +
+                UPLOAD_ICON_SVG +
+                '<span id="welo-rv-dropzone-text-mobile"></span>' +
+                '<span class="welo-rv-dropzone-browse" id="welo-rv-upload-btn-label-mobile"></span>' +
+              '</div>' +
+              '<input id="welo-rv-file-input-mobile" type="file" accept="image/*,video/*" multiple style="display:none;" />' +
+            '</div>' +
+            '<div id="welo-rv-preview-mobile" class="welo-rv-preview"></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="welo-rv-step" data-step="4">' +
+          '<h2 class="welo-rv-title" id="welo-rv-step4-title"></h2>' +
+          '<div class="welo-rv-group">' +
+            '<label class="welo-rv-label" for="welo-rv-email-input" id="welo-rv-email-label"></label>' +
+            '<input id="welo-rv-email-input" type="email" maxlength="255" class="welo-rv-input" />' +
+          '</div>' +
+          '<div class="welo-rv-group">' +
+            '<label class="welo-rv-label" for="welo-rv-name-input" id="welo-rv-name-label"></label>' +
+            '<input id="welo-rv-name-input" type="text" maxlength="255" class="welo-rv-input" />' +
+          '</div>' +
+          '<div class="welo-rv-checkbox">' +
+            '<input type="checkbox" id="welo-rv-accept" />' +
+            '<label for="welo-rv-accept" id="welo-rv-accept-label"></label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="welo-rv-step" data-step="5">' +
+          '<h2 class="welo-rv-title" id="welo-rv-thankyou-title"></h2>' +
+          '<p class="welo-rv-subtitle" id="welo-rv-thankyou-text"></p>' +
+        '</div>' +
+
+        '<div id="welo-rv-error" class="welo-rv-error"></div>' +
+
+        '<div id="welo-rv-loading" class="welo-rv-loading" aria-hidden="true">' +
+          '<span class="welo-rv-spinner"></span>' +
+          '<span id="welo-rv-loading-text"></span>' +
+        '</div>' +
+
+        '<div class="welo-rv-footer">' +
+          '<button type="button" id="welo-rv-back-btn" class="welo-rv-btn-secondary"></button>' +
+          '<button type="button" id="welo-rv-next-btn" class="welo-rv-btn-primary"></button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  // ------------------------------------------------------------------
+  // 5. Injection helpers (idempotenti)
+  // ------------------------------------------------------------------
+  function injectStyles() {
+    if (document.getElementById(STYLE_EL_ID)) return;
+    var styleEl = document.createElement("style");
+    styleEl.id = STYLE_EL_ID;
+    styleEl.textContent = CSS_CONTENT;
+    document.head.appendChild(styleEl);
+  }
+
+  function injectMarkup() {
+    if (document.getElementById(OVERLAY_EL_ID)) return;
+    document.body.insertAdjacentHTML("beforeend", HTML_CONTENT);
+  }
+
+  // ------------------------------------------------------------------
+  // 6. Supabase lib loader (una sola volta, globale)
+  // ------------------------------------------------------------------
+  function loadSupabase() {
+    return new Promise(function (resolve, reject) {
+      if (window.supabase && typeof window.supabase.createClient === "function") {
+        resolve();
+        return;
+      }
+      var existing = document.querySelector(
+        'script[data-welo-supabase], script[src*="@supabase/supabase-js"]'
+      );
+      if (existing) {
+        if (window.supabase && typeof window.supabase.createClient === "function") {
+          resolve();
+          return;
+        }
+        existing.addEventListener("load", function () {
+          resolve();
+        });
+        existing.addEventListener("error", reject);
+        return;
+      }
+      var s = document.createElement("script");
+      s.src = SUPABASE_LIB_URL;
+      s.setAttribute("data-welo-supabase", "1");
+      s.onload = function () {
+        resolve();
+      };
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // 7. Bootstrap
+  // ------------------------------------------------------------------
+  function bootstrap() {
+    try {
+      injectStyles();
+      injectMarkup();
+    } catch (e) {
+      console.error("[Welo Review] Markup/CSS injection failed", e);
+      return;
+    }
+
+    loadSupabase()
+      .then(function () {
+        setupPopup();
+      })
+      .catch(function (err) {
+        console.error("[Welo Review] Failed to load Supabase", err);
+      });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootstrap);
+  } else {
+    bootstrap();
+  }
+
+  // ==================================================================
+  // 8. LOGICA POPUP (identica al file originale, solo adattata al SDK)
+  // ==================================================================
+  function setupPopup() {
+    var createClient = window.supabase && window.supabase.createClient;
+    if (typeof createClient !== "function") {
+      console.error("[Welo Review] Supabase client not available");
+      return;
+    }
+
+    var supabasePopup = createClient(SUPABASE_URL_POPUP, SUPABASE_ANON_KEY_POPUP);
+
+    // Company: priorita' assoluta a data-company, poi fallback slug URL.
+    var COMPANY_SLUG_POPUP = DATA_COMPANY || "";
+
+    var LOCALE_POPUP = window.location.pathname.startsWith("/en") ? "en" : "it";
+
+    var STRINGS_BY_LOCALE = {
       it: {
         step1Title: "Lascia una recensione",
         step1Sub: "Da 1 a 5 stelle, come valuti questa azienda?",
@@ -808,16 +837,17 @@
         uploadBtn: "Scegli i file",
         dropzoneText: "Trascina i file qui o",
         step4Title: "I tuoi dati",
-        emailLabel: "Email (non verrà mostrata pubblicamente)",
+        emailLabel: "Email (non verra' mostrata pubblicamente)",
         nameLabel: "Nome e cognome",
         thankyouTitle: "Grazie per la tua recensione",
-        thankyouText: "Il nostro team la analizzerà per verificarne l'autenticità. Potremmo ricontattarti se servono dettagli aggiuntivi.",
+        thankyouText:
+          "Il nostro team la analizzera' per verificarne l'autenticita'. Potremmo ricontattarti se servono dettagli aggiuntivi.",
         back: "Indietro",
         next: "Avanti",
         send: "Invia recensione",
         close: "Chiudi",
         required: "Per favore compila tutti i campi obbligatori.",
-        genericError: "Qualcosa è andato storto, riprova tra qualche minuto.",
+        genericError: "Qualcosa e' andato storto, riprova tra qualche minuto.",
         acceptText:
           'Accetto i <a href="https://www.welobadge.com/legal/pagine-legali" target="_blank" rel="noopener noreferrer">Termini &amp; Condizioni</a> e la <a href="https://www.welobadge.com/legal/pagine-legali" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.',
         acceptRequired: "Per continuare devi accettare Termini & Condizioni e Privacy Policy.",
@@ -851,7 +881,8 @@
         emailLabel: "Email (will not be shown publicly)",
         nameLabel: "Full name",
         thankyouTitle: "Thank you for your review",
-        thankyouText: "Our team will review it to verify authenticity. We may contact you if we need more details.",
+        thankyouText:
+          "Our team will review it to verify authenticity. We may contact you if we need more details.",
         back: "Back",
         next: "Next",
         send: "Submit review",
@@ -877,47 +908,47 @@
       }
     };
 
-    const STR = STRINGS_BY_LOCALE[LOCALE_POPUP] || STRINGS_BY_LOCALE.it;
+    var STR = STRINGS_BY_LOCALE[LOCALE_POPUP] || STRINGS_BY_LOCALE.it;
 
-    const overlay = document.getElementById("welo-review-overlay");
+    var overlay = document.getElementById(OVERLAY_EL_ID);
     if (!overlay) {
-      console.error("[Welo Review] overlay non trovato");
+      console.error("[Welo Review] overlay not found");
       return;
     }
 
-    const $ = function (id) {
+    function $id(id) {
       return document.getElementById(id);
-    };
+    }
 
-    const steps = overlay.querySelectorAll(".welo-rv-step");
-    const closeBtn = overlay.querySelector(".welo-rv-close");
-    const backBtn = $("welo-rv-back-btn");
-    const nextBtn = $("welo-rv-next-btn");
-    const errorBox = $("welo-rv-error");
-    const loadingBox = $("welo-rv-loading");
-    const loadingText = $("welo-rv-loading-text");
+    var steps = overlay.querySelectorAll(".welo-rv-step");
+    var closeBtn = overlay.querySelector(".welo-rv-close");
+    var backBtn = $id("welo-rv-back-btn");
+    var nextBtn = $id("welo-rv-next-btn");
+    var errorBox = $id("welo-rv-error");
+    var loadingBox = $id("welo-rv-loading");
+    var loadingText = $id("welo-rv-loading-text");
 
-    const starsBtns = overlay.querySelectorAll("#welo-rv-stars-picker button");
-    const titleInput = $("welo-rv-title-input");
-    const textInput = $("welo-rv-text-input");
-    const emailInput = $("welo-rv-email-input");
-    const nameInput = $("welo-rv-name-input");
+    var starsBtns = overlay.querySelectorAll("#welo-rv-stars-picker button");
+    var titleInput = $id("welo-rv-title-input");
+    var textInput = $id("welo-rv-text-input");
+    var emailInput = $id("welo-rv-email-input");
+    var nameInput = $id("welo-rv-name-input");
 
-    const fileInputDesktop = $("welo-rv-file-input-desktop");
-    const fileInputMobile = $("welo-rv-file-input-mobile");
-    const dropzoneDesktop = $("welo-rv-dropzone-desktop");
-    const dropzoneMobile = $("welo-rv-dropzone-mobile");
-    const dropzoneTextDesktop = $("welo-rv-dropzone-text-desktop");
-    const dropzoneTextMobile = $("welo-rv-dropzone-text-mobile");
-    const previewContainerDesktop = $("welo-rv-preview-desktop");
-    const previewContainerMobile = $("welo-rv-preview-mobile");
+    var fileInputDesktop = $id("welo-rv-file-input-desktop");
+    var fileInputMobile = $id("welo-rv-file-input-mobile");
+    var dropzoneDesktop = $id("welo-rv-dropzone-desktop");
+    var dropzoneMobile = $id("welo-rv-dropzone-mobile");
+    var dropzoneTextDesktop = $id("welo-rv-dropzone-text-desktop");
+    var dropzoneTextMobile = $id("welo-rv-dropzone-text-mobile");
+    var previewContainerDesktop = $id("welo-rv-preview-desktop");
+    var previewContainerMobile = $id("welo-rv-preview-mobile");
 
-    const acceptCheckbox = $("welo-rv-accept");
-    const acceptLabel = $("welo-rv-accept-label");
+    var acceptCheckbox = $id("welo-rv-accept");
+    var acceptLabel = $id("welo-rv-accept-label");
 
-    let currentStep = 1;
+    var currentStep = 1;
 
-    const STATE = {
+    var STATE = {
       rating: null,
       title: "",
       text: "",
@@ -928,25 +959,26 @@
     };
 
     function setText(id, value) {
-      const el = $(id);
+      var el = $id(id);
       if (el) el.textContent = value;
     }
 
-    function setHTML(id, value) {
-      const el = $(id);
-      if (el) el.innerHTML = value;
-    }
-
-    async function detectCountry() {
+    function detectCountry() {
       try {
-        const res = await fetch("https://ipapi.co/json/");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data && data.country_name) {
-          STATE.country = data.country_name;
-        }
+        fetch("https://ipapi.co/json/")
+          .then(function (res) {
+            return res.ok ? res.json() : null;
+          })
+          .then(function (data) {
+            if (data && data.country_name) {
+              STATE.country = data.country_name;
+            }
+          })
+          .catch(function () {
+            /* silent */
+          });
       } catch (e) {
-        console.warn("[Welo Review] Country detection failed", e);
+        /* silent */
       }
     }
 
@@ -955,19 +987,15 @@
     setText("welo-rv-step1-title", STR.step1Title);
     setText("welo-rv-step1-sub", STR.step1Sub);
     setText("welo-rv-rating-hint", STR.ratingHint);
-
     setText("welo-rv-step2-title", STR.step2Title);
     setText("welo-rv-step3-title", STR.step3Title);
     setText("welo-rv-step4-title", STR.step4Title);
-
     setText("welo-rv-title-label", STR.titleLabel);
     setText("welo-rv-text-label", STR.textLabel);
-
     setText("welo-rv-upload-title", STR.uploadTitle);
     setText("welo-rv-upload-title-mobile", STR.uploadTitle);
     setText("welo-rv-upload-hint", STR.uploadHint);
     setText("welo-rv-upload-hint-mobile", STR.uploadHint);
-
     setText("welo-rv-upload-btn-label-desktop", STR.uploadBtn);
     setText("welo-rv-upload-btn-label-mobile", STR.uploadBtn);
 
@@ -976,7 +1004,6 @@
 
     setText("welo-rv-email-label", STR.emailLabel);
     setText("welo-rv-name-label", STR.nameLabel);
-
     setText("welo-rv-thankyou-title", STR.thankyouTitle);
     setText("welo-rv-thankyou-text", STR.thankyouText);
 
@@ -994,24 +1021,24 @@
 
     function formatFileSize(bytes) {
       if (!bytes) return "0 Bytes";
-      const k = 1024;
-      const sizes = ["Bytes", "KB", "MB", "GB"];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      var k = 1024;
+      var sizes = ["Bytes", "KB", "MB", "GB"];
+      var i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     }
 
     function isValidEmail(email) {
-      const v = String(email || "").trim();
+      var v = String(email || "").trim();
       if (!v) return false;
       return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
     }
 
     function isVideoFile(file) {
-      return file && typeof file.type === "string" && file.type.startsWith("video/");
+      return file && typeof file.type === "string" && file.type.indexOf("video/") === 0;
     }
 
     function isImageFile(file) {
-      return file && typeof file.type === "string" && file.type.startsWith("image/");
+      return file && typeof file.type === "string" && file.type.indexOf("image/") === 0;
     }
 
     function canvasToBlob(canvas, type, quality) {
@@ -1031,69 +1058,62 @@
     }
 
     async function decodeImageToCanvas(file) {
-      const url = URL.createObjectURL(file);
+      var url = URL.createObjectURL(file);
       try {
         if ("createImageBitmap" in window) {
-          const bmp = await createImageBitmap(file);
-          const canvas = document.createElement("canvas");
+          var bmp = await createImageBitmap(file);
+          var canvas = document.createElement("canvas");
           canvas.width = bmp.width;
           canvas.height = bmp.height;
-          const ctx = canvas.getContext("2d");
+          var ctx = canvas.getContext("2d");
           ctx.drawImage(bmp, 0, 0);
           if (bmp && bmp.close) bmp.close();
           return canvas;
         }
-
-        const img = await new Promise(function (resolve, reject) {
-          const im = new Image();
+        var img = await new Promise(function (resolve, reject) {
+          var im = new Image();
           im.onload = function () {
             resolve(im);
           };
           im.onerror = reject;
           im.src = url;
         });
-
-        const canvas = document.createElement("canvas");
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        return canvas;
+        var canvas2 = document.createElement("canvas");
+        canvas2.width = img.naturalWidth || img.width;
+        canvas2.height = img.naturalHeight || img.height;
+        var ctx2 = canvas2.getContext("2d");
+        ctx2.drawImage(img, 0, 0);
+        return canvas2;
       } finally {
         URL.revokeObjectURL(url);
       }
     }
 
     function resizeCanvas(sourceCanvas, maxLongSide) {
-      const sw = sourceCanvas.width;
-      const sh = sourceCanvas.height;
-      const longSide = Math.max(sw, sh);
-
+      var sw = sourceCanvas.width;
+      var sh = sourceCanvas.height;
+      var longSide = Math.max(sw, sh);
       if (!maxLongSide || longSide <= maxLongSide) return sourceCanvas;
-
-      const scale = maxLongSide / longSide;
-      const tw = Math.max(1, Math.round(sw * scale));
-      const th = Math.max(1, Math.round(sh * scale));
-
-      const canvas = document.createElement("canvas");
+      var scale = maxLongSide / longSide;
+      var tw = Math.max(1, Math.round(sw * scale));
+      var th = Math.max(1, Math.round(sh * scale));
+      var canvas = document.createElement("canvas");
       canvas.width = tw;
       canvas.height = th;
-
-      const ctx = canvas.getContext("2d");
+      var ctx = canvas.getContext("2d");
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(sourceCanvas, 0, 0, tw, th);
-
       return canvas;
     }
 
     async function compressImageToTarget(file, targetBytes) {
       try {
-        const maxBytes = Math.max(1, Number(targetBytes) || 153600);
+        var maxBytes = Math.max(1, Number(targetBytes) || 153600);
         if (file.size <= maxBytes) return file;
 
-        const originalType = String(file.type || "").toLowerCase();
-        let outType = "image/jpeg";
+        var originalType = String(file.type || "").toLowerCase();
+        var outType = "image/jpeg";
 
         if (
           originalType === "image/png" ||
@@ -1109,11 +1129,11 @@
           outType = "image/webp";
         }
 
-        let canvas = await decodeImageToCanvas(file);
+        var canvas = await decodeImageToCanvas(file);
         canvas = resizeCanvas(canvas, 1600);
 
-        let quality = outType === "image/jpeg" ? 0.82 : 0.8;
-        let blob = await canvasToBlob(canvas, outType, quality);
+        var quality = outType === "image/jpeg" ? 0.82 : 0.8;
+        var blob = await canvasToBlob(canvas, outType, quality);
 
         if (!blob) {
           outType = "image/jpeg";
@@ -1123,26 +1143,21 @@
 
         if (!blob) return file;
 
-        const minQ = 0.45;
-
-        for (let i = 0; i < 10 && blob.size > maxBytes; i++) {
+        var minQ = 0.45;
+        for (var i = 0; i < 10 && blob.size > maxBytes; i++) {
           if (quality > minQ) {
             quality = Math.max(minQ, quality - 0.07);
-            const nextBlob = await canvasToBlob(canvas, outType, quality);
+            var nextBlob = await canvasToBlob(canvas, outType, quality);
             if (nextBlob) blob = nextBlob;
             continue;
           }
-
-          const newMaxLong = Math.max(720, Math.round(Math.max(canvas.width, canvas.height) * 0.88));
-          const resized = resizeCanvas(canvas, newMaxLong);
-
+          var newMaxLong = Math.max(720, Math.round(Math.max(canvas.width, canvas.height) * 0.88));
+          var resized = resizeCanvas(canvas, newMaxLong);
           if (resized === canvas) break;
-
           canvas = resized;
           quality = outType === "image/jpeg" ? 0.78 : 0.76;
-
-          const nextBlob = await canvasToBlob(canvas, outType, quality);
-          if (nextBlob) blob = nextBlob;
+          var nextBlob2 = await canvasToBlob(canvas, outType, quality);
+          if (nextBlob2) blob = nextBlob2;
         }
 
         if (!blob) return file;
@@ -1157,26 +1172,29 @@
     }
 
     function syncFileInputs() {
-      const dataTransfer = new DataTransfer();
-      STATE.files.forEach(function (file) {
-        dataTransfer.items.add(file);
-      });
-
-      if (fileInputDesktop) fileInputDesktop.files = dataTransfer.files;
-      if (fileInputMobile) fileInputMobile.files = dataTransfer.files;
+      try {
+        var dataTransfer = new DataTransfer();
+        STATE.files.forEach(function (file) {
+          dataTransfer.items.add(file);
+        });
+        if (fileInputDesktop) fileInputDesktop.files = dataTransfer.files;
+        if (fileInputMobile) fileInputMobile.files = dataTransfer.files;
+      } catch (e) {
+        /* silent - Safari iOS may restrict DataTransfer */
+      }
     }
 
     function createPreviewItem(file, index) {
-      const item = document.createElement("div");
+      var item = document.createElement("div");
       item.className = "welo-rv-preview-item";
       item.dataset.index = String(index);
 
-      const thumb = document.createElement("div");
+      var thumb = document.createElement("div");
       thumb.className = "welo-rv-preview-thumb";
 
       if (isImageFile(file)) {
-        const img = document.createElement("img");
-        const objectUrl = URL.createObjectURL(file);
+        var img = document.createElement("img");
+        var objectUrl = URL.createObjectURL(file);
         img.src = objectUrl;
         img.alt = "";
         img.onload = function () {
@@ -1184,32 +1202,32 @@
         };
         thumb.appendChild(img);
       } else if (isVideoFile(file)) {
-        const videoIcon = document.createElement("div");
-        videoIcon.innerHTML = "🎬";
+        var videoIcon = document.createElement("div");
+        videoIcon.textContent = "🎬";
         videoIcon.style.fontSize = "16px";
         thumb.appendChild(videoIcon);
       } else {
-        const fileIcon = document.createElement("div");
-        fileIcon.innerHTML = "📄";
+        var fileIcon = document.createElement("div");
+        fileIcon.textContent = "📄";
         fileIcon.style.fontSize = "16px";
         thumb.appendChild(fileIcon);
       }
 
-      const info = document.createElement("div");
+      var info = document.createElement("div");
       info.className = "welo-rv-preview-info";
 
-      const name = document.createElement("div");
+      var name = document.createElement("div");
       name.className = "welo-rv-preview-name";
       name.textContent = file.name;
 
-      const size = document.createElement("div");
+      var size = document.createElement("div");
       size.className = "welo-rv-preview-size";
       size.textContent = formatFileSize(file.size);
 
       info.appendChild(name);
       info.appendChild(size);
 
-      const removeBtn = document.createElement("button");
+      var removeBtn = document.createElement("button");
       removeBtn.type = "button";
       removeBtn.className = "welo-rv-preview-remove";
       removeBtn.textContent = STR.remove;
@@ -1221,20 +1239,17 @@
       item.appendChild(thumb);
       item.appendChild(info);
       item.appendChild(removeBtn);
-
       return item;
     }
 
     function renderPreviews() {
       if (previewContainerDesktop) previewContainerDesktop.innerHTML = "";
       if (previewContainerMobile) previewContainerMobile.innerHTML = "";
-
       STATE.files.forEach(function (file, index) {
-        const previewItemDesktop = createPreviewItem(file, index);
-        const previewItemMobile = createPreviewItem(file, index);
-
-        if (previewContainerDesktop) previewContainerDesktop.appendChild(previewItemDesktop);
-        if (previewContainerMobile) previewContainerMobile.appendChild(previewItemMobile);
+        var itemDesktop = createPreviewItem(file, index);
+        var itemMobile = createPreviewItem(file, index);
+        if (previewContainerDesktop) previewContainerDesktop.appendChild(itemDesktop);
+        if (previewContainerMobile) previewContainerMobile.appendChild(itemMobile);
       });
     }
 
@@ -1247,18 +1262,19 @@
     async function addFiles(fileList) {
       errorBox.textContent = "";
 
-      const remainingSlots = 5 - STATE.files.length;
+      var remainingSlots = 5 - STATE.files.length;
       if (remainingSlots <= 0) return;
 
-      const incoming = Array.from(fileList || []).slice(0, remainingSlots);
-      const maxSize = 20 * 1024 * 1024;
+      var incoming = Array.prototype.slice.call(fileList || [], 0, remainingSlots);
+      var maxSize = 20 * 1024 * 1024;
 
-      let alreadyHasVideo = STATE.files.some(isVideoFile);
-      let tooLargeFound = false;
-      let extraVideoFound = false;
+      var alreadyHasVideo = STATE.files.some(isVideoFile);
+      var tooLargeFound = false;
+      var extraVideoFound = false;
 
-      const filtered = [];
-      for (const file of incoming) {
+      var filtered = [];
+      for (var f = 0; f < incoming.length; f++) {
+        var file = incoming[f];
         if (file.size > maxSize) {
           tooLargeFound = true;
           continue;
@@ -1276,15 +1292,15 @@
       if (tooLargeFound) errorBox.textContent = STR.fileTooLarge;
       if (extraVideoFound) errorBox.textContent = STR.onlyOneVideo;
 
-      const targetBytes = 150 * 1024;
-      const processed = [];
+      var targetBytes = 150 * 1024;
+      var processed = [];
 
-      for (let i = 0; i < filtered.length; i++) {
-        const file = filtered[i];
-        if (isImageFile(file)) {
-          processed.push(await compressImageToTarget(file, targetBytes));
+      for (var i = 0; i < filtered.length; i++) {
+        var item = filtered[i];
+        if (isImageFile(item)) {
+          processed.push(await compressImageToTarget(item, targetBytes));
         } else {
-          processed.push(file);
+          processed.push(item);
         }
       }
 
@@ -1315,8 +1331,7 @@
       dropzone.addEventListener("drop", async function (e) {
         e.preventDefault();
         dropzone.classList.remove("is-dragover");
-
-        const files = e.dataTransfer && e.dataTransfer.files;
+        var files = e.dataTransfer && e.dataTransfer.files;
         if (files && files.length > 0) {
           await addFiles(files);
         }
@@ -1331,7 +1346,7 @@
 
     function updateStarsDisplay(activeValue) {
       starsBtns.forEach(function (button) {
-        const value = Number(button.dataset.value);
+        var value = Number(button.dataset.value);
         button.classList.toggle("is-active", value <= activeValue && activeValue > 0);
       });
     }
@@ -1346,7 +1361,6 @@
 
     function setStep(step) {
       currentStep = step;
-
       steps.forEach(function (s) {
         s.classList.toggle("is-active", Number(s.dataset.step) === step);
       });
@@ -1372,9 +1386,7 @@
       }
 
       window.setTimeout(function () {
-        if (step === 2 && titleInput) {
-          titleInput.focus();
-        }
+        if (step === 2 && titleInput) titleInput.focus();
       }, 120);
     }
 
@@ -1416,19 +1428,16 @@
     }
 
     function autoOpenReviewFromUrl() {
-      const hash = window.location.hash.toLowerCase();
-      const params = new URLSearchParams(window.location.search);
-
+      var hash = (window.location.hash || "").toLowerCase();
+      var params = new URLSearchParams(window.location.search);
       if (hash === "#recensione" || hash === "#review" || params.get("review") === "1") {
-        setTimeout(function () {
-          openPopup();
-        }, 150);
+        setTimeout(openPopup, 150);
       }
     }
 
     function normalizeCompanySlug() {
-      if (!COMPANY_SLUG_POPUP || COMPANY_SLUG_POPUP.indexOf("{{wf") > -1) {
-        const parts = window.location.pathname.split("/").filter(Boolean);
+      if (!COMPANY_SLUG_POPUP) {
+        var parts = window.location.pathname.split("/").filter(Boolean);
         COMPANY_SLUG_POPUP = decodeURIComponent(parts[parts.length - 1] || "").trim();
       }
     }
@@ -1436,42 +1445,41 @@
     normalizeCompanySlug();
     autoOpenReviewFromUrl();
 
+    // Esposizione globale
     window.openWeloReviewPopup = openPopup;
     window.openReviewModal = openPopup;
 
-    if (closeBtn) {
-      closeBtn.addEventListener("click", closePopup);
-    }
+    if (closeBtn) closeBtn.addEventListener("click", closePopup);
 
     overlay.addEventListener("click", function (e) {
       if (e.target === overlay) closePopup();
     });
 
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && overlay.classList.contains("is-visible")) {
-        closePopup();
-      }
+      if (e.key === "Escape" && overlay.classList.contains("is-visible")) closePopup();
     });
 
-    document.querySelectorAll('a[href="#recensione"], [href="#recensione"]').forEach(function (el) {
-      el.addEventListener("click", function (e) {
-        e.preventDefault();
-        openPopup();
+    // Qualsiasi link #recensione o #review apre il popup
+    document
+      .querySelectorAll(
+        'a[href="#recensione"], [href="#recensione"], a[href="#review"], [href="#review"]'
+      )
+      .forEach(function (el) {
+        el.addEventListener("click", function (e) {
+          e.preventDefault();
+          openPopup();
+        });
       });
-    });
 
     starsBtns.forEach(function (btn) {
-      const val = Number(btn.dataset.value);
-
+      var val = Number(btn.dataset.value);
       btn.addEventListener("click", function () {
         STATE.rating = val;
         updateStarsDisplay(val);
       });
-
       btn.addEventListener("mouseenter", function () {
         updateStarsDisplay(val);
       });
-
       btn.addEventListener("mouseleave", function () {
         updateStarsDisplay(STATE.rating || 0);
       });
@@ -1481,9 +1489,7 @@
     bindUploader(dropzoneMobile, fileInputMobile);
 
     backBtn.addEventListener("click", function () {
-      if (currentStep > 1 && currentStep <= 5) {
-        setStep(currentStep - 1);
-      }
+      if (currentStep > 1 && currentStep <= 5) setStep(currentStep - 1);
     });
 
     nextBtn.addEventListener("click", async function () {
@@ -1492,7 +1498,6 @@
           errorBox.textContent = STR.required;
           return;
         }
-
         setStep(2);
         return;
       }
@@ -1500,13 +1505,11 @@
       if (currentStep === 2) {
         STATE.title = String(titleInput.value || "").trim();
         STATE.text = String(textInput.value || "").trim();
-
         if (!STATE.title || !STATE.text) {
           errorBox.textContent = STR.required;
           return;
         }
-
-        const isMobile = window.innerWidth <= 480;
+        var isMobile = window.innerWidth <= 480;
         setStep(isMobile ? 3 : 4);
         return;
       }
@@ -1524,12 +1527,10 @@
           errorBox.textContent = STR.required;
           return;
         }
-
         if (!isValidEmail(STATE.email)) {
           errorBox.textContent = STR.invalidEmail;
           return;
         }
-
         if (!acceptCheckbox.checked) {
           errorBox.textContent = STR.acceptRequired;
           return;
@@ -1537,18 +1538,16 @@
         await submitReview();
         return;
       }
-      if (currentStep === 5) {
-        closePopup();
-      }
+
+      if (currentStep === 5) closePopup();
     });
 
-    // ------------------------------------------------------------------
-    // MUX: Direct Upload via Edge Function create-mux-upload
-    // Frontend non espone mai le API key Mux: parla solo con la Edge Function
-    // e col URL upload monouso restituito da Mux.
-    // ------------------------------------------------------------------
+    // --------------------------------------------------------------
+    // MUX: Direct Upload via Edge Function create-mux-upload.
+    // Nessuna API key Mux lato client.
+    // --------------------------------------------------------------
     async function createMuxDirectUpload(submissionId, company) {
-      const res = await fetch(CREATE_MUX_UPLOAD_URL, {
+      var res = await fetch(CREATE_MUX_UPLOAD_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1562,7 +1561,7 @@
         })
       });
 
-      const data = await res.json().catch(function () {
+      var data = await res.json().catch(function () {
         return {};
       });
 
@@ -1575,14 +1574,13 @@
     }
 
     async function putFileToMux(uploadUrl, file) {
-      const res = await fetch(uploadUrl, {
+      var res = await fetch(uploadUrl, {
         method: "PUT",
         body: file,
         headers: {
           "Content-Type": file.type || "application/octet-stream"
         }
       });
-
       if (!res.ok) {
         throw new Error("Mux PUT failed with status " + res.status);
       }
@@ -1607,64 +1605,67 @@
 
       setLoading(true, STR.uploading);
 
-      const submissionId = generateSubmissionId();
+      var submissionId = generateSubmissionId();
 
-      // Separa immagini da video. Le immagini restano su Supabase Storage,
-      // il primo (ed unico) video va su Mux.
-      const imageFiles = STATE.files.filter(isImageFile);
-      const videoFile = STATE.files.find(isVideoFile) || null;
+      // Separazione immagini/video: 1 video max via Mux, resto immagini via Storage.
+      var imageFiles = STATE.files.filter(isImageFile);
+      var videoFile = null;
+      for (var vf = 0; vf < STATE.files.length; vf++) {
+        if (isVideoFile(STATE.files[vf])) {
+          videoFile = STATE.files[vf];
+          break;
+        }
+      }
 
-      const storagePaths = [];
-      const originalFileNames = [];
+      var storagePaths = [];
+      var originalFileNames = [];
 
       try {
-        // 1. Upload immagini su Supabase Storage (invariato).
+        // 1. Upload immagini su Supabase Storage.
         if (imageFiles.length > 0) {
-          const total = imageFiles.length;
-
-          for (let i = 0; i < total; i++) {
-            const file = imageFiles[i];
+          var total = imageFiles.length;
+          for (var i = 0; i < total; i++) {
+            var file = imageFiles[i];
             originalFileNames.push(file.name);
 
             setLoading(true, STR.uploadingFile(i + 1, total));
 
-            const safeName = file.name.replace(/[^a-z0-9.\-]/gi, "_").toLowerCase();
-            const path = COMPANY_SLUG_POPUP + "/" + Date.now() + "-" + (i + 1) + "-" + safeName;
+            var safeName = file.name.replace(/[^a-z0-9.\-]/gi, "_").toLowerCase();
+            var path = COMPANY_SLUG_POPUP + "/" + Date.now() + "-" + (i + 1) + "-" + safeName;
 
-            const { data: uploadData, error: uploadError } = await supabasePopup.storage
+            var uploadRes = await supabasePopup.storage
               .from("reviews-proof")
               .upload(path, file, {
                 cacheControl: "3600",
                 upsert: false
               });
 
-            if (uploadError) {
-              console.error("[Welo Review] Upload error", uploadError);
-              throw uploadError;
+            if (uploadRes.error) {
+              console.error("[Welo Review] Upload error", uploadRes.error);
+              throw uploadRes.error;
             }
 
-            storagePaths.push((uploadData && uploadData.path) || path);
+            storagePaths.push((uploadRes.data && uploadRes.data.path) || path);
           }
         }
 
-        // 2. Se c'è un video, chiedi Direct Upload a Mux via Edge Function.
-        let muxUploadId = null;
-        let muxUploadUrl = null;
+        // 2. Mux Direct Upload per il video (se presente).
+        var muxUploadId = null;
+        var muxUploadUrl = null;
 
         if (videoFile) {
           setLoading(true, STR.preparingVideo);
-          const mux = await createMuxDirectUpload(submissionId, COMPANY_SLUG_POPUP);
+          var mux = await createMuxDirectUpload(submissionId, COMPANY_SLUG_POPUP);
           muxUploadId = mux.upload_id;
           muxUploadUrl = mux.upload_url;
           originalFileNames.push(videoFile.name);
         }
 
-        // 3. Insert recensione. Se c'è video, marchiamo già provider/status.
+        // 3. Insert recensione. Se c'e' video, marca provider/status.
         setLoading(true, STR.savingReview);
 
-        const nowIso = new Date().toISOString();
-
-        const payload = {
+        var nowIso = new Date().toISOString();
+        var payload = {
           azienda: COMPANY_SLUG_POPUP,
           Titolo: STATE.title,
           Testo: STATE.text,
@@ -1682,13 +1683,13 @@
           mux_status: videoFile ? "processing" : null
         };
 
-        const { error: insertError } = await supabasePopup
+        var insertRes = await supabasePopup
           .from("lascia_una_recensione")
           .insert([payload]);
 
-        if (insertError) {
-          console.error("[Welo Review] Insert error", insertError);
-          errorBox.textContent = insertError.message || STR.genericError;
+        if (insertRes.error) {
+          console.error("[Welo Review] Insert error", insertRes.error);
+          errorBox.textContent = insertRes.error.message || STR.genericError;
           nextBtn.disabled = false;
           backBtn.disabled = false;
           nextBtn.textContent = STR.send;
@@ -1696,9 +1697,7 @@
           return;
         }
 
-        // 4. Se c'è un video, fai il PUT su Mux. Il resto
-        //    (asset_id, playback_id, url, thumbnail, status=ready) viene
-        //    aggiornato dall'Edge Function mux-webhook.
+        // 4. PUT video su Mux. Il webhook Mux completa asset_id/playback_id/status.
         if (videoFile && muxUploadUrl) {
           setLoading(true, STR.uploadingVideo);
           try {
@@ -1728,5 +1727,5 @@
         setLoading(false, "");
       }
     }
-  });
-</script>
+  }
+})();
