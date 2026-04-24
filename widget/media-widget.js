@@ -40,6 +40,25 @@
     },
   };
 
+  const VIDEO_ONLY_VALUES = new Set([
+    "video",
+    "videos",
+    "video-only",
+    "only-video",
+    "video only",
+    "videos-only",
+    "only videos",
+    "only-videos",
+  ]);
+
+  const MEDIA_VALUES = new Set([
+    "media",
+    "all",
+    "all-media",
+    "everything",
+    "tutto",
+  ]);
+
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
   function createSlug(value) {
@@ -60,6 +79,15 @@
       .replace(/[_-]+/g, " ")
       .replace(/\s+/g, " ")
       .trim();
+  }
+
+  function normalizeOnlyValue(value) {
+    const raw = String(value || "media").toLowerCase().trim();
+
+    if (VIDEO_ONLY_VALUES.has(raw)) return "video";
+    if (MEDIA_VALUES.has(raw)) return "media";
+
+    return "media";
   }
 
   function getItemCompany(item) {
@@ -589,8 +617,23 @@ mux-video.wm-media::part(video) {
     document.head.appendChild(style);
   }
 
+  function isImageUrl(url = "") {
+    const u = String(url || "").toLowerCase().split("?")[0].split("#")[0];
+
+    return (
+      u.endsWith(".jpg") ||
+      u.endsWith(".jpeg") ||
+      u.endsWith(".png") ||
+      u.endsWith(".webp") ||
+      u.endsWith(".gif") ||
+      u.endsWith(".avif") ||
+      u.endsWith(".heic") ||
+      u.endsWith(".heif")
+    );
+  }
+
   function isVideoUrl(url = "") {
-    const u = String(url || "").toLowerCase().split("?")[0];
+    const u = String(url || "").toLowerCase().split("?")[0].split("#")[0];
 
     return (
       u.endsWith(".mp4") ||
@@ -711,15 +754,12 @@ mux-video.wm-media::part(video) {
     );
   }
 
-  function isMuxItem(item) {
+  function isMuxReadyItem(item) {
     const provider = String(item.provider || item.video_provider || "").toLowerCase();
-    const muxStatus = String(item.mux_status || item.status_mux || "").toLowerCase();
+    const muxStatus = String(item.mux_status || item.status_mux || item.status || "").toLowerCase();
+    const playbackId = getMuxPlaybackId(item);
 
-    return (
-      provider === "mux" ||
-      !!getMuxPlaybackId(item) ||
-      muxStatus === "ready"
-    );
+    return provider === "mux" && !!playbackId && (!muxStatus || muxStatus === "ready" || muxStatus === "approved");
   }
 
   function buildMuxUrl(playbackId) {
@@ -770,7 +810,7 @@ mux-video.wm-media::part(video) {
     const weloPageUrl =
       el.getAttribute("data-url") || `${DEFAULT_WELO_PAGE_BASE}${companySlug}`;
 
-    const only = (el.getAttribute("data-only") || "media").toLowerCase().trim();
+    const only = normalizeOnlyValue(el.getAttribute("data-only") || "media");
     const anonKey = el.getAttribute("data-anon-key") || "";
 
     const HOVER_CAPABLE =
@@ -838,7 +878,7 @@ mux-video.wm-media::part(video) {
 
     function normalizeItem(item) {
       const playbackId = getMuxPlaybackId(item);
-      const provider = isMuxItem(item) && playbackId ? "mux" : "supabase";
+      const provider = isMuxReadyItem(item) ? "mux" : "supabase";
 
       const rawUrl =
         item.url ||
@@ -858,9 +898,11 @@ mux-video.wm-media::part(video) {
         "";
 
       const muxUrl = playbackId ? buildMuxUrl(playbackId) : "";
-      const url = provider === "mux"
-        ? (rawUrl || muxUrl)
-        : (rawUrl || normalizeStoragePath(proofPath));
+
+      const url =
+        provider === "mux"
+          ? (rawUrl || muxUrl)
+          : (rawUrl || normalizeStoragePath(proofPath));
 
       const thumbnail =
         item.thumbnail ||
@@ -888,11 +930,19 @@ mux-video.wm-media::part(video) {
         item.submitted_at ||
         null;
 
-      const isVideo =
-        provider === "mux" ||
-        item.type === "video" ||
-        item.media_type === "video" ||
-        isVideoUrl(url);
+      let isVideo = false;
+
+      if (provider === "mux" && playbackId) {
+        isVideo = true;
+      } else if (String(item.type || "").toLowerCase() === "video") {
+        isVideo = true;
+      } else if (String(item.media_type || "").toLowerCase() === "video") {
+        isVideo = true;
+      } else if (url && isVideoUrl(url)) {
+        isVideo = true;
+      } else if (url && isImageUrl(url)) {
+        isVideo = false;
+      }
 
       return {
         url,
@@ -903,6 +953,7 @@ mux-video.wm-media::part(video) {
         date: created,
         isVideo,
         company: getItemCompany(item),
+        raw: item,
       };
     }
 
@@ -962,9 +1013,7 @@ mux-video.wm-media::part(video) {
     function ensureVideoSrc(videoEl) {
       if (!videoEl) return;
 
-      if (videoEl.tagName && videoEl.tagName.toLowerCase() === "mux-video") {
-        return;
-      }
+      if (videoEl.tagName && videoEl.tagName.toLowerCase() === "mux-video") return;
 
       if (!videoEl.src && videoEl.dataset && videoEl.dataset.src) {
         videoEl.src = videoEl.dataset.src;
@@ -1335,6 +1384,7 @@ mux-video.wm-media::part(video) {
         url.searchParams.set("company_slug", companySlug);
         url.searchParams.set("exact", "true");
         url.searchParams.set("limit", String(limit));
+        url.searchParams.set("only", only);
 
         const headers = {};
 
@@ -1366,7 +1416,7 @@ mux-video.wm-media::part(video) {
           .filter((x) => !!x.url || !!x.playbackId);
 
         if (only === "video") {
-          rawItems = rawItems.filter((x) => x.isVideo);
+          rawItems = rawItems.filter((x) => x.isVideo === true);
         }
 
         const hasMuxVideos = rawItems.some((x) => x.provider === "mux" && x.playbackId);
