@@ -5,7 +5,7 @@
 
   const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnN1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiOiJ1ZnF2Y29qeWZzbnNjdWRkYWRudyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ3ODE4NjY5LCJleHAiOjIwNjMzOTQ2Njl9.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
 
   const TABLE_NAME = "lascia_una_recensione";
   const STAR_FIELD = "Da 1 a 5 stelle come lo valuti?";
@@ -15,6 +15,7 @@
 
   const logoUrl =
     "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png";
+
   const starUrl =
     "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/6821f39414601e1d161f5d08_Image%20(1).png";
 
@@ -39,8 +40,8 @@
         padding: 10px 18px;
         font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
         font-size: 15px;
-        color: #111;
-        text-decoration: none;
+        color: #111 !important;
+        text-decoration: none !important;
         line-height: 1;
         font-weight: 500;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -119,8 +120,12 @@
   function createUrlSlug(value) {
     return String(value || "")
       .trim()
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9\s_-]/g, "")
       .replace(/[_\s]+/g, "-")
-      .replace(/-+/g, "-");
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
   }
 
   function formatReviews(num) {
@@ -172,39 +177,54 @@
     return num !== null && num > 0 && num <= 5;
   }
 
-  function slugToWords(slug) {
-    return String(slug || "")
+  function slugToWords(value) {
+    return String(value || "")
       .trim()
       .replace(/[-_]+/g, " ")
       .replace(/\s+/g, " ")
       .trim();
   }
 
-  function titleCase(str) {
-    return String(str || "")
+  function titleCase(value) {
+    return String(value || "")
       .split(" ")
       .filter(Boolean)
-      .map(function (part) {
-        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-      })
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
       .join(" ");
   }
 
-  function getCompanyCandidates(companySlug) {
-    const slug = String(companySlug || "").trim();
-    const spaced = slugToWords(slug);
+  function getCompanyCandidates(companyName) {
+    const raw = String(companyName || "").trim();
+    const cleanSlug = createUrlSlug(raw);
+    const spaced = slugToWords(raw);
+    const spacedFromSlug = slugToWords(cleanSlug);
     const titled = titleCase(spaced);
-    const urlSlug = createUrlSlug(slug);
+    const titledFromSlug = titleCase(spacedFromSlug);
 
-    return Array.from(new Set([slug, spaced, titled, urlSlug].filter(Boolean)));
+    return Array.from(
+      new Set(
+        [
+          raw,
+          cleanSlug,
+          spaced,
+          spacedFromSlug,
+          titled,
+          titledFromSlug,
+          raw.toLowerCase(),
+          spaced.toLowerCase(),
+          spacedFromSlug.toLowerCase()
+        ].filter(Boolean)
+      )
+    );
   }
 
   function computeSupabaseStats(rows) {
     let total = 0;
     let weighted = 0;
 
-    rows.forEach(function (row) {
+    rows.forEach((row) => {
       const stars = Number(row[STAR_FIELD]) || 0;
+
       if (stars >= 1 && stars <= 5) {
         total += 1;
         weighted += stars;
@@ -217,14 +237,12 @@
     };
   }
 
-  async function fetchSupabaseStats(companySlug) {
-    const candidates = getCompanyCandidates(companySlug);
+  async function fetchSupabaseStats(companyName) {
+    const candidates = getCompanyCandidates(companyName);
 
     try {
       const orFilter = candidates
-        .map(function (value) {
-          return `azienda.ilike.${value}`;
-        })
+        .map((value) => `azienda.ilike.${value}`)
         .join(",");
 
       const params = new URLSearchParams({
@@ -234,7 +252,7 @@
       });
 
       const response = await fetch(
-        SUPABASE_URL + "/rest/v1/" + TABLE_NAME + "?" + params.toString(),
+        `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?${params.toString()}`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
@@ -259,28 +277,32 @@
     }
   }
 
-  async function fetchJsonData(companySlug) {
-    const jsonSlug = createUrlSlug(companySlug);
+  async function fetchJsonData(companyName) {
+    const jsonSlug = createUrlSlug(companyName);
     const dataUrl = `${GITHUB_PAGES_BASE}/data/${jsonSlug}.json?ts=${Date.now()}`;
 
     try {
       const res = await fetch(dataUrl, { cache: "no-store" });
-      if (!res.ok) throw new Error("Errore caricamento JSON");
+
+      if (!res.ok) {
+        throw new Error("JSON not found");
+      }
+
       return await res.json();
     } catch (err) {
-      console.warn("Welo Widget: errore caricamento JSON, fallback attivo", err);
+      console.warn("Welo Widget: JSON non trovato, fallback Supabase attivo", err);
       return { reviews: 0, rating: 0 };
     }
   }
 
   async function renderWidget(widgetDiv) {
-    const companySlug = (widgetDiv.getAttribute("data-welo") || "welo").trim();
-    const urlSlug = createUrlSlug(companySlug);
+    const companyName = (widgetDiv.getAttribute("data-welo") || "welo").trim();
+    const urlSlug = createUrlSlug(companyName);
 
     const align = String(
       widgetDiv.getAttribute("data-align") ||
-      currentScript?.getAttribute("data-align") ||
-      ""
+        currentScript?.getAttribute("data-align") ||
+        ""
     )
       .toLowerCase()
       .trim();
@@ -294,9 +316,12 @@
     const weloPageUrl = `https://www.welobadge.com/en/welo-page/${urlSlug}`;
 
     try {
-      const data = await fetchJsonData(companySlug);
+      const data = await fetchJsonData(companyName);
 
-      let finalReviews = hasValidReviewsCount(data.reviews) ? Number(data.reviews) : 0;
+      let finalReviews = hasValidReviewsCount(data.reviews)
+        ? Number(data.reviews)
+        : 0;
+
       let finalRating = hasValidRating(data.rating)
         ? Number(String(data.rating).replace(",", "."))
         : 0;
@@ -305,7 +330,7 @@
       const needsRatingFallback = !hasValidRating(data.rating);
 
       if (needsReviewsFallback || needsRatingFallback) {
-        const supabaseStats = await fetchSupabaseStats(companySlug);
+        const supabaseStats = await fetchSupabaseStats(companyName);
 
         if (needsReviewsFallback) {
           finalReviews = supabaseStats.reviews;
