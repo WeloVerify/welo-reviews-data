@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v4.3.2
+ * Welo Reviews Widget — v4.2.4
  *
  * Embed example:
  * <div
@@ -11,30 +11,26 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/welo-badge"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.3.2" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.4" defer></script>
  */
 
 (function () {
   "use strict";
 
-  /* =========================================================
-     CONFIG
-  ========================================================= */
+  if (window.__WELO_REVIEWS_WIDGET_V424__) return;
+  window.__WELO_REVIEWS_WIDGET_V424__ = true;
+
   const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InVmcXZjb2p5ZnN1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
 
   const TABLE_REVIEWS = "lascia_una_recensione";
   const FIELD_COMPANY = "azienda";
   const FIELD_STATUS = "status";
   const FIELD_STARS = "Da 1 a 5 stelle come lo valuti?";
-  const APPROVED_VALUES = ["Approved", "approved"];
-
   const STORAGE_BASE = SUPABASE_URL + "/storage/v1/object/public/reviews-proof/";
+  const HLS_JS_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js";
 
-  /* =========================================================
-     ASSETS
-  ========================================================= */
   const BRAND_LOGO =
     "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/682461741cc0cd01187ea413_Rectangle%207089%201.png";
 
@@ -50,21 +46,20 @@
   const SHARE_ICON =
     "https://cdn.prod.website-files.com/672c7e4b5413fe846587b57a/68388cef10c9406397f55734_Vector.svg";
 
-  /* =========================================================
-     I18N
-  ========================================================= */
   const TEXTS = {
     it: {
       summaryTopline: "Recensioni verificate da",
       brandName: "Welo",
       writeReview: "Scrivi una recensione",
+      viewMoreReviews: "Guarda altre recensioni",
       newest: "Più recenti",
       oldest: "Più vecchie",
       withMedia: "Con allegati",
       noReviews: "Ancora nessuna recensione, scrivi tu la prima.",
       noReviewsMedia: "Nessuna recensione con allegati corrisponde ai filtri.",
       verified: "Verificata da Welo",
-      verifiedTooltip: "La recensione è stata verificata da Welo. Scopri il nostro processo di verifica:",
+      verifiedTooltip:
+        "La recensione è stata verificata da Welo. Scopri il nostro processo di verifica:",
       readMore: "Leggi di più",
       loadMore: "Carica di più",
       share: "Condividi",
@@ -96,13 +91,15 @@
       summaryTopline: "Verified reviews by",
       brandName: "Welo",
       writeReview: "Write a review",
+      viewMoreReviews: "View more reviews",
       newest: "Newest",
       oldest: "Oldest",
       withMedia: "With media",
       noReviews: "No reviews yet, be the first to write one.",
       noReviewsMedia: "No reviews with attachments match the filters.",
       verified: "Verified by Welo",
-      verifiedTooltip: "This review was verified by Welo. Learn about our verification process:",
+      verifiedTooltip:
+        "This review was verified by Welo. Learn about our verification process:",
       readMore: "Read more",
       loadMore: "Load more",
       share: "Share",
@@ -132,16 +129,109 @@
     }
   };
 
-  /* =========================================================
-     GUARD
-  ========================================================= */
-  if (window.__WELO_REVIEWS_WIDGET_V432__) return;
-  window.__WELO_REVIEWS_WIDGET_V432__ = true;
+  const AVATAR_PALETTE = [
+    "#F3D58B",
+    "#F6C7D3",
+    "#D8C8FF",
+    "#CDE7FF",
+    "#D8F1C6",
+    "#FFD8B3",
+    "#E7E7E7"
+  ];
 
-  /* =========================================================
-     THEME
-  ========================================================= */
   const AUTO_THEME_WIDGETS = new Set();
+  let HLS_PROMISE = null;
+
+  function escapeHtml(str) {
+    return String(str == null ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function safeJsonParse(value, fallback) {
+    try {
+      return JSON.parse(value);
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function safeDecode(value) {
+    try {
+      return decodeURIComponent(value);
+    } catch (_) {
+      return value || "";
+    }
+  }
+
+  function normalizeLocale(input) {
+    const v = String(input || "").trim().toLowerCase();
+    if (v === "it" || v === "it-it" || v === "italian" || v === "italiano") return "it";
+    if (v === "en" || v === "en-us" || v === "en-gb" || v === "english" || v === "inglese") return "en";
+    if (v === "auto") return "auto";
+    return "";
+  }
+
+  function detectLocaleFromElement(el) {
+    const explicit =
+      normalizeLocale(el.getAttribute("data-locale")) ||
+      normalizeLocale(el.getAttribute("data-lang")) ||
+      normalizeLocale(el.getAttribute("data-widget-language"));
+
+    if (explicit && explicit !== "auto") return explicit;
+
+    const htmlLang = normalizeLocale(document.documentElement.lang || "");
+    if (htmlLang && htmlLang !== "auto") return htmlLang;
+
+    const navLangs = []
+      .concat(navigator.languages || [])
+      .concat([navigator.language || ""])
+      .map(normalizeLocale)
+      .filter(Boolean);
+
+    if (navLangs.length && navLangs[0] !== "auto") return navLangs[0];
+
+    return "en";
+  }
+
+  function makeSlug(input) {
+    return String(input || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9\s_-]/g, "")
+      .replace(/[_\s]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function normalizeCompanyName(input) {
+    return String(input || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9\s_-]/g, "")
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function matchesCompanyExact(rowCompany, targetCompany) {
+    const rowName = normalizeCompanyName(rowCompany);
+    const targetName = normalizeCompanyName(targetCompany);
+
+    const rowSlug = makeSlug(rowCompany);
+    const targetSlug = makeSlug(targetCompany);
+
+    return rowName === targetName || rowSlug === targetSlug;
+  }
 
   function normalizeThemeValue(value) {
     const v = String(value || "").trim().toLowerCase();
@@ -186,14 +276,13 @@
         AUTO_THEME_WIDGETS.delete(widgetRoot);
         return;
       }
-
       widgetRoot.setAttribute("data-resolved-theme", getResolvedTheme("auto"));
     });
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV432) return;
-    window.__weloReviewsAutoThemeInstalledV432 = true;
+    if (window.__weloReviewsAutoThemeInstalledV424) return;
+    window.__weloReviewsAutoThemeInstalledV424 = true;
 
     if (!window.matchMedia) return;
 
@@ -209,9 +298,6 @@
     }
   }
 
-  /* =========================================================
-     STYLES
-  ========================================================= */
   function injectInterFontOnce() {
     if (document.querySelector('link[data-welo-inter="1"]')) return;
 
@@ -224,10 +310,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v432")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v424")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v432";
+    style.id = "welo-reviews-widget-styles-v424";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -274,6 +360,7 @@
   --welo-btn-hover: #242424;
   --welo-btn-border: #171717;
   --welo-btn-text: #ffffff;
+
   --welo-btn-secondary-bg: #ffffff;
   --welo-btn-secondary-hover: #fafafa;
   --welo-btn-secondary-border: #e8e8e8;
@@ -310,6 +397,7 @@
   --welo-btn-hover: #ececec;
   --welo-btn-border: #ffffff;
   --welo-btn-text: #111111;
+
   --welo-btn-secondary-bg: #171717;
   --welo-btn-secondary-hover: #1d1d1d;
   --welo-btn-secondary-border: #2a2a2a;
@@ -422,65 +510,59 @@
 .welo-reviews-widget .welo-summary-actions {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.welo-reviews-widget .welo-summary-write-btn {
+.welo-reviews-widget .welo-summary-write-btn,
+.welo-reviews-widget .welo-summary-more-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 56px;
-  padding: 15px 34px;
+  padding: 15px 30px;
   border-radius: 999px;
-  border: 1px solid var(--welo-btn-border);
-  background: var(--welo-btn-bg);
-  color: var(--welo-btn-text);
   font-size: 17px;
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.02em;
   text-decoration: none;
-  transition: background-color 0.22s ease, transform 0.1s ease, opacity 0.2s ease;
+  transition: background-color 0.22s ease, transform 0.1s ease, opacity 0.2s ease, border-color 0.2s ease;
+  gap: 9px;
+}
+
+.welo-reviews-widget .welo-summary-write-btn {
+  border: 1px solid var(--welo-btn-border);
+  background: var(--welo-btn-bg);
+  color: var(--welo-btn-text);
+}
+
+.welo-reviews-widget .welo-summary-more-btn {
+  border: 1px solid var(--welo-btn-secondary-border);
+  background: var(--welo-btn-secondary-bg);
+  color: var(--welo-btn-secondary-text);
 }
 
 .welo-reviews-widget .welo-summary-write-btn:hover {
   background: var(--welo-btn-hover);
 }
 
-.welo-reviews-widget .welo-summary-write-btn:active {
+.welo-reviews-widget .welo-summary-more-btn:hover {
+  background: var(--welo-btn-secondary-hover);
+  border-color: var(--review-border-strong);
+}
+
+.welo-reviews-widget .welo-summary-write-btn:active,
+.welo-reviews-widget .welo-summary-more-btn:active {
   transform: translateY(1px);
 }
 
-.welo-reviews-widget .review-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 260px;
-  width: 100%;
-  min-height: 48px;
-  padding: 11px 22px;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--welo-btn-text);
-  background-color: var(--welo-btn-bg);
-  border: 1px solid var(--welo-btn-border);
-  border-radius: 999px;
-  text-decoration: none;
-  transition: background-color 0.22s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
-  cursor: pointer;
-}
-
-.welo-reviews-widget .review-button:hover {
-  background-color: var(--welo-btn-hover);
-}
-
-.welo-reviews-widget .review-button:active {
-  transform: translateY(1px);
-}
-
+.welo-reviews-widget .welo-summary-write-btn img,
 .welo-reviews-widget .review-button img {
   width: 18px;
   height: 18px;
+  object-fit: contain;
   display: block;
   filter: var(--welo-button-icon-filter);
 }
@@ -827,6 +909,34 @@
   line-height: 1.5;
 }
 
+.welo-reviews-widget .review-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 260px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 20px;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--welo-btn-text);
+  background-color: var(--welo-btn-bg);
+  border: 1px solid var(--welo-btn-border);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background-color 0.22s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+  cursor: pointer;
+}
+
+.welo-reviews-widget .review-button:hover {
+  background-color: var(--welo-btn-hover);
+}
+
+.welo-reviews-widget .review-button:active {
+  transform: translateY(1px);
+}
+
 .welo-reviews-widget .load-more-reviews {
   margin: 12px auto 0;
   display: flex;
@@ -1145,10 +1255,12 @@
 
   .welo-reviews-widget .welo-summary-actions {
     width: 100%;
-    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .welo-reviews-widget .welo-summary-write-btn {
+  .welo-reviews-widget .welo-summary-write-btn,
+  .welo-reviews-widget .welo-summary-more-btn {
     width: 100%;
     min-height: 46px;
     padding: 12px 22px;
@@ -1330,129 +1442,7 @@
   }
 }
     `;
-
     document.head.appendChild(style);
-  }
-
-  /* =========================================================
-     HELPERS
-  ========================================================= */
-  const AVATAR_PALETTE = [
-    "#F3D58B",
-    "#F6C7D3",
-    "#D8C8FF",
-    "#CDE7FF",
-    "#D8F1C6",
-    "#FFD8B3",
-    "#E7E7E7"
-  ];
-
-  function escapeHtml(str) {
-    return String(str == null ? "" : str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function safeJsonParse(value, fallback) {
-    try {
-      return JSON.parse(value);
-    } catch (_) {
-      return fallback;
-    }
-  }
-
-  function safeDecode(value) {
-    try {
-      return decodeURIComponent(value);
-    } catch (_) {
-      return value || "";
-    }
-  }
-
-  function normalizeLocale(input) {
-    const v = String(input || "").trim().toLowerCase();
-
-    if (v === "it" || v === "it-it" || v === "italian" || v === "italiano") return "it";
-    if (v === "en" || v === "en-us" || v === "en-gb" || v === "english" || v === "inglese") return "en";
-    if (v === "auto") return "auto";
-
-    return "";
-  }
-
-  function detectLocaleFromElement(el) {
-    const explicit =
-      normalizeLocale(el.getAttribute("data-locale")) ||
-      normalizeLocale(el.getAttribute("data-lang")) ||
-      normalizeLocale(el.getAttribute("data-widget-language"));
-
-    if (explicit && explicit !== "auto") return explicit;
-
-    const htmlLang = normalizeLocale(document.documentElement.lang || "");
-    if (htmlLang && htmlLang !== "auto") return htmlLang;
-
-    const navLangs = []
-      .concat(navigator.languages || [])
-      .concat([navigator.language || ""])
-      .map(normalizeLocale)
-      .filter(Boolean);
-
-    if (navLangs.length && navLangs[0] !== "auto") return navLangs[0];
-
-    return "en";
-  }
-
-  function makeSlug(input) {
-    return String(input || "")
-      .trim()
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9\s_-]/g, "")
-      .replace(/[_\s]+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-  }
-
-  function normalizeCompanyName(input) {
-    return String(input || "")
-      .trim()
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/&/g, "and")
-      .replace(/[_-]+/g, " ")
-      .replace(/[^a-z0-9.\s]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function matchesCompanyExact(rowCompany, targetCompany) {
-    const rowName = normalizeCompanyName(rowCompany);
-    const targetName = normalizeCompanyName(targetCompany);
-
-    const rowSlug = makeSlug(rowCompany);
-    const targetSlug = makeSlug(targetCompany);
-
-    return rowName === targetName || rowSlug === targetSlug;
-  }
-
-  function getCompanyCandidates(input) {
-    const raw = String(input || "").trim();
-    const slug = makeSlug(raw);
-    const spaced = slug.replace(/-/g, " ").trim();
-    const titled = spaced
-      .split(" ")
-      .filter(Boolean)
-      .map(function (part) {
-        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-      })
-      .join(" ");
-
-    return Array.from(new Set([raw, slug, spaced, titled].filter(Boolean)));
   }
 
   function getPublicUrlFromPath(path) {
@@ -1470,49 +1460,44 @@
     return STORAGE_BASE + encoded;
   }
 
-  function muxPlaybackUrl(playbackId) {
-    if (!playbackId) return null;
-    return "https://stream.mux.com/" + encodeURIComponent(playbackId) + ".m3u8";
-  }
-
-  function muxThumbnailUrl(playbackId) {
-    if (!playbackId) return null;
-    return "https://image.mux.com/" + encodeURIComponent(playbackId) + "/thumbnail.jpg?time=1";
-  }
-
   function getMuxPlaybackId(row) {
     return (
       row.mux_playback_id ||
-      row.playback_id ||
       row.muxPlaybackId ||
-      row.mux_playback ||
+      row.playback_id ||
+      row.playbackId ||
+      row.mux_public_playback_id ||
       ""
     );
   }
 
+  function getMuxStatus(row) {
+    return String(row.mux_status || row.muxStatus || "").toLowerCase();
+  }
+
+  function getMuxVideoUrl(playbackId) {
+    if (!playbackId) return "";
+    return "https://stream.mux.com/" + encodeURIComponent(playbackId) + ".m3u8";
+  }
+
+  function getMuxPosterUrl(playbackId) {
+    if (!playbackId) return "";
+    return "https://image.mux.com/" + encodeURIComponent(playbackId) + "/thumbnail.jpg?time=1&width=640";
+  }
+
   function parseMediaFromRow(row) {
-    const media = [];
+    const items = [];
 
-    const muxId = getMuxPlaybackId(row);
-    const muxUrl =
-      row.mux_playback_url ||
-      row.video_url ||
-      row.videoUrl ||
-      row.mux_url ||
-      muxPlaybackUrl(muxId);
+    const playbackId = getMuxPlaybackId(row);
+    const muxStatus = getMuxStatus(row);
 
-    const muxThumb =
-      row.mux_thumbnail_url ||
-      row.thumbnail_url ||
-      row.thumbnailUrl ||
-      muxThumbnailUrl(muxId);
-
-    if (muxUrl) {
-      media.push({
-        url: muxUrl,
-        poster: muxThumb || "",
+    if (playbackId && (!muxStatus || muxStatus === "ready" || muxStatus === "asset.ready")) {
+      items.push({
+        url: getMuxVideoUrl(playbackId),
+        poster: getMuxPosterUrl(playbackId),
         type: "video",
-        provider: "mux"
+        provider: "mux",
+        playbackId: playbackId
       });
     }
 
@@ -1532,11 +1517,12 @@
         .filter(Boolean)
         .forEach(function (path) {
           const url = getPublicUrlFromPath(path);
-          const isVideo = /\.(mp4|mov|webm|ogg|m4v)$/i.test(path);
+          const isVideo = /\.(mp4|mov|webm|ogg|m4v)(\?|#|$)/i.test(path);
 
           if (url) {
-            media.push({
+            items.push({
               url: url,
+              poster: "",
               type: isVideo ? "video" : "image",
               provider: "supabase"
             });
@@ -1544,12 +1530,8 @@
         });
     }
 
-    const seen = new Set();
-
-    return media.filter(function (item) {
-      if (!item.url || seen.has(item.url)) return false;
-      seen.add(item.url);
-      return true;
+    return items.filter(function (item) {
+      return !!item.url;
     });
   }
 
@@ -1620,7 +1602,10 @@
   }
 
   function formatReviewCount(value, locale) {
-    const localeMap = { it: "it-IT", en: "en-US" };
+    const localeMap = {
+      it: "it-IT",
+      en: "en-US"
+    };
 
     return new Intl.NumberFormat(localeMap[locale] || "en-US").format(
       Number(value || 0)
@@ -1783,15 +1768,23 @@
     return "https://www.welobadge.com/en/welo-page/" + encodeURIComponent(slug);
   }
 
+  function getWriteReviewUrl(placeholderEl, weloPageUrl) {
+    const direct =
+      String(placeholderEl.getAttribute("data-write-review-url") || "").trim() ||
+      String(placeholderEl.getAttribute("data-review-url") || "").trim();
+
+    if (direct) return direct;
+
+    return weloPageUrl + (weloPageUrl.indexOf("?") >= 0 ? "&" : "?") + "review=1";
+  }
+
   function hashString(value) {
     const str = String(value || "");
     let hash = 0;
-
     for (let i = 0; i < str.length; i++) {
       hash = (hash << 5) - hash + str.charCodeAt(i);
       hash |= 0;
     }
-
     return Math.abs(hash);
   }
 
@@ -1816,9 +1809,6 @@
     return parts[0].charAt(0).toUpperCase();
   }
 
-  /* =========================================================
-     SUPABASE
-  ========================================================= */
   async function supabaseFetch(url) {
     const res = await fetch(url, {
       headers: {
@@ -1844,74 +1834,97 @@
   }
 
   async function fetchReviewsForCompany(companyName) {
-    const candidates = getCompanyCandidates(companyName);
-    const allRows = [];
-    const seen = new Set();
+    const targetSearch = normalizeCompanyName(companyName) || makeSlug(companyName) || companyName;
 
-    async function collect(url) {
-      try {
-        const rows = await supabaseFetch(url);
+    const url =
+      buildBaseRestUrl() +
+      "?select=*" +
+      "&" +
+      encodeURIComponent(FIELD_STATUS) +
+      "=in.(Approved,approved)" +
+      "&" +
+      encodeURIComponent(FIELD_COMPANY) +
+      "=ilike." +
+      encodeURIComponent("*" + targetSearch + "*") +
+      "&order=" +
+      encodeURIComponent("Submitted at.desc");
 
-        rows.forEach(function (row) {
-          const id =
-            row.id ||
-            row["Submission ID"] ||
-            row.submission_id ||
-            JSON.stringify(row);
+    const rows = await supabaseFetch(url);
 
-          if (!seen.has(id)) {
-            seen.add(id);
-            allRows.push(row);
-          }
-        });
-      } catch (err) {
-        console.warn("[Welo Reviews Widget] Supabase query failed:", err);
-      }
-    }
-
-    for (let s = 0; s < APPROVED_VALUES.length; s++) {
-      const status = APPROVED_VALUES[s];
-
-      for (let i = 0; i < candidates.length; i++) {
-        const candidate = candidates[i];
-
-        const exactUrl =
-          buildBaseRestUrl() +
-          "?select=*" +
-          "&" +
-          encodeURIComponent(FIELD_STATUS) +
-          "=eq." +
-          encodeURIComponent(status) +
-          "&" +
-          encodeURIComponent(FIELD_COMPANY) +
-          "=ilike." +
-          encodeURIComponent(candidate);
-
-        const wildcardUrl =
-          buildBaseRestUrl() +
-          "?select=*" +
-          "&" +
-          encodeURIComponent(FIELD_STATUS) +
-          "=eq." +
-          encodeURIComponent(status) +
-          "&" +
-          encodeURIComponent(FIELD_COMPANY) +
-          "=ilike." +
-          encodeURIComponent("*" + candidate + "*");
-
-        await collect(exactUrl);
-        await collect(wildcardUrl);
-      }
-    }
-
-    return allRows.filter(function (row) {
+    return rows.filter(function (row) {
       return matchesCompanyExact(row[FIELD_COMPANY], companyName);
     });
   }
 
-  /* =========================================================
-     LIGHTBOX
-  ========================================================= */
+  function loadHls() {
+    if (window.Hls) return Promise.resolve(window.Hls);
+
+    if (HLS_PROMISE) return HLS_PROMISE;
+
+    HLS_PROMISE = new Promise(function (resolve, reject) {
+      const existing = document.querySelector('script[data-welo-hls="1"]');
+      if (existing) {
+        existing.addEventListener("load", function () {
+          resolve(window.Hls);
+        });
+        existing.addEventListener("error", reject);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = HLS_JS_URL;
+      script.async = true;
+      script.setAttribute("data-welo-hls", "1");
+      script.onload = function () {
+        resolve(window.Hls);
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+
+    return HLS_PROMISE;
+  }
+
+  async function attachVideoSource(video, item) {
+    if (!video || !item || !item.url) return;
+
+    if (item.poster) {
+      video.poster = item.poster;
+    }
+
+    const isHls = /\.m3u8(\?|#|$)/i.test(item.url);
+
+    if (!isHls) {
+      video.src = item.url;
+      return;
+    }
+
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = item.url;
+      return;
+    }
+
+    try {
+      const Hls = await loadHls();
+
+      if (Hls && Hls.isSupported()) {
+        const hls = new Hls({
+          maxBufferLength: 20,
+          capLevelToPlayerSize: true,
+          startLevel: -1
+        });
+
+        hls.loadSource(item.url);
+        hls.attachMedia(video);
+        video.__weloHls = hls;
+      } else {
+        video.src = item.url;
+      }
+    } catch (_) {
+      video.src = item.url;
+    }
+  }
+
   function createLightbox(instanceId, T) {
     const overlay = document.createElement("div");
     overlay.className = "welo-review-lightbox-overlay";
@@ -1943,15 +1956,25 @@
 
     const state = { media: [], index: 0 };
 
-    function render() {
+    function destroyCurrentVideo() {
+      const video = mediaContainer.querySelector("video");
+      if (video && video.__weloHls) {
+        try {
+          video.__weloHls.destroy();
+        } catch (_) {}
+        video.__weloHls = null;
+      }
+    }
+
+    async function render() {
       const item = state.media[state.index];
       if (!item) return;
 
+      destroyCurrentVideo();
       mediaContainer.innerHTML = "";
 
       if (item.type === "video") {
         const video = document.createElement("video");
-        video.src = item.url;
         video.controls = true;
         video.playsInline = true;
         video.className = "welo-review-lightbox-media";
@@ -1959,12 +1982,9 @@
         video.style.height = "auto";
         video.style.maxHeight = "82vh";
         video.style.objectFit = "contain";
-
-        if (item.poster) {
-          video.poster = item.poster;
-        }
-
         mediaContainer.appendChild(video);
+
+        await attachVideoSource(video, item);
       } else {
         const img = document.createElement("img");
         img.src = item.url;
@@ -1999,6 +2019,7 @@
       document.body.style.overflow = "";
       state.media = [];
       state.index = 0;
+      destroyCurrentVideo();
       mediaContainer.innerHTML = "";
       counter.textContent = "";
     }
@@ -2031,12 +2052,9 @@
     return { open: open, close: close };
   }
 
-  /* =========================================================
-     TOOLTIP HANDLERS
-  ========================================================= */
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV432) return;
-    window.__weloReviewsTooltipHandlersInstalledV432 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV424) return;
+    window.__weloReviewsTooltipHandlersInstalledV424 = true;
 
     function closeAll() {
       document
@@ -2049,7 +2067,9 @@
     document.addEventListener(
       "pointerdown",
       function (e) {
-        const insideLink = e.target.closest(".welo-reviews-widget .welo-verified-tooltip a");
+        const insideLink = e.target.closest(
+          ".welo-reviews-widget .welo-verified-tooltip a"
+        );
         if (insideLink) return;
 
         const trigger = e.target.closest(".welo-reviews-widget .review-verified");
@@ -2089,9 +2109,6 @@
     window.addEventListener("scroll", closeAll, { passive: true });
   }
 
-  /* =========================================================
-     SHARE
-  ========================================================= */
   async function shareReview(locale, stars, title, text) {
     const T = TEXTS[locale];
     const baseUrl = window.location.href.split("#")[0];
@@ -2128,12 +2145,9 @@
     } catch (_) {}
   }
 
-  /* =========================================================
-     MOUNT
-  ========================================================= */
   function mountWidget(placeholderEl) {
-    if (!placeholderEl || placeholderEl.__weloMountedV432) return;
-    placeholderEl.__weloMountedV432 = true;
+    if (!placeholderEl || placeholderEl.__weloMounted) return;
+    placeholderEl.__weloMounted = true;
 
     const company = String(placeholderEl.getAttribute("data-company") || "").trim();
 
@@ -2144,10 +2158,15 @@
 
     const locale = detectLocaleFromElement(placeholderEl);
     const T = TEXTS[locale] || TEXTS.en;
-    const themeValue = normalizeThemeValue(placeholderEl.getAttribute("data-theme") || "light");
+    const themeValue = normalizeThemeValue(
+      placeholderEl.getAttribute("data-theme") || "light"
+    );
     const preferredCountries = preferredCountriesFromElement(placeholderEl, locale);
-    const allowedStarsSet = new Set(parseAllowedStars(placeholderEl.getAttribute("data-stars")));
+    const allowedStarsSet = new Set(
+      parseAllowedStars(placeholderEl.getAttribute("data-stars"))
+    );
     const weloPageUrl = getWeloPageUrl(placeholderEl, company, locale);
+    const writeReviewUrl = getWriteReviewUrl(placeholderEl, weloPageUrl);
 
     const REPORT_URL =
       locale === "it"
@@ -2182,27 +2201,40 @@
           </div>
 
           <div class="welo-summary-main">
-            <div class="welo-summary-score">0.0</div>
+            <div class="welo-summary-score">...</div>
             <div class="welo-summary-side">
               <div class="welo-summary-stars"></div>
-              <div class="welo-summary-meta">${escapeHtml(T.basedOn)} 0 ${escapeHtml(T.reviewPlural)}</div>
+              <div class="welo-summary-meta">${escapeHtml(T.loading)}</div>
             </div>
           </div>
 
           <div class="welo-summary-actions">
             <a class="welo-summary-write-btn" href="${escapeHtml(
+              writeReviewUrl
+            )}" target="_blank" rel="noopener noreferrer">
+              <img src="${escapeHtml(BUTTON_ICON)}" alt="">
+              ${escapeHtml(T.writeReview)}
+            </a>
+
+            <a class="welo-summary-more-btn" href="${escapeHtml(
               weloPageUrl
             )}" target="_blank" rel="noopener noreferrer">
-              ${escapeHtml(T.writeReview)}
+              ${escapeHtml(T.viewMoreReviews)}
             </a>
           </div>
         </div>
 
         <div class="reviews-controls">
           <div class="sort-pill-group">
-            <button class="sort-pill active" type="button" data-sort="newest">${escapeHtml(T.newest)}</button>
-            <button class="sort-pill" type="button" data-sort="oldest">${escapeHtml(T.oldest)}</button>
-            <button class="sort-pill sort-pill-attachments" type="button" data-attachments="true">${escapeHtml(T.withMedia)}</button>
+            <button class="sort-pill active" type="button" data-sort="newest">${escapeHtml(
+              T.newest
+            )}</button>
+            <button class="sort-pill" type="button" data-sort="oldest">${escapeHtml(
+              T.oldest
+            )}</button>
+            <button class="sort-pill sort-pill-attachments" type="button" data-attachments="true">${escapeHtml(
+              T.withMedia
+            )}</button>
           </div>
         </div>
 
@@ -2225,7 +2257,11 @@
     function updateSummary() {
       const uid = "welo-summary-star-" + Math.random().toString(36).slice(2, 9);
       summaryScoreEl.textContent = formatSummaryScore(STATS.average);
-      summaryStarsEl.innerHTML = buildAverageStars(STATS.average, uid, "welo-summary-star");
+      summaryStarsEl.innerHTML = buildAverageStars(
+        STATS.average,
+        uid,
+        "welo-summary-star"
+      );
       summaryMetaEl.textContent = buildSummaryMetaText(STATS.total, locale);
     }
 
@@ -2233,7 +2269,15 @@
       const videos = listEl.querySelectorAll(".review-media-video-thumb video");
 
       videos.forEach(function (video) {
+        const raw = video.getAttribute("data-src") || "";
+        const poster = video.getAttribute("data-poster") || "";
+
+        if (poster) video.poster = poster;
+
+        if (!raw || /\.m3u8(\?|#|$)/i.test(raw)) return;
+
         try {
+          video.src = raw;
           video.muted = true;
           video.playsInline = true;
           video.setAttribute("playsinline", "");
@@ -2268,7 +2312,12 @@
         });
       }
 
-      CURRENT_REVIEWS = sortReviewsByPreferredCountryAndDate(base, preferredCountries, activeSort);
+      CURRENT_REVIEWS = sortReviewsByPreferredCountryAndDate(
+        base,
+        preferredCountries,
+        activeSort
+      );
+
       visibleCount = 4;
       renderReviews();
     }
@@ -2281,7 +2330,7 @@
           <div class="no-reviews-box">
             <div class="no-reviews-text">${escapeHtml(text)}</div>
             <a class="review-button" href="${escapeHtml(
-              weloPageUrl
+              writeReviewUrl
             )}" target="_blank" rel="noopener noreferrer">
               <img src="${escapeHtml(BUTTON_ICON)}" alt="">
               ${escapeHtml(T.writeReview)}
@@ -2301,14 +2350,15 @@
           const title = String(r.Titolo || r.title || "");
           const text = String(r.Testo || r.text || "");
           const author = String(r["Nome e cognome"] || r.nome || r.name || "");
-          const date = new Date(r["Submitted at"] || r.created_at || r.createdAt || "");
+          const date = new Date(
+            r["Submitted at"] || r.created_at || r.createdAt || ""
+          );
           const relativeDate = formatRelativeTime(date, locale);
           const media = parseMediaFromRow(r);
           const initials = escapeHtml(getInitials(author));
           const avatarColor = escapeHtml(getAvatarColor(author));
 
           let mediaHtml = "";
-
           if (media.length) {
             const encodedMedia = encodeURIComponent(JSON.stringify(media));
 
@@ -2318,13 +2368,19 @@
                   .map(function (item, index) {
                     const classes =
                       "review-media-thumb " +
-                      (index === 0 ? "review-media-thumb--main" : "review-media-thumb--secondary");
+                      (index === 0
+                        ? "review-media-thumb--main"
+                        : "review-media-thumb--secondary");
 
                     const inner =
                       item.type === "video"
                         ? `
                           <div class="review-media-video-thumb">
-                            <video src="${escapeHtml(item.url)}" ${item.poster ? `poster="${escapeHtml(item.poster)}"` : ""} muted playsinline preload="metadata"></video>
+                            ${
+                              item.poster
+                                ? `<img src="${escapeHtml(item.poster)}" alt="" loading="lazy">`
+                                : `<video data-src="${escapeHtml(item.url)}" data-poster="${escapeHtml(item.poster || "")}" muted playsinline preload="metadata"></video>`
+                            }
                           </div>
                           <div class="review-media-play-icon"></div>
                         `
@@ -2349,16 +2405,24 @@
 
           return `
             <div class="review-card">
-              <div class="review-verified" role="button" tabindex="0" aria-label="${escapeHtml(T.verified)}">
+              <div class="review-verified" role="button" tabindex="0" aria-label="${escapeHtml(
+                T.verified
+              )}">
                 <img src="${escapeHtml(VER_ICON)}" alt="">
                 <span>${escapeHtml(T.verified)}</span>
                 <div class="welo-verified-tooltip" role="tooltip">
                   ${escapeHtml(T.verifiedTooltip)}
-                  <a href="${escapeHtml(VERIFIED_PROCESS_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(T.readMore)}</a>
+                  <a href="${escapeHtml(
+                    VERIFIED_PROCESS_URL
+                  )}" target="_blank" rel="noopener noreferrer">${escapeHtml(
+                    T.readMore
+                  )}</a>
                 </div>
               </div>
 
-              <div class="review-stars" aria-label="${stars} ${escapeHtml(T.ariaStars)}">
+              <div class="review-stars" aria-label="${stars} ${escapeHtml(
+            T.ariaStars
+          )}">
                 ${renderCardStars(stars)}
               </div>
 
@@ -2378,7 +2442,9 @@
               </div>
 
               <div class="review-actions">
-                <a class="review-report" href="${escapeHtml(REPORT_URL)}" target="_blank" rel="noopener noreferrer">
+                <a class="review-report" href="${escapeHtml(
+                  REPORT_URL
+                )}" target="_blank" rel="noopener noreferrer">
                   <img src="${escapeHtml(FLAG_ICON)}" alt="">
                   <span>${escapeHtml(T.report)}</span>
                 </a>
@@ -2421,9 +2487,9 @@
         widgetRoot.querySelectorAll('.sort-pill[data-sort]').forEach(function (btn) {
           btn.classList.remove("active");
         });
-
         target.classList.add("active");
-        activeSort = target.getAttribute("data-sort") === "oldest" ? "oldest" : "newest";
+        activeSort =
+          target.getAttribute("data-sort") === "oldest" ? "oldest" : "newest";
         recomputeAndRender();
         return;
       }
@@ -2453,11 +2519,9 @@
 
       if (action === "share") {
         e.preventDefault();
-
         const stars = Number(target.getAttribute("data-stars")) || 0;
         const title = safeDecode(target.getAttribute("data-title") || "");
         const text = safeDecode(target.getAttribute("data-text") || "");
-
         shareReview(locale, stars, title, text);
       }
     });
@@ -2465,15 +2529,15 @@
     async function load() {
       try {
         const data = await fetchReviewsForCompany(company);
-
         ALL_REVIEWS = Array.isArray(data) ? data : [];
         STATS = computeStats(ALL_REVIEWS);
-
         updateSummary();
         recomputeAndRender();
       } catch (err) {
         console.error("[Welo Reviews Widget] Load error:", err);
-
+        summaryScoreEl.textContent = "0.0";
+        summaryStarsEl.innerHTML = buildAverageStars(0, "welo-summary-error", "welo-summary-star");
+        summaryMetaEl.textContent = buildSummaryMetaText(0, locale);
         listEl.innerHTML = `
           <div class="no-reviews-box">
             <div class="no-reviews-text">${escapeHtml(T.widgetError)}</div>
@@ -2485,9 +2549,6 @@
     load();
   }
 
-  /* =========================================================
-     BOOT
-  ========================================================= */
   function boot() {
     injectInterFontOnce();
     injectStyles();
