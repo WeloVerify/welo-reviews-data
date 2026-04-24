@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v4.2.2
+ * Welo Reviews Widget — v4.3.0
  *
  * Embed example:
  * <div
@@ -11,7 +11,7 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/truswave"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.2" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.3.0" defer></script>
  */
 
 (function () {
@@ -22,7 +22,7 @@
   ========================================================= */
   const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXJhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNjdWRkYWRudyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ3ODE4NjY5LCJleHAiOjIwNjMzOTQ2NjljfQ.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
 
   const TABLE_REVIEWS = "lascia_una_recensione";
   const FIELD_COMPANY = "azienda";
@@ -30,8 +30,8 @@
   const FIELD_STARS = "Da 1 a 5 stelle come lo valuti?";
   const APPROVED_VALUES = ["Approved", "approved"];
 
-  const STORAGE_BASE =
-    SUPABASE_URL + "/storage/v1/object/public/reviews-proof/";
+  const STORAGE_BASE = SUPABASE_URL + "/storage/v1/object/public/reviews-proof/";
+  const MUX_VIDEO_SCRIPT = "https://cdn.jsdelivr.net/npm/@mux/mux-video";
 
   /* =========================================================
      ASSETS
@@ -138,8 +138,8 @@
   /* =========================================================
      GUARD
   ========================================================= */
-  if (window.__WELO_REVIEWS_WIDGET_V422__) return;
-  window.__WELO_REVIEWS_WIDGET_V422__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V430__) return;
+  window.__WELO_REVIEWS_WIDGET_V430__ = true;
 
   /* =========================================================
      THEME
@@ -194,8 +194,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV422) return;
-    window.__weloReviewsAutoThemeInstalledV422 = true;
+    if (window.__weloReviewsAutoThemeInstalledV430) return;
+    window.__weloReviewsAutoThemeInstalledV430 = true;
 
     if (!window.matchMedia) return;
 
@@ -209,6 +209,59 @@
     } else if (typeof mq.addListener === "function") {
       mq.addListener(onChange);
     }
+  }
+
+  /* =========================================================
+     MUX
+  ========================================================= */
+  function loadMuxVideoOnce() {
+    return new Promise(function (resolve, reject) {
+      if (window.customElements && customElements.get("mux-video")) {
+        resolve();
+        return;
+      }
+
+      const existing = document.querySelector('script[src*="@mux/mux-video"]');
+
+      if (existing) {
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", reject, { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = MUX_VIDEO_SCRIPT;
+      script.defer = true;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  function getMuxPlaybackId(row) {
+    return (
+      row.mux_playback_id ||
+      row.playback_id ||
+      row.playbackId ||
+      row.muxPlaybackId ||
+      ""
+    );
+  }
+
+  function isMuxReady(row) {
+    const provider = String(row.video_provider || row.provider || "").toLowerCase();
+    const muxStatus = String(row.mux_status || "").toLowerCase();
+    const playbackId = getMuxPlaybackId(row);
+
+    return provider === "mux" && !!playbackId && muxStatus === "ready";
+  }
+
+  function buildMuxPlaybackUrl(playbackId) {
+    return playbackId ? "https://stream.mux.com/" + playbackId + ".m3u8" : "";
+  }
+
+  function buildMuxThumbnailUrl(playbackId) {
+    return playbackId ? "https://image.mux.com/" + playbackId + "/thumbnail.jpg" : "";
   }
 
   /* =========================================================
@@ -226,10 +279,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v422")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v430")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v422";
+    style.id = "welo-reviews-widget-styles-v430";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -469,14 +522,6 @@
   border: 0 !important;
   box-shadow: none !important;
   outline: none !important;
-}
-
-.welo-reviews-widget .sort-pill-group::before,
-.welo-reviews-widget .sort-pill-group::after,
-.welo-reviews-widget .sort-pill::before,
-.welo-reviews-widget .sort-pill::after {
-  display: none !important;
-  content: none !important;
 }
 
 .welo-reviews-widget .sort-pill {
@@ -905,12 +950,14 @@
 }
 
 .welo-reviews-widget .review-media-thumb img,
-.welo-reviews-widget .review-media-thumb video {
+.welo-reviews-widget .review-media-thumb video,
+.welo-reviews-widget .review-media-thumb mux-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
   pointer-events: none;
+  background: #050505;
 }
 
 .welo-reviews-widget .review-media-video-thumb {
@@ -934,6 +981,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
 }
 
 .welo-reviews-widget .review-media-play-icon::before {
@@ -997,10 +1045,20 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
 }
 
-.welo-review-lightbox-media {
+.welo-review-lightbox-media,
+.welo-review-lightbox-media mux-video {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 82vh;
   display: block;
+}
+
+.welo-review-lightbox-media-container video,
+.welo-review-lightbox-media-container mux-video {
+  width: 100%;
+  height: auto;
+  max-height: 82vh;
+  object-fit: contain;
+  background: #000;
 }
 
 .welo-review-lightbox-close {
@@ -1452,7 +1510,11 @@
     return STORAGE_BASE + encoded;
   }
 
-  function parseMediaFromRow(row) {
+  function isVideoPath(path) {
+    return /\.(mp4|mov|webm|ogg|m4v)(\?|#|$)/i.test(String(path || ""));
+  }
+
+  function parseLegacyMediaFromRow(row) {
     const raw =
       row.prove_di_acquisto ||
       row["prove_di_acquisto"] ||
@@ -1470,15 +1532,48 @@
       .filter(Boolean)
       .map(function (path) {
         const url = getPublicUrlFromPath(path);
-        const isVideo = /\.(mp4|mov|webm|ogg|m4v)$/i.test(path);
+        const isVideo = isVideoPath(path);
+
         return {
           url: url,
-          type: isVideo ? "video" : "image"
+          type: isVideo ? "video" : "image",
+          provider: "supabase"
         };
       })
       .filter(function (item) {
         return !!item.url;
       });
+  }
+
+  function parseMuxMediaFromRow(row) {
+    if (!isMuxReady(row)) return [];
+
+    const playbackId = getMuxPlaybackId(row);
+    if (!playbackId) return [];
+
+    return [
+      {
+        type: "video",
+        provider: "mux",
+        playbackId: playbackId,
+        url:
+          row.mux_playback_url ||
+          row.playback_url ||
+          buildMuxPlaybackUrl(playbackId),
+        thumbnail:
+          row.mux_thumbnail_url ||
+          row.thumbnail_url ||
+          row.poster_url ||
+          buildMuxThumbnailUrl(playbackId)
+      }
+    ];
+  }
+
+  function parseMediaFromRow(row) {
+    const muxMedia = parseMuxMediaFromRow(row);
+    const legacyMedia = parseLegacyMediaFromRow(row);
+
+    return muxMedia.concat(legacyMedia);
   }
 
   function getCountryFromRow(row) {
@@ -1861,7 +1956,19 @@
 
       mediaContainer.innerHTML = "";
 
-      if (item.type === "video") {
+      if (item.type === "video" && item.provider === "mux" && item.playbackId) {
+        const muxVideo = document.createElement("mux-video");
+        muxVideo.className = "welo-review-lightbox-media";
+        muxVideo.setAttribute("playback-id", item.playbackId);
+        muxVideo.setAttribute("stream-type", "on-demand");
+        muxVideo.setAttribute("controls", "");
+        muxVideo.setAttribute("playsinline", "");
+        muxVideo.setAttribute("preload", "metadata");
+
+        if (item.thumbnail) muxVideo.setAttribute("poster", item.thumbnail);
+
+        mediaContainer.appendChild(muxVideo);
+      } else if (item.type === "video") {
         const video = document.createElement("video");
         video.src = item.url;
         video.controls = true;
@@ -1942,8 +2049,8 @@
      TOOLTIP HANDLERS
   ========================================================= */
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV422) return;
-    window.__weloReviewsTooltipHandlersInstalledV422 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV430) return;
+    window.__weloReviewsTooltipHandlersInstalledV430 = true;
 
     function closeAll() {
       document
@@ -2041,8 +2148,8 @@
      MOUNT
   ========================================================= */
   function mountWidget(placeholderEl) {
-    if (!placeholderEl || placeholderEl.__weloMounted) return;
-    placeholderEl.__weloMounted = true;
+    if (!placeholderEl || placeholderEl.__weloMountedV430) return;
+    placeholderEl.__weloMountedV430 = true;
 
     const company = String(placeholderEl.getAttribute("data-company") || "").trim();
 
@@ -2179,6 +2286,12 @@
       });
     }
 
+    function hasMuxMediaInReviews(rows) {
+      return rows.some(function (row) {
+        return isMuxReady(row);
+      });
+    }
+
     function recomputeAndRender() {
       let base = ALL_REVIEWS.filter(function (row) {
         const stars = Number(row[FIELD_STARS]) || 0;
@@ -2251,17 +2364,27 @@
                         ? "review-media-thumb--main"
                         : "review-media-thumb--secondary");
 
-                    const inner =
-                      item.type === "video"
-                        ? `
-                          <div class="review-media-video-thumb">
-                            <video src="${escapeHtml(
-                              item.url
-                            )}" muted playsinline preload="metadata"></video>
-                          </div>
-                          <div class="review-media-play-icon"></div>
-                        `
-                        : `<img src="${escapeHtml(item.url)}" alt="" loading="lazy">`;
+                    let inner = "";
+
+                    if (item.type === "video" && item.provider === "mux" && item.playbackId) {
+                      inner = `
+                        <div class="review-media-video-thumb">
+                          <img src="${escapeHtml(item.thumbnail || buildMuxThumbnailUrl(item.playbackId))}" alt="" loading="lazy">
+                        </div>
+                        <div class="review-media-play-icon"></div>
+                      `;
+                    } else if (item.type === "video") {
+                      inner = `
+                        <div class="review-media-video-thumb">
+                          <video src="${escapeHtml(
+                            item.url
+                          )}" muted playsinline preload="metadata"></video>
+                        </div>
+                        <div class="review-media-play-icon"></div>
+                      `;
+                    } else {
+                      inner = `<img src="${escapeHtml(item.url)}" alt="" loading="lazy">`;
+                    }
 
                     return `
                       <div
@@ -2407,6 +2530,15 @@
       try {
         const data = await fetchReviewsForCompany(company);
         ALL_REVIEWS = Array.isArray(data) ? data : [];
+
+        if (hasMuxMediaInReviews(ALL_REVIEWS)) {
+          try {
+            await loadMuxVideoOnce();
+          } catch (muxErr) {
+            console.warn("[Welo Reviews Widget] Mux video script failed:", muxErr);
+          }
+        }
+
         STATS = computeStats(ALL_REVIEWS);
         updateSummary();
         recomputeAndRender();
