@@ -833,7 +833,7 @@
         titleLabel: "Titolo della recensione",
         textLabel: "Testo della recensione",
         uploadTitle: "Allega una foto o un video",
-        uploadHint: "Puoi caricare fino a 5 file (max 1 video e 4 immagini). Max ~20MB per file.",
+        uploadHint: "Puoi caricare fino a 5 file, max 1 video e 4 immagini. Immagini max 20MB, video supportati anche in alta qualità.",
         uploadBtn: "Scegli i file",
         dropzoneText: "Trascina i file qui o",
         step4Title: "I tuoi dati",
@@ -855,7 +855,8 @@
         savingReview: "Salvataggio recensione...",
         remove: "Elimina",
         invalidEmail: "Inserisci un indirizzo email valido.",
-        fileTooLarge: "Alcuni file superano il limite di 20MB e non sono stati aggiunti.",
+        imageTooLarge: "Alcune immagini superano il limite di 20MB e non sono state aggiunte.",
+        videoTooLarge: "Il video supera il limite massimo di 500MB e non è stato aggiunto.",
         onlyOneVideo: "Puoi caricare massimo 1 video per recensione.",
         preparingVideo: "Preparazione upload video...",
         uploadingVideo: "Caricamento video...",
@@ -874,7 +875,7 @@
         titleLabel: "Review title",
         textLabel: "Review text",
         uploadTitle: "Attach a photo or video",
-        uploadHint: "You can upload up to 5 files (max 1 video and 4 images). Max ~20MB per file.",
+        uploadHint: "You can upload up to 5 files, max 1 video and 4 images. Images max 20MB, high-quality videos supported.",
         uploadBtn: "Choose files",
         dropzoneText: "Drag files here or",
         step4Title: "Your information",
@@ -896,7 +897,8 @@
         savingReview: "Saving your review...",
         remove: "Remove",
         invalidEmail: "Please enter a valid email address.",
-        fileTooLarge: "Some files exceed the 20MB size limit and were not added.",
+        imageTooLarge: "Some images exceed the 20MB limit and were not added.",
+        videoTooLarge: "The video exceeds the 500MB limit and was not added.",
         onlyOneVideo: "You can only upload 1 video per review.",
         preparingVideo: "Preparing video upload...",
         uploadingVideo: "Uploading video...",
@@ -1266,31 +1268,47 @@
       if (remainingSlots <= 0) return;
 
       var incoming = Array.prototype.slice.call(fileList || [], 0, remainingSlots);
-      var maxSize = 20 * 1024 * 1024;
+      var MAX_IMAGE_SIZE = 20 * 1024 * 1024;    // 20MB per immagini (Supabase Storage)
+      var MAX_VIDEO_SIZE = 500 * 1024 * 1024;   // 500MB per video (Mux Direct Upload)
 
       var alreadyHasVideo = STATE.files.some(isVideoFile);
-      var tooLargeFound = false;
+      var imageTooLargeFound = false;
+      var videoTooLargeFound = false;
       var extraVideoFound = false;
 
       var filtered = [];
       for (var f = 0; f < incoming.length; f++) {
         var file = incoming[f];
-        if (file.size > maxSize) {
-          tooLargeFound = true;
-          continue;
-        }
+
         if (isVideoFile(file)) {
           if (alreadyHasVideo) {
             extraVideoFound = true;
             continue;
           }
+          if (file.size > MAX_VIDEO_SIZE) {
+            videoTooLargeFound = true;
+            continue;
+          }
           alreadyHasVideo = true;
+          filtered.push(file);
+        } else {
+          // immagine (o file generico non-video): limite 20MB
+          if (file.size > MAX_IMAGE_SIZE) {
+            imageTooLargeFound = true;
+            continue;
+          }
+          filtered.push(file);
         }
-        filtered.push(file);
       }
 
-      if (tooLargeFound) errorBox.textContent = STR.fileTooLarge;
-      if (extraVideoFound) errorBox.textContent = STR.onlyOneVideo;
+      // Priorita' errori: extra video > video troppo grande > immagine troppo grande
+      if (extraVideoFound) {
+        errorBox.textContent = STR.onlyOneVideo;
+      } else if (videoTooLargeFound) {
+        errorBox.textContent = STR.videoTooLarge;
+      } else if (imageTooLargeFound) {
+        errorBox.textContent = STR.imageTooLarge;
+      }
 
       var targetBytes = 150 * 1024;
       var processed = [];
