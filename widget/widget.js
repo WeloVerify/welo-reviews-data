@@ -5,12 +5,10 @@
 
   const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiOiJ1ZnF2Y29qeWZzbnNjdWRkYWRudyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ3ODE4NjY5LCJleHAiOjIwNjMzOTQ2Njl9.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnN1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
 
   const TABLE_NAME = "lascia_una_recensione";
   const STAR_FIELD = "Da 1 a 5 stelle come lo valuti?";
-  const APPROVED_STATUS = "Approved";
-
   const GITHUB_PAGES_BASE = "https://weloverify.github.io/welo-reviews-data";
 
   const logoUrl =
@@ -128,6 +126,47 @@
       .replace(/^-|-$/g, "");
   }
 
+  function slugToWords(value) {
+    return String(value || "")
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function titleCase(value) {
+    return String(value || "")
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(" ");
+  }
+
+  function getCompanyCandidates(companyName) {
+    const raw = String(companyName || "").trim();
+    const cleanSlug = createUrlSlug(raw);
+    const spaced = slugToWords(raw);
+    const spacedFromSlug = slugToWords(cleanSlug);
+    const titled = titleCase(spaced);
+    const titledFromSlug = titleCase(spacedFromSlug);
+
+    return Array.from(
+      new Set(
+        [
+          raw,
+          cleanSlug,
+          spaced,
+          spacedFromSlug,
+          titled,
+          titledFromSlug,
+          raw.toLowerCase(),
+          spaced.toLowerCase(),
+          spacedFromSlug.toLowerCase()
+        ].filter(Boolean)
+      )
+    );
+  }
+
   function formatReviews(num) {
     const value = Number(num) || 0;
 
@@ -177,47 +216,6 @@
     return num !== null && num > 0 && num <= 5;
   }
 
-  function slugToWords(value) {
-    return String(value || "")
-      .trim()
-      .replace(/[-_]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function titleCase(value) {
-    return String(value || "")
-      .split(" ")
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join(" ");
-  }
-
-  function getCompanyCandidates(companyName) {
-    const raw = String(companyName || "").trim();
-    const cleanSlug = createUrlSlug(raw);
-    const spaced = slugToWords(raw);
-    const spacedFromSlug = slugToWords(cleanSlug);
-    const titled = titleCase(spaced);
-    const titledFromSlug = titleCase(spacedFromSlug);
-
-    return Array.from(
-      new Set(
-        [
-          raw,
-          cleanSlug,
-          spaced,
-          spacedFromSlug,
-          titled,
-          titledFromSlug,
-          raw.toLowerCase(),
-          spaced.toLowerCase(),
-          spacedFromSlug.toLowerCase()
-        ].filter(Boolean)
-      )
-    );
-  }
-
   function computeSupabaseStats(rows) {
     let total = 0;
     let weighted = 0;
@@ -241,22 +239,21 @@
     const candidates = getCompanyCandidates(companyName);
 
     try {
-      const orFilter = candidates
-        .map((value) => `azienda.ilike.${value}`)
+      const companyFilter = candidates
+        .map((value) => `azienda.ilike.*${value}*`)
         .join(",");
 
-      const params = new URLSearchParams({
-        status: "eq." + APPROVED_STATUS,
-        select: "*",
-        or: "(" + orFilter + ")"
-      });
+      const params = new URLSearchParams();
+      params.set("select", "*");
+      params.set("status", "in.(Approved,approved)");
+      params.set("or", `(${companyFilter})`);
 
       const response = await fetch(
         `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?${params.toString()}`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
-            Authorization: "Bearer " + SUPABASE_ANON_KEY
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`
           },
           cache: "no-store"
         }
