@@ -7,6 +7,8 @@
   const DEFAULT_BUCKET_PUBLIC_PATH = "/storage/v1/object/public/reviews-proof/";
   const DEFAULT_WELO_PAGE_BASE = "https://www.welobadge.com/welo-page/";
 
+  const MUX_VIDEO_SCRIPT = "https://cdn.jsdelivr.net/npm/@mux/mux-video";
+
   const I18N = {
     it: {
       title: "Video recensioni",
@@ -99,6 +101,7 @@
         .trim();
 
     if (raw === "it" || raw === "ita" || raw === "italy" || raw === "it-it") return "it";
+
     if (
       raw === "us" ||
       raw === "en" ||
@@ -141,6 +144,30 @@
       "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap";
 
     document.head.appendChild(link);
+  }
+
+  function loadMuxVideoOnce() {
+    return new Promise(function (resolve, reject) {
+      if (window.customElements && customElements.get("mux-video")) {
+        resolve();
+        return;
+      }
+
+      const existing = document.querySelector('script[src*="@mux/mux-video"]');
+
+      if (existing) {
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", reject, { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = MUX_VIDEO_SCRIPT;
+      script.defer = true;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
   }
 
   function ensureStyles() {
@@ -346,7 +373,8 @@
   will-change: transform, box-shadow;
 }
 
-.wm-media {
+.wm-media,
+mux-video.wm-media {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -356,6 +384,21 @@
   user-select: none;
   -webkit-user-drag: none;
   pointer-events: none;
+  background: #000;
+}
+
+mux-video.wm-media::part(video) {
+  object-fit: cover;
+}
+
+.wm-media-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
 }
 
 .wm-ph {
@@ -543,7 +586,6 @@
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = css;
-
     document.head.appendChild(style);
   }
 
@@ -554,7 +596,9 @@
       u.endsWith(".mp4") ||
       u.endsWith(".webm") ||
       u.endsWith(".mov") ||
-      u.endsWith(".m4v")
+      u.endsWith(".m4v") ||
+      u.endsWith(".ogg") ||
+      u.endsWith(".m3u8")
     );
   }
 
@@ -569,7 +613,6 @@
     if (typeof v === "number") return new Date(v);
 
     const d = new Date(v);
-
     return isNaN(d.getTime()) ? null : d;
   }
 
@@ -656,6 +699,35 @@
   <path d="M15.5 9.2c1.2 1.2 1.2 4.4 0 5.6" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"></path>
   <path d="M18.2 6.6c3 3 3 7.8 0 10.8" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".85"></path>
 </svg>`;
+  }
+
+  function getMuxPlaybackId(item) {
+    return (
+      item.playback_id ||
+      item.playbackId ||
+      item.mux_playback_id ||
+      item.muxPlaybackId ||
+      ""
+    );
+  }
+
+  function isMuxItem(item) {
+    const provider = String(item.provider || item.video_provider || "").toLowerCase();
+    const muxStatus = String(item.mux_status || item.status_mux || "").toLowerCase();
+
+    return (
+      provider === "mux" ||
+      !!getMuxPlaybackId(item) ||
+      muxStatus === "ready"
+    );
+  }
+
+  function buildMuxUrl(playbackId) {
+    return playbackId ? `https://stream.mux.com/${playbackId}.m3u8` : "";
+  }
+
+  function buildMuxThumbnail(playbackId) {
+    return playbackId ? `https://image.mux.com/${playbackId}/thumbnail.jpg` : "";
   }
 
   function buildWidget(el) {
@@ -751,7 +823,23 @@
     let items = [];
     let shown = 0;
 
+    function normalizeStoragePath(path) {
+      if (!path) return "";
+      if (path.startsWith("http://") || path.startsWith("https://")) return path;
+
+      const cleaned = String(path).replace(/^\/+/, "");
+      const encoded = cleaned
+        .split("/")
+        .map((seg) => encodeURIComponent(seg))
+        .join("/");
+
+      return `${storageBase}${encoded}`;
+    }
+
     function normalizeItem(item) {
+      const playbackId = getMuxPlaybackId(item);
+      const provider = isMuxItem(item) && playbackId ? "mux" : "supabase";
+
       const rawUrl =
         item.url ||
         item.mediaUrl ||
@@ -759,6 +847,8 @@
         item.public_url ||
         item.proof_url ||
         item.prove_di_acquisto_url ||
+        item.mux_playback_url ||
+        item.playback_url ||
         "";
 
       const proofPath =
@@ -767,7 +857,18 @@
         item.path ||
         "";
 
-      const url = rawUrl || (proofPath ? `${storageBase}${proofPath}` : "");
+      const muxUrl = playbackId ? buildMuxUrl(playbackId) : "";
+      const url = provider === "mux"
+        ? (rawUrl || muxUrl)
+        : (rawUrl || normalizeStoragePath(proofPath));
+
+      const thumbnail =
+        item.thumbnail ||
+        item.thumbnail_url ||
+        item.mux_thumbnail_url ||
+        item.poster ||
+        item.poster_url ||
+        (playbackId ? buildMuxThumbnail(playbackId) : "");
 
       const name =
         item.author ||
@@ -788,12 +889,16 @@
         null;
 
       const isVideo =
+        provider === "mux" ||
         item.type === "video" ||
         item.media_type === "video" ||
         isVideoUrl(url);
 
       return {
         url,
+        thumbnail,
+        playbackId,
+        provider,
         name: safeStr(name, t.anonymous),
         date: created,
         isVideo,
@@ -806,15 +911,25 @@
       status.textContent = msg || "";
     }
 
-    function pauseAllExcept(exceptVideo) {
-      grid.querySelectorAll("video.wm-media").forEach((v) => {
-        if (v === exceptVideo) return;
+    function pauseMedia(mediaEl) {
+      if (!mediaEl) return;
 
-        try {
-          v.pause();
-        } catch (_) {}
+      try {
+        mediaEl.pause();
+      } catch (_) {}
 
-        const wrap = v.closest(".wm-cardWrap");
+      try {
+        mediaEl.currentTime = 0;
+      } catch (_) {}
+    }
+
+    function pauseAllExcept(exceptMedia) {
+      grid.querySelectorAll("video.wm-media, mux-video.wm-media").forEach((media) => {
+        if (media === exceptMedia) return;
+
+        pauseMedia(media);
+
+        const wrap = media.closest(".wm-cardWrap");
         if (wrap) wrap.classList.remove("is-playing");
       });
     }
@@ -847,6 +962,10 @@
     function ensureVideoSrc(videoEl) {
       if (!videoEl) return;
 
+      if (videoEl.tagName && videoEl.tagName.toLowerCase() === "mux-video") {
+        return;
+      }
+
       if (!videoEl.src && videoEl.dataset && videoEl.dataset.src) {
         videoEl.src = videoEl.dataset.src;
         videoEl.preload = "metadata";
@@ -857,22 +976,22 @@
       }
     }
 
-    async function playWithFallback(videoEl) {
-      if (!videoEl) return;
+    async function playWithFallback(mediaEl) {
+      if (!mediaEl) return;
 
-      ensureVideoSrc(videoEl);
-      videoEl.muted = muted;
+      ensureVideoSrc(mediaEl);
+      mediaEl.muted = muted;
 
       const tryPlay = async () => {
         try {
-          await videoEl.play();
+          await mediaEl.play();
           return true;
         } catch (e) {
-          if (!videoEl.muted) {
-            videoEl.muted = true;
+          if (!mediaEl.muted) {
+            mediaEl.muted = true;
 
             try {
-              await videoEl.play();
+              await mediaEl.play();
               return true;
             } catch (_) {}
           }
@@ -895,12 +1014,12 @@
         };
 
         const onCanPlay = async () => {
-          videoEl.removeEventListener("canplay", onCanPlay);
+          mediaEl.removeEventListener("canplay", onCanPlay);
           await tryPlay();
           finish();
         };
 
-        videoEl.addEventListener("canplay", onCanPlay, { once: true });
+        mediaEl.addEventListener("canplay", onCanPlay, { once: true });
         setTimeout(finish, 900);
       });
     }
@@ -919,7 +1038,54 @@
 
       let mediaEl;
 
-      if (it.isVideo) {
+      if (it.isVideo && it.provider === "mux" && it.playbackId) {
+        const mv = document.createElement("mux-video");
+
+        mv.className = "wm-media";
+        mv.setAttribute("playback-id", it.playbackId);
+        mv.setAttribute("stream-type", "on-demand");
+        mv.setAttribute("metadata-video-title", "Welo video review");
+        mv.setAttribute("playsinline", "");
+        mv.setAttribute("webkit-playsinline", "");
+        mv.setAttribute("muted", "");
+        mv.setAttribute("loop", "");
+        mv.setAttribute("preload", "metadata");
+
+        mv.muted = muted;
+        mv.loop = true;
+        mv.playsInline = true;
+
+        if (it.thumbnail) {
+          mv.setAttribute("poster", it.thumbnail);
+
+          const fallbackImg = document.createElement("img");
+          fallbackImg.className = "wm-media-fallback";
+          fallbackImg.src = it.thumbnail;
+          fallbackImg.alt = it.name;
+          fallbackImg.loading = "lazy";
+          fallbackImg.decoding = "async";
+          card.appendChild(fallbackImg);
+
+          mv.addEventListener(
+            "loadeddata",
+            () => {
+              fallbackImg.remove();
+              wrap.classList.add("is-ready");
+            },
+            { once: true }
+          );
+        } else {
+          mv.addEventListener(
+            "loadeddata",
+            () => {
+              wrap.classList.add("is-ready");
+            },
+            { once: true }
+          );
+        }
+
+        mediaEl = mv;
+      } else if (it.isVideo) {
         const v = document.createElement("video");
 
         v.className = "wm-media";
@@ -966,7 +1132,6 @@
         img.decoding = "async";
 
         mediaEl = img;
-
         wrap.classList.add("is-ready");
       }
 
@@ -1014,11 +1179,14 @@
             localStorage.setItem("welo_media_muted", String(muted));
           } catch (_) {}
 
-          grid.querySelectorAll("video.wm-media").forEach((vid) => {
+          grid.querySelectorAll("video.wm-media, mux-video.wm-media").forEach((vid) => {
             vid.muted = muted;
 
             if (!muted && !vid.paused) {
-              vid.volume = 1;
+              try {
+                vid.volume = 1;
+              } catch (_) {}
+
               vid.play().catch(() => {});
             }
           });
@@ -1063,17 +1231,17 @@
         wrap.addEventListener("pointerenter", async () => {
           if (!it.isVideo) return;
 
-          const v = card.querySelector("video.wm-media");
-          if (!v) return;
+          const media = card.querySelector("video.wm-media, mux-video.wm-media");
+          if (!media) return;
 
           wrap.classList.add("is-playing");
-          ensureVideoSrc(v);
+          ensureVideoSrc(media);
 
           try {
-            v.currentTime = 0;
+            media.currentTime = 0;
           } catch (_) {}
 
-          await playWithFallback(v);
+          await playWithFallback(media);
         });
 
         wrap.addEventListener("pointerleave", () => {
@@ -1081,17 +1249,8 @@
           wrap.classList.remove("is-playing");
 
           if (it.isVideo) {
-            const v = card.querySelector("video.wm-media");
-
-            if (v) {
-              try {
-                v.pause();
-              } catch (_) {}
-
-              try {
-                v.currentTime = 0;
-              } catch (_) {}
-            }
+            const media = card.querySelector("video.wm-media, mux-video.wm-media");
+            pauseMedia(media);
           }
         });
       } else {
@@ -1125,20 +1284,16 @@
 
           if (!isTap) return;
 
-          const v = card.querySelector("video.wm-media");
+          const media = card.querySelector("video.wm-media, mux-video.wm-media");
+          if (!media) return;
 
-          if (!v) return;
-
-          if (v.paused) {
-            pauseAllExcept(v);
+          if (media.paused) {
+            pauseAllExcept(media);
             wrap.classList.add("is-playing");
-            ensureVideoSrc(v);
-            await playWithFallback(v);
+            ensureVideoSrc(media);
+            await playWithFallback(media);
           } else {
-            try {
-              v.pause();
-            } catch (_) {}
-
+            pauseMedia(media);
             wrap.classList.remove("is-playing");
           }
         });
@@ -1208,10 +1363,20 @@
 
         rawItems = rawItems
           .map(normalizeItem)
-          .filter((x) => !!x.url);
+          .filter((x) => !!x.url || !!x.playbackId);
 
         if (only === "video") {
           rawItems = rawItems.filter((x) => x.isVideo);
+        }
+
+        const hasMuxVideos = rawItems.some((x) => x.provider === "mux" && x.playbackId);
+
+        if (hasMuxVideos) {
+          try {
+            await loadMuxVideoOnce();
+          } catch (e) {
+            console.warn("Welo media widget: Mux video script failed to load", e);
+          }
         }
 
         items = rawItems;
