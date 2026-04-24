@@ -5,7 +5,7 @@
 
   const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnN1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
 
   const TABLE_NAME = "lascia_una_recensione";
   const STAR_FIELD = "Da 1 a 5 stelle come lo valuti?";
@@ -116,6 +116,13 @@
     document.head.appendChild(style);
   }
 
+  function createUrlSlug(value) {
+    return String(value || "")
+      .trim()
+      .replace(/[_\s]+/g, "-")
+      .replace(/-+/g, "-");
+  }
+
   function formatReviews(num) {
     const value = Number(num) || 0;
 
@@ -187,8 +194,9 @@
     const slug = String(companySlug || "").trim();
     const spaced = slugToWords(slug);
     const titled = titleCase(spaced);
+    const urlSlug = createUrlSlug(slug);
 
-    return Array.from(new Set([slug, spaced, titled].filter(Boolean)));
+    return Array.from(new Set([slug, spaced, titled, urlSlug].filter(Boolean)));
   }
 
   function computeSupabaseStats(rows) {
@@ -252,7 +260,8 @@
   }
 
   async function fetchJsonData(companySlug) {
-    const dataUrl = `${GITHUB_PAGES_BASE}/data/${companySlug}.json?ts=${Date.now()}`;
+    const jsonSlug = createUrlSlug(companySlug);
+    const dataUrl = `${GITHUB_PAGES_BASE}/data/${jsonSlug}.json?ts=${Date.now()}`;
 
     try {
       const res = await fetch(dataUrl, { cache: "no-store" });
@@ -266,6 +275,7 @@
 
   async function renderWidget(widgetDiv) {
     const companySlug = (widgetDiv.getAttribute("data-welo") || "welo").trim();
+    const urlSlug = createUrlSlug(companySlug);
 
     const align = String(
       widgetDiv.getAttribute("data-align") ||
@@ -281,7 +291,7 @@
 
     widgetDiv.innerHTML = `<span class="welo-widget-status">Loading...</span>`;
 
-    const weloPageUrl = `https://www.welobadge.com/en/welo-page/${companySlug}`;
+    const weloPageUrl = `https://www.welobadge.com/en/welo-page/${urlSlug}`;
 
     try {
       const data = await fetchJsonData(companySlug);
