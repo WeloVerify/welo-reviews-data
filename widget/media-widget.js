@@ -2,7 +2,6 @@
   const STYLE_ID = "welo-media-widget-styles";
   const FONT_ID = "welo-media-widget-font";
 
-  // Defaults (override via data-attributes)
   const DEFAULT_PROJECT_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const DEFAULT_FUNCTION_PATH = "/functions/v1/welo-media-reviews";
   const DEFAULT_BUCKET_PUBLIC_PATH = "/storage/v1/object/public/reviews-proof/";
@@ -17,6 +16,10 @@
       muted: "Audio disattivato",
       unmuted: "Audio attivo",
       anonymous: "Cliente",
+      loading: "Caricamento…",
+      noMedia: "Nessun media disponibile.",
+      error: "Errore nel caricamento dei media.",
+      missingCompany: "Manca data-welo, aggiungi il nome azienda.",
       timeAgo: (n, unit) => `${n} ${unit} fa`,
     },
     en: {
@@ -27,12 +30,62 @@
       muted: "Muted",
       unmuted: "Sound on",
       anonymous: "Customer",
+      loading: "Loading…",
+      noMedia: "No media available.",
+      error: "Error loading media.",
+      missingCompany: "Missing data-welo, add the company name.",
       timeAgo: (n, unit) => `${n} ${unit} ago`,
     },
   };
 
-  // Utils
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+  function createSlug(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9\s_-]/g, "")
+      .replace(/[_\s]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function normalizeCompany(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function getItemCompany(item) {
+    return (
+      item.azienda ||
+      item.company ||
+      item.company_name ||
+      item.companyName ||
+      item.business ||
+      item.business_name ||
+      item.businessName ||
+      item.slug ||
+      item.company_slug ||
+      item.companySlug ||
+      ""
+    );
+  }
+
+  function matchesExactCompany(item, company) {
+    const targetName = normalizeCompany(company);
+    const targetSlug = createSlug(company);
+
+    const itemCompany = getItemCompany(item);
+    const itemName = normalizeCompany(itemCompany);
+    const itemSlug = createSlug(itemCompany);
+
+    return itemName === targetName || itemSlug === targetSlug;
+  }
 
   function pickLocale(el) {
     const raw =
@@ -46,7 +99,16 @@
         .trim();
 
     if (raw === "it" || raw === "ita" || raw === "italy" || raw === "it-it") return "it";
-    if (raw === "us" || raw === "en" || raw === "eng" || raw === "en-us" || raw === "uk" || raw === "en-gb") return "en";
+    if (
+      raw === "us" ||
+      raw === "en" ||
+      raw === "eng" ||
+      raw === "en-us" ||
+      raw === "uk" ||
+      raw === "en-gb"
+    ) {
+      return "en";
+    }
 
     const nav = (navigator.language || "en").toLowerCase();
     return nav.startsWith("it") ? "it" : "en";
@@ -54,21 +116,30 @@
 
   function pickTheme(el) {
     const raw = (el.getAttribute("data-theme") || "auto").toLowerCase().trim();
+
     if (raw === "light" || raw === "white") return "light";
     if (raw === "dark" || raw === "black") return "dark";
+
     if (raw === "auto") {
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const prefersDark =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+
       return prefersDark ? "dark" : "light";
     }
+
     return "light";
   }
 
   function ensureFont() {
     if (document.getElementById(FONT_ID)) return;
+
     const link = document.createElement("link");
     link.id = FONT_ID;
     link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap";
+
     document.head.appendChild(link);
   }
 
@@ -76,26 +147,27 @@
     if (document.getElementById(STYLE_ID)) return;
 
     const css = `
-/* ============ WELO MEDIA WIDGET (namespaced) ============ */
-.wm-root, .wm-root * { box-sizing: border-box; }
+.wm-root,
+.wm-root * {
+  box-sizing: border-box;
+}
 
-.wm-root{
-  /* LIGHT defaults */
+.wm-root {
   --wm-bg: #ffffff;
   --wm-fg: #0a0a0a;
   --wm-muted: #6b7280;
-  --wm-border: rgba(10,10,10,.12);
+  --wm-border: rgba(10, 10, 10, 0.12);
   --wm-card: #ffffff;
-  --wm-card-border: rgba(10,10,10,.10);
-  --wm-shadow: rgba(0,0,0,.10);
+  --wm-card-border: rgba(10, 10, 10, 0.10);
+  --wm-shadow: rgba(0, 0, 0, 0.10);
 
   --wm-cta-bg: #0a0a0a;
   --wm-cta-fg: #ffffff;
-  --wm-cta-border: rgba(10,10,10,.12);
+  --wm-cta-border: rgba(10, 10, 10, 0.12);
 
   --wm-more-bg: #ffffff;
   --wm-more-fg: #0a0a0a;
-  --wm-more-border: rgba(10,10,10,.12);
+  --wm-more-border: rgba(10, 10, 10, 0.12);
 
   --wm-ph-a: #f3f4f6;
   --wm-ph-b: #e5e7eb;
@@ -107,29 +179,28 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* DARK overrides */
-.wm-root[data-theme="dark"]{
+.wm-root[data-theme="dark"] {
   --wm-bg: #0a0a0a;
   --wm-fg: #ffffff;
-  --wm-muted: rgba(255,255,255,.72);
-  --wm-border: rgba(255,255,255,.14);
+  --wm-muted: rgba(255, 255, 255, 0.72);
+  --wm-border: rgba(255, 255, 255, 0.14);
   --wm-card: #0a0a0a;
-  --wm-card-border: rgba(255,255,255,.12);
-  --wm-shadow: rgba(0,0,0,.35);
+  --wm-card-border: rgba(255, 255, 255, 0.12);
+  --wm-shadow: rgba(0, 0, 0, 0.35);
 
   --wm-cta-bg: #ffffff;
   --wm-cta-fg: #0a0a0a;
-  --wm-cta-border: rgba(255,255,255,.18);
+  --wm-cta-border: rgba(255, 255, 255, 0.18);
 
-  --wm-more-bg: rgba(255,255,255,.06);
+  --wm-more-bg: rgba(255, 255, 255, 0.06);
   --wm-more-fg: #ffffff;
-  --wm-more-border: rgba(255,255,255,.16);
+  --wm-more-border: rgba(255, 255, 255, 0.16);
 
-  --wm-ph-a: rgba(255,255,255,.10);
-  --wm-ph-b: rgba(255,255,255,.06);
+  --wm-ph-a: rgba(255, 255, 255, 0.10);
+  --wm-ph-b: rgba(255, 255, 255, 0.06);
 }
 
-.wm-wrap{
+.wm-wrap {
   width: min(1200px, 100%);
   margin: 0 auto;
   padding: 0 16px 18px 16px;
@@ -138,25 +209,29 @@
   isolation: isolate;
 }
 
-/* Header */
-.wm-header{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:16px;
+.wm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   padding: 6px 0 40px 0;
   background: var(--wm-bg);
   flex-wrap: wrap;
 }
-.wm-hgroup{ min-width:0; }
-.wm-title{
+
+.wm-hgroup {
+  min-width: 0;
+}
+
+.wm-title {
   font-size: 30px;
   line-height: 1.05;
   font-weight: 600;
   letter-spacing: -0.03em;
   margin: 0;
 }
-.wm-subtitle{
+
+.wm-subtitle {
   margin-top: 10px;
   font-size: 18px;
   line-height: 1.35;
@@ -164,67 +239,100 @@
   color: var(--wm-muted);
 }
 
-/* CTA */
-.wm-cta{
+.wm-cta {
   flex: 0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:14px 18px;
-  border-radius:999px;
-  border:1px solid var(--wm-cta-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--wm-cta-border);
   background: var(--wm-cta-bg);
   color: var(--wm-cta-fg);
-  text-decoration:none;
-  font-weight:600;
-  font-size:14px;
-  line-height:1;
-  white-space:nowrap;
-  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
   box-shadow: 0 10px 30px var(--wm-shadow);
   max-width: 100%;
 }
-.wm-cta:hover{ transform: translateY(-1px); box-shadow: 0 16px 40px var(--wm-shadow); }
-.wm-cta:active{ transform: translateY(0) scale(.98); opacity:.95; }
-.wm-cta svg{ width:16px; height:16px; }
 
-/* Grid */
-.wm-gridWrap{ background: var(--wm-bg); overflow: visible; }
-.wm-grid{
-  display:grid;
+.wm-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 40px var(--wm-shadow);
+}
+
+.wm-cta:active {
+  transform: translateY(0) scale(0.98);
+  opacity: 0.95;
+}
+
+.wm-cta svg {
+  width: 16px;
+  height: 16px;
+}
+
+.wm-gridWrap {
+  background: var(--wm-bg);
+  overflow: visible;
+}
+
+.wm-grid {
+  display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   background: var(--wm-bg);
   overflow: visible;
 }
-@media (max-width: 980px){
-  .wm-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+@media (max-width: 980px) {
+  .wm-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
-@media (max-width: 720px){
-  .wm-header{
+
+@media (max-width: 720px) {
+  .wm-header {
     flex-direction: column;
     align-items: stretch;
     padding-bottom: 34px;
   }
-  .wm-title{ font-size: 30px; }
-  .wm-subtitle{ font-size: 18px; }
-  .wm-cta{ width: 100%; }
-}
-@media (max-width: 520px){
-  .wm-grid{ grid-template-columns: repeat(1, minmax(0, 1fr)); }
-  .wm-title{ font-size: 28px; }
+
+  .wm-title {
+    font-size: 30px;
+  }
+
+  .wm-subtitle {
+    font-size: 18px;
+  }
+
+  .wm-cta {
+    width: 100%;
+  }
 }
 
-/* Card */
-.wm-cardWrap{
+@media (max-width: 520px) {
+  .wm-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .wm-title {
+    font-size: 28px;
+  }
+}
+
+.wm-cardWrap {
   perspective: 900px;
   background: var(--wm-bg);
   border-radius: 18px;
   overflow: visible;
   touch-action: pan-y;
 }
-.wm-card{
+
+.wm-card {
   position: relative;
   width: 100%;
   aspect-ratio: 10 / 16;
@@ -238,149 +346,216 @@
   will-change: transform, box-shadow;
 }
 
-/* Media */
-.wm-media{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
+.wm-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  display:block;
-  user-select:none;
-  -webkit-user-drag:none;
-  pointer-events:none;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
-/* Placeholder */
-.wm-ph{
-  position:absolute;
-  inset:0;
+.wm-ph {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(180deg, var(--wm-ph-a) 0%, var(--wm-ph-b) 100%);
   opacity: 0;
-  transition: opacity .18s ease;
+  transition: opacity 0.18s ease;
 }
-.wm-cardWrap.is-video .wm-ph{ opacity: 1; }
-.wm-cardWrap.is-ready .wm-ph{ opacity: 0; }
 
-/* Gradient + Caption */
-.wm-grad{
-  position:absolute;
-  inset:0;
-  background: linear-gradient(to top, rgba(0,0,0,.76) 0%, rgba(0,0,0,.20) 38%, rgba(0,0,0,0) 62%);
-  pointer-events:none;
+.wm-cardWrap.is-video .wm-ph {
   opacity: 1;
-  transition: opacity .18s ease;
-}
-.wm-caption{
-  position:absolute;
-  left:18px; right:18px; bottom:18px;
-  color:#fff;
-  z-index:4;
-  transition: opacity .18s ease, transform .18s ease;
-}
-.wm-name{
-  font-size:18px;
-  line-height:1.15;
-  font-weight:500;
-  letter-spacing:-0.01em;
-  margin:0;
-}
-.wm-date{
-  margin-top:8px;
-  font-size:15px;
-  line-height:1.2;
-  font-weight:400;
-  color: rgba(255,255,255,.86);
 }
 
-/* Play */
-.wm-play{
-  position:absolute;
-  inset:0;
-  display:grid;
-  place-items:center;
-  z-index:3;
-  pointer-events:none;
-  transition: opacity .15s ease, transform .15s ease;
-}
-.wm-playIcon{
-  width:84px;
-  height:84px;
-  filter: drop-shadow(0 10px 25px rgba(0,0,0,.25));
+.wm-cardWrap.is-ready .wm-ph {
+  opacity: 0;
 }
 
-/* Mute toggle */
-.wm-audio{
-  position:absolute;
-  top:14px; right:14px;
-  z-index:5;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:44px; height:44px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.22);
-  background: rgba(0,0,0,.45);
+.wm-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.76) 0%, rgba(0, 0, 0, 0.20) 38%, rgba(0, 0, 0, 0) 62%);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.18s ease;
+}
+
+.wm-caption {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  color: #fff;
+  z-index: 4;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.wm-name {
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.wm-date {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.wm-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.wm-playIcon {
+  width: 84px;
+  height: 84px;
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.25));
+}
+
+.wm-audio {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  cursor:pointer;
-  opacity:0;
+  cursor: pointer;
+  opacity: 0;
   transform: translateY(-4px);
-  transition: opacity .16s ease, transform .16s ease;
+  transition: opacity 0.16s ease, transform 0.16s ease;
 }
-.wm-audio svg{ width:20px; height:20px; fill:#fff; }
-.wm-audio:active{ transform: translateY(0) scale(.96); }
 
-/* Hover effects */
-@media (hover: hover) and (pointer: fine){
-  .wm-cardWrap:hover .wm-card{ box-shadow: 0 22px 60px rgba(0,0,0,.22); }
-  .wm-cardWrap:hover .wm-caption{ opacity:0; transform: translateY(8px); }
-  .wm-cardWrap:hover .wm-grad{ opacity:0; }
-  .wm-cardWrap:hover .wm-play{ opacity:0; transform: scale(.98); }
-  .wm-cardWrap:hover .wm-audio{ opacity:1; transform: translateY(0); }
+.wm-audio svg {
+  width: 20px;
+  height: 20px;
+  fill: #fff;
 }
-.wm-cardWrap.is-playing .wm-caption{ opacity:0; transform: translateY(8px); }
-.wm-cardWrap.is-playing .wm-grad{ opacity:0; }
-.wm-cardWrap.is-playing .wm-play{ opacity:0; transform: scale(.98); }
-.wm-cardWrap.is-playing .wm-audio{ opacity:1; transform: translateY(0); }
-.wm-cardWrap.is-playing .wm-card{ box-shadow: 0 22px 60px rgba(0,0,0,.22); }
 
-/* Status / More */
-.wm-status{
+.wm-audio:active {
+  transform: translateY(0) scale(0.96);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wm-cardWrap:hover .wm-card {
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+  }
+
+  .wm-cardWrap:hover .wm-caption {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  .wm-cardWrap:hover .wm-grad {
+    opacity: 0;
+  }
+
+  .wm-cardWrap:hover .wm-play {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  .wm-cardWrap:hover .wm-audio {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wm-cardWrap.is-playing .wm-caption {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.wm-cardWrap.is-playing .wm-grad {
+  opacity: 0;
+}
+
+.wm-cardWrap.is-playing .wm-play {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+.wm-cardWrap.is-playing .wm-audio {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.wm-cardWrap.is-playing .wm-card {
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+}
+
+.wm-status {
   padding: 18px 0 6px 0;
   color: var(--wm-muted);
-  font-size:14px;
+  font-size: 14px;
 }
-.wm-moreBtn{
+
+.wm-moreBtn {
   margin: 18px auto 0 auto;
-  display:none;
-  padding:12px 18px;
-  border-radius:12px;
-  border:1px solid var(--wm-more-border);
+  display: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--wm-more-border);
   background: var(--wm-more-bg);
   color: var(--wm-more-fg);
-  font-weight:600;
-  cursor:pointer;
-  transition: transform .14s ease, box-shadow .14s ease;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
 }
-.wm-moreBtn:hover{ transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0,0,0,.10); }
-.wm-moreBtn:active{ transform: translateY(0) scale(.98); }
 
-/* Reduce motion */
-@media (prefers-reduced-motion: reduce){
-  .wm-card{ transition: box-shadow 160ms ease; transform:none !important; }
+.wm-moreBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
+}
+
+.wm-moreBtn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wm-card {
+    transition: box-shadow 160ms ease;
+    transform: none !important;
+  }
 }
     `;
 
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = css;
+
     document.head.appendChild(style);
   }
 
   function isVideoUrl(url = "") {
-    const u = url.toLowerCase().split("?")[0];
-    return u.endsWith(".mp4") || u.endsWith(".webm") || u.endsWith(".mov") || u.endsWith(".m4v");
+    const u = String(url || "").toLowerCase().split("?")[0];
+
+    return (
+      u.endsWith(".mp4") ||
+      u.endsWith(".webm") ||
+      u.endsWith(".mov") ||
+      u.endsWith(".m4v")
+    );
   }
 
   function safeStr(v, fallback = "") {
@@ -392,13 +567,16 @@
     if (!v) return null;
     if (v instanceof Date) return v;
     if (typeof v === "number") return new Date(v);
+
     const d = new Date(v);
+
     return isNaN(d.getTime()) ? null : d;
   }
 
   function relativeTimeFromNow(date, locale) {
     const t = I18N[locale] || I18N.en;
     const d = parseDate(date);
+
     if (!d) return "";
 
     const now = new Date();
@@ -411,15 +589,44 @@
     const months = Math.floor(days / 30);
     const years = Math.floor(days / 365);
 
-    if (years >= 1) return t.timeAgo(years, locale === "it" ? (years === 1 ? "anno" : "anni") : (years === 1 ? "year" : "years"));
-    if (months >= 1) return t.timeAgo(months, locale === "it" ? (months === 1 ? "mese" : "mesi") : (months === 1 ? "month" : "months"));
-    if (days >= 1) return t.timeAgo(days, locale === "it" ? (days === 1 ? "giorno" : "giorni") : (days === 1 ? "day" : "days"));
-    if (hours >= 1) return t.timeAgo(hours, locale === "it" ? (hours === 1 ? "ora" : "ore") : (hours === 1 ? "hour" : "hours"));
-    if (minutes >= 1) return t.timeAgo(minutes, locale === "it" ? (minutes === 1 ? "minuto" : "minuti") : (minutes === 1 ? "minute" : "minutes"));
+    if (years >= 1) {
+      return t.timeAgo(
+        years,
+        locale === "it" ? (years === 1 ? "anno" : "anni") : years === 1 ? "year" : "years"
+      );
+    }
+
+    if (months >= 1) {
+      return t.timeAgo(
+        months,
+        locale === "it" ? (months === 1 ? "mese" : "mesi") : months === 1 ? "month" : "months"
+      );
+    }
+
+    if (days >= 1) {
+      return t.timeAgo(
+        days,
+        locale === "it" ? (days === 1 ? "giorno" : "giorni") : days === 1 ? "day" : "days"
+      );
+    }
+
+    if (hours >= 1) {
+      return t.timeAgo(
+        hours,
+        locale === "it" ? (hours === 1 ? "ora" : "ore") : hours === 1 ? "hour" : "hours"
+      );
+    }
+
+    if (minutes >= 1) {
+      return t.timeAgo(
+        minutes,
+        locale === "it" ? (minutes === 1 ? "minuto" : "minuti") : minutes === 1 ? "minute" : "minutes"
+      );
+    }
+
     return locale === "it" ? "poco fa" : "just now";
   }
 
-  // SVGs
   function playSvg() {
     return `
 <svg class="wm-playIcon" viewBox="0 0 96 96" aria-hidden="true">
@@ -441,6 +648,7 @@
   <path d="M16.5 9.5 21 14m0-4.5-4.5 4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"></path>
 </svg>`;
   }
+
   function iconUnmuted() {
     return `
 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -450,7 +658,6 @@
 </svg>`;
   }
 
-  // Widget
   function buildWidget(el) {
     ensureFont();
     ensureStyles();
@@ -458,39 +665,51 @@
     const locale = pickLocale(el);
     const t = I18N[locale] || I18N.en;
 
-    const company =
+    const company = safeStr(
       el.getAttribute("data-welo") ||
-      el.getAttribute("data-company") ||
-      el.getAttribute("data-slug") ||
-      "";
+        el.getAttribute("data-company") ||
+        el.getAttribute("data-slug") ||
+        ""
+    );
 
     if (!company) {
-      el.innerHTML = `<div class="wm-root"><div class="wm-wrap"><div class="wm-status">Missing data-welo (company slug).</div></div></div>`;
+      el.innerHTML = `
+        <div class="wm-root">
+          <div class="wm-wrap">
+            <div class="wm-status">${t.missingCompany}</div>
+          </div>
+        </div>
+      `;
       return;
     }
 
+    const companySlug = createSlug(company);
     const theme = pickTheme(el);
 
     const projectUrl = el.getAttribute("data-project-url") || DEFAULT_PROJECT_URL;
     const apiUrl = el.getAttribute("data-api") || `${projectUrl}${DEFAULT_FUNCTION_PATH}`;
-    const storageBase = el.getAttribute("data-storage-base") || `${projectUrl}${DEFAULT_BUCKET_PUBLIC_PATH}`;
+    const storageBase =
+      el.getAttribute("data-storage-base") || `${projectUrl}${DEFAULT_BUCKET_PUBLIC_PATH}`;
 
     const limit = parseInt(el.getAttribute("data-limit") || "24", 10);
     const initial = parseInt(el.getAttribute("data-initial") || "8", 10);
     const step = parseInt(el.getAttribute("data-step") || String(initial), 10);
 
     const weloPageUrl =
-      el.getAttribute("data-url") ||
-      `${DEFAULT_WELO_PAGE_BASE}${encodeURIComponent(company)}`;
+      el.getAttribute("data-url") || `${DEFAULT_WELO_PAGE_BASE}${companySlug}`;
 
-    const only = (el.getAttribute("data-only") || "media").toLowerCase().trim(); // media | video
+    const only = (el.getAttribute("data-only") || "media").toLowerCase().trim();
     const anonKey = el.getAttribute("data-anon-key") || "";
 
-    const HOVER_CAPABLE = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const HOVER_CAPABLE =
+      window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-    // Mount (do not force background on host element)
-    try { el.style.background = "transparent"; } catch (_) {}
+    const REDUCED_MOTION =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    try {
+      el.style.background = "transparent";
+    } catch (_) {}
 
     el.innerHTML = `
 <div class="wm-root" data-theme="${theme}">
@@ -500,6 +719,7 @@
         <div class="wm-title">${t.title}</div>
         <div class="wm-subtitle">${t.subtitle}</div>
       </div>
+
       <a class="wm-cta" href="${weloPageUrl}" target="_blank" rel="noopener">
         ${t.viewMore}
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -522,6 +742,7 @@
     const moreBtn = el.querySelector(".wm-moreBtn");
 
     let muted = true;
+
     try {
       const saved = localStorage.getItem("welo_media_muted");
       if (saved === "false") muted = false;
@@ -540,7 +761,12 @@
         item.prove_di_acquisto_url ||
         "";
 
-      const proofPath = item.prove_di_acquisto || item.proof_path || item.path || "";
+      const proofPath =
+        item.prove_di_acquisto ||
+        item.proof_path ||
+        item.path ||
+        "";
+
       const url = rawUrl || (proofPath ? `${storageBase}${proofPath}` : "");
 
       const name =
@@ -571,6 +797,7 @@
         name: safeStr(name, t.anonymous),
         date: created,
         isVideo,
+        company: getItemCompany(item),
       };
     }
 
@@ -582,38 +809,57 @@
     function pauseAllExcept(exceptVideo) {
       grid.querySelectorAll("video.wm-media").forEach((v) => {
         if (v === exceptVideo) return;
-        try { v.pause(); } catch (_) {}
+
+        try {
+          v.pause();
+        } catch (_) {}
+
         const wrap = v.closest(".wm-cardWrap");
         if (wrap) wrap.classList.remove("is-playing");
       });
     }
 
-    const videoObserver = ("IntersectionObserver" in window)
-      ? new IntersectionObserver((entries, obs) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            const v = entry.target;
-            if (v && v.dataset && v.dataset.src && !v.src) {
-              v.src = v.dataset.src;
-              v.preload = "metadata";
-              try { v.load(); } catch (_) {}
-            }
-            obs.unobserve(v);
-          });
-        }, { rootMargin: "900px 0px", threshold: 0.01 })
-      : null;
+    const videoObserver =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(
+            (entries, obs) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+
+                const v = entry.target;
+
+                if (v && v.dataset && v.dataset.src && !v.src) {
+                  v.src = v.dataset.src;
+                  v.preload = "metadata";
+
+                  try {
+                    v.load();
+                  } catch (_) {}
+                }
+
+                obs.unobserve(v);
+              });
+            },
+            { rootMargin: "900px 0px", threshold: 0.01 }
+          )
+        : null;
 
     function ensureVideoSrc(videoEl) {
       if (!videoEl) return;
+
       if (!videoEl.src && videoEl.dataset && videoEl.dataset.src) {
         videoEl.src = videoEl.dataset.src;
         videoEl.preload = "metadata";
-        try { videoEl.load(); } catch (_) {}
+
+        try {
+          videoEl.load();
+        } catch (_) {}
       }
     }
 
     async function playWithFallback(videoEl) {
       if (!videoEl) return;
+
       ensureVideoSrc(videoEl);
       videoEl.muted = muted;
 
@@ -624,18 +870,29 @@
         } catch (e) {
           if (!videoEl.muted) {
             videoEl.muted = true;
-            try { await videoEl.play(); return true; } catch (_) {}
+
+            try {
+              await videoEl.play();
+              return true;
+            } catch (_) {}
           }
+
           return false;
         }
       };
 
       const ok = await tryPlay();
+
       if (ok) return;
 
       await new Promise((resolve) => {
         let done = false;
-        const finish = () => { if (done) return; done = true; resolve(); };
+
+        const finish = () => {
+          if (done) return;
+          done = true;
+          resolve();
+        };
 
         const onCanPlay = async () => {
           videoEl.removeEventListener("canplay", onCanPlay);
@@ -651,6 +908,7 @@
     function createCard(it) {
       const wrap = document.createElement("div");
       wrap.className = "wm-cardWrap";
+
       if (it.isVideo) wrap.classList.add("is-video");
 
       const card = document.createElement("div");
@@ -660,8 +918,10 @@
       ph.className = "wm-ph";
 
       let mediaEl;
+
       if (it.isVideo) {
         const v = document.createElement("video");
+
         v.className = "wm-media";
         v.dataset.src = it.url;
         v.preload = "none";
@@ -676,26 +936,37 @@
         v.controlsList = "nodownload noplaybackrate noremoteplayback";
         v.crossOrigin = "anonymous";
 
-        v.addEventListener("loadeddata", () => {
-          wrap.classList.add("is-ready");
-        }, { once: true });
+        v.addEventListener(
+          "loadeddata",
+          () => {
+            wrap.classList.add("is-ready");
+          },
+          { once: true }
+        );
 
-        if (videoObserver) videoObserver.observe(v);
-        else {
+        if (videoObserver) {
+          videoObserver.observe(v);
+        } else {
           v.src = it.url;
           v.preload = "metadata";
-          try { v.load(); } catch (_) {}
+
+          try {
+            v.load();
+          } catch (_) {}
         }
 
         mediaEl = v;
       } else {
         const img = document.createElement("img");
+
         img.className = "wm-media";
         img.src = it.url;
         img.alt = it.name;
         img.loading = "lazy";
         img.decoding = "async";
+
         mediaEl = img;
+
         wrap.classList.add("is-ready");
       }
 
@@ -717,6 +988,7 @@
       caption.appendChild(dt);
 
       let play = null;
+
       if (it.isVideo) {
         play = document.createElement("div");
         play.className = "wm-play";
@@ -724,6 +996,7 @@
       }
 
       let audioBtn = null;
+
       if (it.isVideo) {
         audioBtn = document.createElement("button");
         audioBtn.type = "button";
@@ -736,34 +1009,43 @@
           e.stopPropagation();
 
           muted = !muted;
-          try { localStorage.setItem("welo_media_muted", String(muted)); } catch (_) {}
+
+          try {
+            localStorage.setItem("welo_media_muted", String(muted));
+          } catch (_) {}
 
           grid.querySelectorAll("video.wm-media").forEach((vid) => {
             vid.muted = muted;
+
             if (!muted && !vid.paused) {
               vid.volume = 1;
               vid.play().catch(() => {});
             }
           });
 
-          audioBtn.setAttribute("aria-label", muted ? t.muted : t.unmuted);
-          audioBtn.innerHTML = muted ? iconMuted() : iconUnmuted();
+          grid.querySelectorAll(".wm-audio").forEach((btn) => {
+            btn.setAttribute("aria-label", muted ? t.muted : t.unmuted);
+            btn.innerHTML = muted ? iconMuted() : iconUnmuted();
+          });
         });
       }
 
       card.appendChild(mediaEl);
       card.appendChild(ph);
       card.appendChild(grad);
+
       if (play) card.appendChild(play);
       if (audioBtn) card.appendChild(audioBtn);
+
       card.appendChild(caption);
       wrap.appendChild(card);
 
       const MAX_TILT = 3.2;
 
       function resetTilt() {
-        card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg)`;
+        card.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
       }
+
       function onMove(e) {
         const r = card.getBoundingClientRect();
         const x = (e.clientX - r.left) / r.width;
@@ -780,12 +1062,17 @@
 
         wrap.addEventListener("pointerenter", async () => {
           if (!it.isVideo) return;
+
           const v = card.querySelector("video.wm-media");
           if (!v) return;
 
           wrap.classList.add("is-playing");
           ensureVideoSrc(v);
-          try { v.currentTime = 0; } catch (_) {}
+
+          try {
+            v.currentTime = 0;
+          } catch (_) {}
+
           await playWithFallback(v);
         });
 
@@ -795,9 +1082,15 @@
 
           if (it.isVideo) {
             const v = card.querySelector("video.wm-media");
+
             if (v) {
-              try { v.pause(); } catch (_) {}
-              try { v.currentTime = 0; } catch (_) {}
+              try {
+                v.pause();
+              } catch (_) {}
+
+              try {
+                v.currentTime = 0;
+              } catch (_) {}
             }
           }
         });
@@ -806,10 +1099,14 @@
       }
 
       if (!HOVER_CAPABLE && it.isVideo) {
-        let downX = 0, downY = 0, downT = 0, pointerId = null;
+        let downX = 0;
+        let downY = 0;
+        let downT = 0;
+        let pointerId = null;
 
         wrap.addEventListener("pointerdown", (e) => {
           if (e.pointerType !== "touch") return;
+
           pointerId = e.pointerId;
           downX = e.clientX;
           downY = e.clientY;
@@ -825,9 +1122,11 @@
           const dtap = Date.now() - downT;
 
           const isTap = dx < 10 && dy < 10 && dtap < 450;
+
           if (!isTap) return;
 
           const v = card.querySelector("video.wm-media");
+
           if (!v) return;
 
           if (v.paused) {
@@ -836,7 +1135,10 @@
             ensureVideoSrc(v);
             await playWithFallback(v);
           } else {
-            try { v.pause(); } catch (_) {}
+            try {
+              v.pause();
+            } catch (_) {}
+
             wrap.classList.remove("is-playing");
           }
         });
@@ -852,10 +1154,14 @@
 
     function render() {
       grid.innerHTML = "";
-      setStatus("");
+      setStatus("", false);
 
       const slice = items.slice(0, shown);
-      slice.forEach((it) => grid.appendChild(createCard(it)));
+
+      slice.forEach((it) => {
+        grid.appendChild(createCard(it));
+      });
+
       moreBtn.style.display = items.length > shown ? "inline-block" : "none";
     }
 
@@ -865,34 +1171,54 @@
     });
 
     async function load() {
-      setStatus(locale === "it" ? "Caricamento…" : "Loading…", true);
+      setStatus(t.loading, true);
 
       try {
         const url = new URL(apiUrl);
+
         url.searchParams.set("company", company);
+        url.searchParams.set("company_slug", companySlug);
+        url.searchParams.set("exact", "true");
         url.searchParams.set("limit", String(limit));
 
         const headers = {};
+
         if (anonKey) {
-          headers["Authorization"] = `Bearer ${anonKey}`;
-          headers["apikey"] = anonKey;
+          headers.Authorization = `Bearer ${anonKey}`;
+          headers.apikey = anonKey;
         }
 
-        const res = await fetch(url.toString(), { method: "GET", headers, cache: "no-store" });
+        const res = await fetch(url.toString(), {
+          method: "GET",
+          headers,
+          cache: "no-store",
+        });
+
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
-        let rawItems = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
-        rawItems = rawItems.map(normalizeItem).filter((x) => !!x.url);
 
-        // filter by "only"
-        if (only === "video") rawItems = rawItems.filter((x) => x.isVideo);
+        let rawItems = Array.isArray(data?.items)
+          ? data.items
+          : Array.isArray(data)
+            ? data
+            : [];
+
+        rawItems = rawItems.filter((item) => matchesExactCompany(item, company));
+
+        rawItems = rawItems
+          .map(normalizeItem)
+          .filter((x) => !!x.url);
+
+        if (only === "video") {
+          rawItems = rawItems.filter((x) => x.isVideo);
+        }
 
         items = rawItems;
         shown = Math.min(initial, items.length);
 
         if (!items.length) {
-          setStatus(locale === "it" ? "Nessun media disponibile." : "No media available.", true);
+          setStatus(t.noMedia, true);
           moreBtn.style.display = "none";
           grid.innerHTML = "";
           return;
@@ -902,7 +1228,7 @@
         render();
       } catch (err) {
         console.error("Welo media widget error:", err);
-        setStatus(locale === "it" ? "Errore nel caricamento dei media." : "Error loading media.", true);
+        setStatus(t.error, true);
       }
     }
 
@@ -914,10 +1240,15 @@
       ...document.querySelectorAll(".welo-media-widget"),
       ...document.querySelectorAll("[data-welo-media]"),
     ];
+
     const unique = Array.from(new Set(nodes));
+
     unique.forEach(buildWidget);
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
