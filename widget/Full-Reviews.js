@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v4.2.5
+ * Welo Reviews Widget — v4.2.6
  *
  * Embed example:
  * <div
@@ -11,14 +11,14 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/welo-badge"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.5" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.6" defer></script>
  */
 
 (function () {
   "use strict";
 
-  if (window.__WELO_REVIEWS_WIDGET_V425__) return;
-  window.__WELO_REVIEWS_WIDGET_V425__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V426__) return;
+  window.__WELO_REVIEWS_WIDGET_V426__ = true;
 
   const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const SUPABASE_ANON_KEY =
@@ -303,8 +303,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV425) return;
-    window.__weloReviewsAutoThemeInstalledV425 = true;
+    if (window.__weloReviewsAutoThemeInstalledV426) return;
+    window.__weloReviewsAutoThemeInstalledV426 = true;
 
     if (!window.matchMedia) return;
 
@@ -332,10 +332,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v425")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v426")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v425";
+    style.id = "welo-reviews-widget-styles-v426";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -1884,25 +1884,43 @@
 
   async function fetchReviewsOffset(companyName) {
     try {
-      const candidates = getCompanyCandidates(companyName);
+      const rawCompany = String(companyName || "").trim();
+      if (!rawCompany) return 0;
 
+      const exactUrl =
+        buildOffsetRestUrl() +
+        "?select=company_name,reviews_offset" +
+        "&" +
+        encodeURIComponent(FIELD_OFFSET_COMPANY) +
+        "=eq." +
+        encodeURIComponent(rawCompany) +
+        "&limit=1";
+
+      let rows = await supabaseFetch(exactUrl);
+
+      if (Array.isArray(rows) && rows.length) {
+        const value = rows[0] ? rows[0].reviews_offset : 0;
+        return Math.max(0, Number.parseInt(value, 10) || 0);
+      }
+
+      const candidates = getCompanyCandidates(rawCompany);
       const companyFilter = candidates
         .map(function (value) {
           return FIELD_OFFSET_COMPANY + ".ilike.*" + value + "*";
         })
         .join(",");
 
-      const url =
+      const fallbackUrl =
         buildOffsetRestUrl() +
         "?select=company_name,reviews_offset" +
         "&or=" +
         encodeURIComponent("(" + companyFilter + ")") +
-        "&limit=10";
+        "&limit=20";
 
-      const rows = await supabaseFetch(url);
+      rows = await supabaseFetch(fallbackUrl);
 
       const exact = rows.find(function (row) {
-        return matchesCompanyExact(row.company_name, companyName);
+        return matchesCompanyExact(row.company_name, rawCompany);
       });
 
       const selected = exact || rows[0];
@@ -2112,8 +2130,8 @@
   }
 
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV425) return;
-    window.__weloReviewsTooltipHandlersInstalledV425 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV426) return;
+    window.__weloReviewsTooltipHandlersInstalledV426 = true;
 
     function closeAll() {
       document
