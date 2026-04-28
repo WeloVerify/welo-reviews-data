@@ -1,5 +1,5 @@
 /*!
- * Welo Reviews Widget — v4.2.4
+ * Welo Reviews Widget — v4.2.5
  *
  * Embed example:
  * <div
@@ -11,23 +11,27 @@
  *   data-theme="auto"
  *   data-welo-page="https://www.welobadge.com/en/welo-page/welo-badge"
  * ></div>
- * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.4" defer></script>
+ * <script src="https://weloverify.github.io/welo-reviews-data/widget/Full-Reviews.js?v=4.2.5" defer></script>
  */
 
 (function () {
   "use strict";
 
-  if (window.__WELO_REVIEWS_WIDGET_V424__) return;
-  window.__WELO_REVIEWS_WIDGET_V424__ = true;
+  if (window.__WELO_REVIEWS_WIDGET_V425__) return;
+  window.__WELO_REVIEWS_WIDGET_V425__ = true;
 
   const SUPABASE_URL = "https://ufqvcojyfsnscuddadnw.supabase.co";
   const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
-  
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+
   const TABLE_REVIEWS = "lascia_una_recensione";
+  const TABLE_REVIEW_OFFSETS = "public_company_review_offsets";
+
   const FIELD_COMPANY = "azienda";
+  const FIELD_OFFSET_COMPANY = "company_name";
   const FIELD_STATUS = "status";
   const FIELD_STARS = "Da 1 a 5 stelle come lo valuti?";
+
   const STORAGE_BASE = SUPABASE_URL + "/storage/v1/object/public/reviews-proof/";
   const HLS_JS_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js";
 
@@ -233,6 +237,24 @@
     return rowName === targetName || rowSlug === targetSlug;
   }
 
+  function getCompanyCandidates(companyName) {
+    const raw = String(companyName || "").trim();
+    const slug = makeSlug(raw);
+    const normalized = normalizeCompanyName(raw);
+
+    return Array.from(
+      new Set(
+        [
+          raw,
+          slug,
+          normalized,
+          raw.toLowerCase(),
+          normalized.toLowerCase()
+        ].filter(Boolean)
+      )
+    );
+  }
+
   function normalizeThemeValue(value) {
     const v = String(value || "").trim().toLowerCase();
     if (v === "dark") return "dark";
@@ -281,8 +303,8 @@
   }
 
   function installAutoThemeHandlersOnce() {
-    if (window.__weloReviewsAutoThemeInstalledV424) return;
-    window.__weloReviewsAutoThemeInstalledV424 = true;
+    if (window.__weloReviewsAutoThemeInstalledV425) return;
+    window.__weloReviewsAutoThemeInstalledV425 = true;
 
     if (!window.matchMedia) return;
 
@@ -310,10 +332,10 @@
   }
 
   function injectStyles() {
-    if (document.getElementById("welo-reviews-widget-styles-v424")) return;
+    if (document.getElementById("welo-reviews-widget-styles-v425")) return;
 
     const style = document.createElement("style");
-    style.id = "welo-reviews-widget-styles-v424";
+    style.id = "welo-reviews-widget-styles-v425";
     style.textContent = `
 .welo-reviews-widget-shell,
 .welo-reviews-widget-shell *,
@@ -1833,6 +1855,10 @@
     return SUPABASE_URL + "/rest/v1/" + TABLE_REVIEWS;
   }
 
+  function buildOffsetRestUrl() {
+    return SUPABASE_URL + "/rest/v1/" + TABLE_REVIEW_OFFSETS;
+  }
+
   async function fetchReviewsForCompany(companyName) {
     const targetSearch = normalizeCompanyName(companyName) || makeSlug(companyName) || companyName;
 
@@ -1854,6 +1880,39 @@
     return rows.filter(function (row) {
       return matchesCompanyExact(row[FIELD_COMPANY], companyName);
     });
+  }
+
+  async function fetchReviewsOffset(companyName) {
+    try {
+      const candidates = getCompanyCandidates(companyName);
+
+      const companyFilter = candidates
+        .map(function (value) {
+          return FIELD_OFFSET_COMPANY + ".ilike.*" + value + "*";
+        })
+        .join(",");
+
+      const url =
+        buildOffsetRestUrl() +
+        "?select=company_name,reviews_offset" +
+        "&or=" +
+        encodeURIComponent("(" + companyFilter + ")") +
+        "&limit=10";
+
+      const rows = await supabaseFetch(url);
+
+      const exact = rows.find(function (row) {
+        return matchesCompanyExact(row.company_name, companyName);
+      });
+
+      const selected = exact || rows[0];
+      const value = selected ? selected.reviews_offset : 0;
+
+      return Math.max(0, Number.parseInt(value, 10) || 0);
+    } catch (err) {
+      console.warn("[Welo Reviews Widget] Reviews offset fallback:", err);
+      return 0;
+    }
   }
 
   function loadHls() {
@@ -2053,8 +2112,8 @@
   }
 
   function installVerifiedTooltipHandlersOnce() {
-    if (window.__weloReviewsTooltipHandlersInstalledV424) return;
-    window.__weloReviewsTooltipHandlersInstalledV424 = true;
+    if (window.__weloReviewsTooltipHandlersInstalledV425) return;
+    window.__weloReviewsTooltipHandlersInstalledV425 = true;
 
     function closeAll() {
       document
@@ -2184,6 +2243,8 @@
     let ALL_REVIEWS = [];
     let CURRENT_REVIEWS = [];
     let STATS = { total: 0, average: 0 };
+    let REVIEWS_OFFSET = 0;
+    let PUBLIC_REVIEW_TOTAL = 0;
     let activeSort = "newest";
     let attachmentsOnly = false;
     let visibleCount = 4;
@@ -2256,13 +2317,19 @@
 
     function updateSummary() {
       const uid = "welo-summary-star-" + Math.random().toString(36).slice(2, 9);
+
+      PUBLIC_REVIEW_TOTAL = Math.max(
+        0,
+        Number(STATS.total || 0) + Number(REVIEWS_OFFSET || 0)
+      );
+
       summaryScoreEl.textContent = formatSummaryScore(STATS.average);
       summaryStarsEl.innerHTML = buildAverageStars(
         STATS.average,
         uid,
         "welo-summary-star"
       );
-      summaryMetaEl.textContent = buildSummaryMetaText(STATS.total, locale);
+      summaryMetaEl.textContent = buildSummaryMetaText(PUBLIC_REVIEW_TOTAL, locale);
     }
 
     function initVideoThumbPreviews() {
@@ -2528,9 +2595,18 @@
 
     async function load() {
       try {
-        const data = await fetchReviewsForCompany(company);
+        const results = await Promise.all([
+          fetchReviewsForCompany(company),
+          fetchReviewsOffset(company)
+        ]);
+
+        const data = results[0];
+        const offset = results[1];
+
         ALL_REVIEWS = Array.isArray(data) ? data : [];
+        REVIEWS_OFFSET = Math.max(0, Number.parseInt(offset, 10) || 0);
         STATS = computeStats(ALL_REVIEWS);
+
         updateSummary();
         recomputeAndRender();
       } catch (err) {
