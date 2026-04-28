@@ -8,6 +8,7 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
 
   const TABLE_NAME = "lascia_una_recensione";
+  const OFFSET_VIEW_NAME = "public_company_review_offsets";
   const STAR_FIELD = "Da 1 a 5 stelle come lo valuti?";
   const GITHUB_PAGES_BASE = "https://weloverify.github.io/welo-reviews-data";
 
@@ -23,9 +24,7 @@
     const style = document.createElement("style");
     style.id = "welo-badge-xr92-styles";
     style.textContent = `
-      .welo-widget {
-        display: inline-block;
-      }
+      .welo-widget { display: inline-block; }
 
       .welo-badge-xr92 {
         display: inline-flex;
@@ -52,9 +51,7 @@
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
       }
 
-      .welo-badge-xr92 strong {
-        font-weight: 700;
-      }
+      .welo-badge-xr92 strong { font-weight: 700; }
 
       .welo-badge-xr92 img {
         display: inline-block;
@@ -96,13 +93,8 @@
           gap: 4px;
         }
 
-        .welo-logo-xr92 {
-          height: 13px;
-        }
-
-        .welo-star-xr92 {
-          height: 15px;
-        }
+        .welo-logo-xr92 { height: 13px; }
+        .welo-star-xr92 { height: 15px; }
       }
 
       @media (max-width: 480px) {
@@ -235,6 +227,42 @@
     };
   }
 
+  async function fetchReviewsOffset(companyName) {
+    const candidates = getCompanyCandidates(companyName);
+
+    try {
+      const companyFilter = candidates
+        .map((value) => `company_name.ilike.*${value}*`)
+        .join(",");
+
+      const params = new URLSearchParams();
+      params.set("select", "reviews_offset");
+      params.set("or", `(${companyFilter})`);
+      params.set("limit", "1");
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/${OFFSET_VIEW_NAME}?${params.toString()}`,
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          cache: "no-store"
+        }
+      );
+
+      if (!response.ok) return 0;
+
+      const rows = await response.json();
+      const value = Array.isArray(rows) && rows[0] ? rows[0].reviews_offset : 0;
+
+      return Math.max(0, Number.parseInt(value, 10) || 0);
+    } catch (err) {
+      console.warn("Welo Widget: reviews offset fallback", err);
+      return 0;
+    }
+  }
+
   async function fetchSupabaseStats(companyName) {
     const candidates = getCompanyCandidates(companyName);
 
@@ -313,7 +341,10 @@
     const weloPageUrl = `https://www.welobadge.com/en/welo-page/${urlSlug}`;
 
     try {
-      const data = await fetchJsonData(companyName);
+      const [data, reviewsOffset] = await Promise.all([
+        fetchJsonData(companyName),
+        fetchReviewsOffset(companyName)
+      ]);
 
       let finalReviews = hasValidReviewsCount(data.reviews)
         ? Number(data.reviews)
@@ -337,6 +368,8 @@
           finalRating = supabaseStats.rating;
         }
       }
+
+      finalReviews = finalReviews + reviewsOffset;
 
       const formattedReviews = formatReviews(finalReviews);
 
