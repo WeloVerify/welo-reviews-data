@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------
  * Uso:
  *   <script
- *     src="https://weloverify.github.io/welo-reviews-data/widget/welo-popup-form.js?v=4"
+ *     src="https://weloverify.github.io/welo-reviews-data/widget/welo-popup-form.js?v=5"
  *     data-company="Welo Badge"
  *     defer>
  *   </script>
