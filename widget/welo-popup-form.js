@@ -3,13 +3,14 @@
  * ------------------------------------------------------------------
  * Uso:
  *   <script
- *     src="https://weloverify.github.io/welo-reviews-data/widget/welo-popup-form.js?v=3"
+ *     src="https://weloverify.github.io/welo-reviews-data/widget/welo-popup-form.js?v=4"
  *     data-company="Welo Badge"
  *     defer>
  *   </script>
  *
  * - Immagini: Supabase Storage (bucket `reviews-proof`)
  * - Video:    Mux Direct Upload via Edge Function `create-mux-upload`
+ * - Submit:   Supabase Edge Function `submit-review-secure`
  * - Nessuna API key Mux esposta lato client.
  * ------------------------------------------------------------------
  */
@@ -24,8 +25,7 @@
   window.__WELO_REVIEW_POPUP_LOADED__ = true;
 
   // ------------------------------------------------------------------
-  // 1. Leggi data-company dallo script tag (prima di qualunque async).
-  //    `document.currentScript` va catturato subito, qui.
+  // 1. Leggi data-company dallo script tag
   // ------------------------------------------------------------------
   function findScriptEl() {
     if (document.currentScript) return document.currentScript;
@@ -44,8 +44,20 @@
   var SUPABASE_URL_POPUP = "https://ufqvcojyfsnscuddadnw.supabase.co";
   var SUPABASE_ANON_KEY_POPUP =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+
+  /*
+   * IMPORTANTE:
+   * Se copi questa key da un vecchio file e non funziona, usa la anon key corretta del progetto.
+   * La URL della function è questa:
+   * https://ufqvcojyfsnscuddadnw.supabase.co/functions/v1/submit-review-secure
+   */
+
   var CREATE_MUX_UPLOAD_URL =
     SUPABASE_URL_POPUP + "/functions/v1/create-mux-upload";
+
+  var SUBMIT_REVIEW_SECURE_URL =
+    SUPABASE_URL_POPUP + "/functions/v1/submit-review-secure";
+
   var SUPABASE_LIB_URL =
     "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/umd/supabase.js";
 
@@ -53,7 +65,7 @@
   var OVERLAY_EL_ID = "welo-review-overlay";
 
   // ------------------------------------------------------------------
-  // 3. CSS (iniettato via <style> in <head>)
+  // 3. CSS
   // ------------------------------------------------------------------
   var CSS_CONTENT = `
   #welo-review-overlay,
@@ -420,6 +432,17 @@
     color: #111;
   }
 
+  .welo-rv-hp-wrap {
+    position: absolute !important;
+    left: -99999px !important;
+    top: auto !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+  }
+
   .welo-rv-footer {
     display: flex;
     justify-content: space-between;
@@ -601,9 +624,7 @@
   `;
 
   // ------------------------------------------------------------------
-  // 4. HTML (iniettato via insertAdjacentHTML in <body>)
-  //    I tag <style>/<script> originali sono esclusi: CSS viene iniettato
-  //    via injectStyles(), lo script non serve (siamo gia' in JS).
+  // 4. HTML
   // ------------------------------------------------------------------
   var STAR_SVG =
     '<svg class="welo-rv-star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">' +
@@ -704,6 +725,14 @@
             '<label class="welo-rv-label" for="welo-rv-name-input" id="welo-rv-name-label"></label>' +
             '<input id="welo-rv-name-input" type="text" maxlength="255" class="welo-rv-input" />' +
           '</div>' +
+          '<div class="welo-rv-group">' +
+            '<label class="welo-rv-label" for="welo-rv-phone-input" id="welo-rv-phone-label"></label>' +
+            '<input id="welo-rv-phone-input" type="tel" maxlength="40" class="welo-rv-input" />' +
+          '</div>' +
+          '<div class="welo-rv-group welo-rv-hp-wrap" aria-hidden="true">' +
+            '<label for="welo-rv-website-input">Website</label>' +
+            '<input id="welo-rv-website-input" type="text" name="website" autocomplete="off" tabindex="-1" />' +
+          '</div>' +
           '<div class="welo-rv-checkbox">' +
             '<input type="checkbox" id="welo-rv-accept" />' +
             '<label for="welo-rv-accept" id="welo-rv-accept-label"></label>' +
@@ -730,7 +759,7 @@
     '</div>';
 
   // ------------------------------------------------------------------
-  // 5. Injection helpers (idempotenti)
+  // 5. Injection helpers
   // ------------------------------------------------------------------
   function injectStyles() {
     if (document.getElementById(STYLE_EL_ID)) return;
@@ -746,7 +775,7 @@
   }
 
   // ------------------------------------------------------------------
-  // 6. Supabase lib loader (una sola volta, globale)
+  // 6. Supabase lib loader
   // ------------------------------------------------------------------
   function loadSupabase() {
     return new Promise(function (resolve, reject) {
@@ -754,20 +783,24 @@
         resolve();
         return;
       }
+
       var existing = document.querySelector(
         'script[data-welo-supabase], script[src*="@supabase/supabase-js"]'
       );
+
       if (existing) {
         if (window.supabase && typeof window.supabase.createClient === "function") {
           resolve();
           return;
         }
+
         existing.addEventListener("load", function () {
           resolve();
         });
         existing.addEventListener("error", reject);
         return;
       }
+
       var s = document.createElement("script");
       s.src = SUPABASE_LIB_URL;
       s.setAttribute("data-welo-supabase", "1");
@@ -807,10 +840,11 @@
   }
 
   // ==================================================================
-  // 8. LOGICA POPUP (identica al file originale, solo adattata al SDK)
+  // 8. LOGICA POPUP
   // ==================================================================
   function setupPopup() {
     var createClient = window.supabase && window.supabase.createClient;
+
     if (typeof createClient !== "function") {
       console.error("[Welo Review] Supabase client not available");
       return;
@@ -818,9 +852,7 @@
 
     var supabasePopup = createClient(SUPABASE_URL_POPUP, SUPABASE_ANON_KEY_POPUP);
 
-    // Company: priorita' assoluta a data-company, poi fallback slug URL.
     var COMPANY_SLUG_POPUP = DATA_COMPANY || "";
-
     var LOCALE_POPUP = window.location.pathname.startsWith("/en") ? "en" : "it";
 
     var STRINGS_BY_LOCALE = {
@@ -837,17 +869,18 @@
         uploadBtn: "Scegli i file",
         dropzoneText: "Trascina i file qui o",
         step4Title: "I tuoi dati",
-        emailLabel: "Email (non verra' mostrata pubblicamente)",
+        emailLabel: "Email (non verrà mostrata pubblicamente)",
         nameLabel: "Nome e cognome",
+        phoneLabel: "Numero di telefono (non verrà mostrato pubblicamente)",
         thankyouTitle: "Grazie per la tua recensione",
         thankyouText:
-          "Il nostro team la analizzera' per verificarne l'autenticita'. Potremmo ricontattarti se servono dettagli aggiuntivi.",
+          "Il nostro team la analizzerà per verificarne l'autenticità. Potremmo ricontattarti se servono dettagli aggiuntivi.",
         back: "Indietro",
         next: "Avanti",
         send: "Invia recensione",
         close: "Chiudi",
         required: "Per favore compila tutti i campi obbligatori.",
-        genericError: "Qualcosa e' andato storto, riprova tra qualche minuto.",
+        genericError: "Qualcosa è andato storto, riprova tra qualche minuto.",
         acceptText:
           'Accetto i <a href="https://www.welobadge.com/legal/pagine-legali" target="_blank" rel="noopener noreferrer">Termini &amp; Condizioni</a> e la <a href="https://www.welobadge.com/legal/pagine-legali" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.',
         acceptRequired: "Per continuare devi accettare Termini & Condizioni e Privacy Policy.",
@@ -881,6 +914,7 @@
         step4Title: "Your information",
         emailLabel: "Email (will not be shown publicly)",
         nameLabel: "Full name",
+        phoneLabel: "Phone number (will not be shown publicly)",
         thankyouTitle: "Thank you for your review",
         thankyouText:
           "Our team will review it to verify authenticity. We may contact you if we need more details.",
@@ -935,6 +969,8 @@
     var textInput = $id("welo-rv-text-input");
     var emailInput = $id("welo-rv-email-input");
     var nameInput = $id("welo-rv-name-input");
+    var phoneInput = $id("welo-rv-phone-input");
+    var honeypotInput = $id("welo-rv-website-input");
 
     var fileInputDesktop = $id("welo-rv-file-input-desktop");
     var fileInputMobile = $id("welo-rv-file-input-mobile");
@@ -956,8 +992,13 @@
       text: "",
       email: "",
       name: "",
+      phone: "",
       files: [],
-      country: null
+      country: null,
+      formStartedAt: null,
+      formSubmittedAt: null,
+      source: "organic",
+      inviteToken: null
     };
 
     function setText(id, value) {
@@ -976,15 +1017,42 @@
               STATE.country = data.country_name;
             }
           })
-          .catch(function () {
-            /* silent */
-          });
+          .catch(function () {});
+      } catch (e) {}
+    }
+
+    function detectReviewSource() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+
+        var inviteToken =
+          params.get("review_invite") ||
+          params.get("invite") ||
+          params.get("token") ||
+          null;
+
+        var source =
+          params.get("source") ||
+          params.get("utm_source") ||
+          null;
+
+        if (inviteToken) {
+          STATE.source = "email_invite";
+          STATE.inviteToken = inviteToken;
+        } else if (source) {
+          STATE.source = String(source).trim() || "unknown";
+        } else if (document.referrer) {
+          STATE.source = "referral";
+        } else {
+          STATE.source = "organic";
+        }
       } catch (e) {
-        /* silent */
+        STATE.source = "unknown";
       }
     }
 
     detectCountry();
+    detectReviewSource();
 
     setText("welo-rv-step1-title", STR.step1Title);
     setText("welo-rv-step1-sub", STR.step1Sub);
@@ -1000,14 +1068,14 @@
     setText("welo-rv-upload-hint-mobile", STR.uploadHint);
     setText("welo-rv-upload-btn-label-desktop", STR.uploadBtn);
     setText("welo-rv-upload-btn-label-mobile", STR.uploadBtn);
+    setText("welo-rv-email-label", STR.emailLabel);
+    setText("welo-rv-name-label", STR.nameLabel);
+    setText("welo-rv-phone-label", STR.phoneLabel);
+    setText("welo-rv-thankyou-title", STR.thankyouTitle);
+    setText("welo-rv-thankyou-text", STR.thankyouText);
 
     if (dropzoneTextDesktop) dropzoneTextDesktop.textContent = STR.dropzoneText;
     if (dropzoneTextMobile) dropzoneTextMobile.textContent = STR.dropzoneText;
-
-    setText("welo-rv-email-label", STR.emailLabel);
-    setText("welo-rv-name-label", STR.nameLabel);
-    setText("welo-rv-thankyou-title", STR.thankyouTitle);
-    setText("welo-rv-thankyou-text", STR.thankyouText);
 
     if (backBtn) backBtn.textContent = STR.back;
     if (nextBtn) nextBtn.textContent = STR.next;
@@ -1061,6 +1129,7 @@
 
     async function decodeImageToCanvas(file) {
       var url = URL.createObjectURL(file);
+
       try {
         if ("createImageBitmap" in window) {
           var bmp = await createImageBitmap(file);
@@ -1072,6 +1141,7 @@
           if (bmp && bmp.close) bmp.close();
           return canvas;
         }
+
         var img = await new Promise(function (resolve, reject) {
           var im = new Image();
           im.onload = function () {
@@ -1080,6 +1150,7 @@
           im.onerror = reject;
           im.src = url;
         });
+
         var canvas2 = document.createElement("canvas");
         canvas2.width = img.naturalWidth || img.width;
         canvas2.height = img.naturalHeight || img.height;
@@ -1095,17 +1166,22 @@
       var sw = sourceCanvas.width;
       var sh = sourceCanvas.height;
       var longSide = Math.max(sw, sh);
+
       if (!maxLongSide || longSide <= maxLongSide) return sourceCanvas;
+
       var scale = maxLongSide / longSide;
       var tw = Math.max(1, Math.round(sw * scale));
       var th = Math.max(1, Math.round(sh * scale));
+
       var canvas = document.createElement("canvas");
       canvas.width = tw;
       canvas.height = th;
+
       var ctx = canvas.getContext("2d");
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(sourceCanvas, 0, 0, tw, th);
+
       return canvas;
     }
 
@@ -1146,6 +1222,7 @@
         if (!blob) return file;
 
         var minQ = 0.45;
+
         for (var i = 0; i < 10 && blob.size > maxBytes; i++) {
           if (quality > minQ) {
             quality = Math.max(minQ, quality - 0.07);
@@ -1153,11 +1230,18 @@
             if (nextBlob) blob = nextBlob;
             continue;
           }
-          var newMaxLong = Math.max(720, Math.round(Math.max(canvas.width, canvas.height) * 0.88));
+
+          var newMaxLong = Math.max(
+            720,
+            Math.round(Math.max(canvas.width, canvas.height) * 0.88)
+          );
+
           var resized = resizeCanvas(canvas, newMaxLong);
           if (resized === canvas) break;
+
           canvas = resized;
           quality = outType === "image/jpeg" ? 0.78 : 0.76;
+
           var nextBlob2 = await canvasToBlob(canvas, outType, quality);
           if (nextBlob2) blob = nextBlob2;
         }
@@ -1176,14 +1260,14 @@
     function syncFileInputs() {
       try {
         var dataTransfer = new DataTransfer();
+
         STATE.files.forEach(function (file) {
           dataTransfer.items.add(file);
         });
+
         if (fileInputDesktop) fileInputDesktop.files = dataTransfer.files;
         if (fileInputMobile) fileInputMobile.files = dataTransfer.files;
-      } catch (e) {
-        /* silent - Safari iOS may restrict DataTransfer */
-      }
+      } catch (e) {}
     }
 
     function createPreviewItem(file, index) {
@@ -1241,15 +1325,18 @@
       item.appendChild(thumb);
       item.appendChild(info);
       item.appendChild(removeBtn);
+
       return item;
     }
 
     function renderPreviews() {
       if (previewContainerDesktop) previewContainerDesktop.innerHTML = "";
       if (previewContainerMobile) previewContainerMobile.innerHTML = "";
+
       STATE.files.forEach(function (file, index) {
         var itemDesktop = createPreviewItem(file, index);
         var itemMobile = createPreviewItem(file, index);
+
         if (previewContainerDesktop) previewContainerDesktop.appendChild(itemDesktop);
         if (previewContainerMobile) previewContainerMobile.appendChild(itemMobile);
       });
@@ -1268,8 +1355,8 @@
       if (remainingSlots <= 0) return;
 
       var incoming = Array.prototype.slice.call(fileList || [], 0, remainingSlots);
-      var MAX_IMAGE_SIZE = 20 * 1024 * 1024;    // 20MB per immagini (Supabase Storage)
-      var MAX_VIDEO_SIZE = 500 * 1024 * 1024;   // 500MB per video (Mux Direct Upload)
+      var MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+      var MAX_VIDEO_SIZE = 500 * 1024 * 1024;
 
       var alreadyHasVideo = STATE.files.some(isVideoFile);
       var imageTooLargeFound = false;
@@ -1277,6 +1364,7 @@
       var extraVideoFound = false;
 
       var filtered = [];
+
       for (var f = 0; f < incoming.length; f++) {
         var file = incoming[f];
 
@@ -1285,23 +1373,24 @@
             extraVideoFound = true;
             continue;
           }
+
           if (file.size > MAX_VIDEO_SIZE) {
             videoTooLargeFound = true;
             continue;
           }
+
           alreadyHasVideo = true;
           filtered.push(file);
         } else {
-          // immagine (o file generico non-video): limite 20MB
           if (file.size > MAX_IMAGE_SIZE) {
             imageTooLargeFound = true;
             continue;
           }
+
           filtered.push(file);
         }
       }
 
-      // Priorita' errori: extra video > video troppo grande > immagine troppo grande
       if (extraVideoFound) {
         errorBox.textContent = STR.onlyOneVideo;
       } else if (videoTooLargeFound) {
@@ -1315,6 +1404,7 @@
 
       for (var i = 0; i < filtered.length; i++) {
         var item = filtered[i];
+
         if (isImageFile(item)) {
           processed.push(await compressImageToTarget(item, targetBytes));
         } else {
@@ -1341,6 +1431,7 @@
 
       dropzone.addEventListener("dragleave", function (e) {
         e.preventDefault();
+
         if (!dropzone.contains(e.relatedTarget)) {
           dropzone.classList.remove("is-dragover");
         }
@@ -1349,7 +1440,9 @@
       dropzone.addEventListener("drop", async function (e) {
         e.preventDefault();
         dropzone.classList.remove("is-dragover");
+
         var files = e.dataTransfer && e.dataTransfer.files;
+
         if (files && files.length > 0) {
           await addFiles(files);
         }
@@ -1371,7 +1464,9 @@
 
     function setLoading(isVisible, text) {
       if (!loadingBox) return;
+
       loadingBox.style.display = isVisible ? "flex" : "none";
+
       if (typeof text === "string" && loadingText) {
         loadingText.textContent = text;
       }
@@ -1379,6 +1474,7 @@
 
     function setStep(step) {
       currentStep = step;
+
       steps.forEach(function (s) {
         s.classList.toggle("is-active", Number(s.dataset.step) === step);
       });
@@ -1414,7 +1510,10 @@
       STATE.text = "";
       STATE.email = "";
       STATE.name = "";
+      STATE.phone = "";
       STATE.files = [];
+      STATE.formStartedAt = null;
+      STATE.formSubmittedAt = null;
 
       updateStarsDisplay(0);
 
@@ -1422,6 +1521,8 @@
       if (textInput) textInput.value = "";
       if (emailInput) emailInput.value = "";
       if (nameInput) nameInput.value = "";
+      if (phoneInput) phoneInput.value = "";
+      if (honeypotInput) honeypotInput.value = "";
       if (fileInputDesktop) fileInputDesktop.value = "";
       if (fileInputMobile) fileInputMobile.value = "";
       if (acceptCheckbox) acceptCheckbox.checked = false;
@@ -1433,7 +1534,10 @@
 
     function openPopup() {
       resetState();
+      STATE.formStartedAt = new Date().toISOString();
+
       setStep(1);
+
       overlay.classList.add("is-visible");
       overlay.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
@@ -1448,6 +1552,7 @@
     function autoOpenReviewFromUrl() {
       var hash = (window.location.hash || "").toLowerCase();
       var params = new URLSearchParams(window.location.search);
+
       if (hash === "#recensione" || hash === "#review" || params.get("review") === "1") {
         setTimeout(openPopup, 150);
       }
@@ -1463,7 +1568,6 @@
     normalizeCompanySlug();
     autoOpenReviewFromUrl();
 
-    // Esposizione globale
     window.openWeloReviewPopup = openPopup;
     window.openReviewModal = openPopup;
 
@@ -1474,10 +1578,11 @@
     });
 
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && overlay.classList.contains("is-visible")) closePopup();
+      if (e.key === "Escape" && overlay.classList.contains("is-visible")) {
+        closePopup();
+      }
     });
 
-    // Qualsiasi link #recensione o #review apre il popup
     document
       .querySelectorAll(
         'a[href="#recensione"], [href="#recensione"], a[href="#review"], [href="#review"]'
@@ -1491,13 +1596,16 @@
 
     starsBtns.forEach(function (btn) {
       var val = Number(btn.dataset.value);
+
       btn.addEventListener("click", function () {
         STATE.rating = val;
         updateStarsDisplay(val);
       });
+
       btn.addEventListener("mouseenter", function () {
         updateStarsDisplay(val);
       });
+
       btn.addEventListener("mouseleave", function () {
         updateStarsDisplay(STATE.rating || 0);
       });
@@ -1507,7 +1615,9 @@
     bindUploader(dropzoneMobile, fileInputMobile);
 
     backBtn.addEventListener("click", function () {
-      if (currentStep > 1 && currentStep <= 5) setStep(currentStep - 1);
+      if (currentStep > 1 && currentStep <= 5) {
+        setStep(currentStep - 1);
+      }
     });
 
     nextBtn.addEventListener("click", async function () {
@@ -1516,6 +1626,7 @@
           errorBox.textContent = STR.required;
           return;
         }
+
         setStep(2);
         return;
       }
@@ -1523,10 +1634,12 @@
       if (currentStep === 2) {
         STATE.title = String(titleInput.value || "").trim();
         STATE.text = String(textInput.value || "").trim();
+
         if (!STATE.title || !STATE.text) {
           errorBox.textContent = STR.required;
           return;
         }
+
         var isMobile = window.innerWidth <= 480;
         setStep(isMobile ? 3 : 4);
         return;
@@ -1540,29 +1653,34 @@
       if (currentStep === 4) {
         STATE.email = String(emailInput.value || "").trim();
         STATE.name = String(nameInput.value || "").trim();
+        STATE.phone = phoneInput ? String(phoneInput.value || "").trim() : "";
 
         if (!STATE.email || !STATE.name) {
           errorBox.textContent = STR.required;
           return;
         }
+
         if (!isValidEmail(STATE.email)) {
           errorBox.textContent = STR.invalidEmail;
           return;
         }
+
         if (!acceptCheckbox.checked) {
           errorBox.textContent = STR.acceptRequired;
           return;
         }
+
         await submitReview();
         return;
       }
 
-      if (currentStep === 5) closePopup();
+      if (currentStep === 5) {
+        closePopup();
+      }
     });
 
     // --------------------------------------------------------------
-    // MUX: Direct Upload via Edge Function create-mux-upload.
-    // Nessuna API key Mux lato client.
+    // MUX: Direct Upload via Edge Function create-mux-upload
     // --------------------------------------------------------------
     async function createMuxDirectUpload(submissionId, company) {
       var res = await fetch(CREATE_MUX_UPLOAD_URL, {
@@ -1588,7 +1706,10 @@
         throw new Error((data && data.error) || "Mux upload creation failed");
       }
 
-      return { upload_id: data.upload_id, upload_url: data.upload_url };
+      return {
+        upload_id: data.upload_id,
+        upload_url: data.upload_url
+      };
     }
 
     async function putFileToMux(uploadUrl, file) {
@@ -1599,6 +1720,7 @@
           "Content-Type": file.type || "application/octet-stream"
         }
       });
+
       if (!res.ok) {
         throw new Error("Mux PUT failed with status " + res.status);
       }
@@ -1615,6 +1737,44 @@
       }
     }
 
+    async function submitReviewSecure(payload) {
+      var res = await fetch(SUBMIT_REVIEW_SECURE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + SUPABASE_ANON_KEY_POPUP,
+          apikey: SUPABASE_ANON_KEY_POPUP
+        },
+        body: JSON.stringify(payload)
+      });
+
+      var data = await res.json().catch(function () {
+        return {};
+      });
+
+      if (!res.ok || !data.success) {
+        console.error("[Welo Review] Secure submit failed", data);
+        throw new Error((data && data.error) || STR.genericError);
+      }
+
+      return data;
+    }
+
+    function getCompletionTimeSeconds(submittedAtIso) {
+      try {
+        if (!STATE.formStartedAt || !submittedAtIso) return null;
+
+        var started = new Date(STATE.formStartedAt).getTime();
+        var submitted = new Date(submittedAtIso).getTime();
+
+        if (!started || !submitted || submitted < started) return null;
+
+        return Math.round((submitted - started) / 1000);
+      } catch (e) {
+        return null;
+      }
+    }
+
     async function submitReview() {
       errorBox.textContent = "";
       nextBtn.disabled = true;
@@ -1625,9 +1785,9 @@
 
       var submissionId = generateSubmissionId();
 
-      // Separazione immagini/video: 1 video max via Mux, resto immagini via Storage.
       var imageFiles = STATE.files.filter(isImageFile);
       var videoFile = null;
+
       for (var vf = 0; vf < STATE.files.length; vf++) {
         if (isVideoFile(STATE.files[vf])) {
           videoFile = STATE.files[vf];
@@ -1639,9 +1799,10 @@
       var originalFileNames = [];
 
       try {
-        // 1. Upload immagini su Supabase Storage.
+        // 1. Upload immagini su Supabase Storage
         if (imageFiles.length > 0) {
           var total = imageFiles.length;
+
           for (var i = 0; i < total; i++) {
             var file = imageFiles[i];
             originalFileNames.push(file.name);
@@ -1649,7 +1810,14 @@
             setLoading(true, STR.uploadingFile(i + 1, total));
 
             var safeName = file.name.replace(/[^a-z0-9.\-]/gi, "_").toLowerCase();
-            var path = COMPANY_SLUG_POPUP + "/" + Date.now() + "-" + (i + 1) + "-" + safeName;
+            var path =
+              COMPANY_SLUG_POPUP +
+              "/" +
+              Date.now() +
+              "-" +
+              (i + 1) +
+              "-" +
+              safeName;
 
             var uploadRes = await supabasePopup.storage
               .from("reviews-proof")
@@ -1667,62 +1835,98 @@
           }
         }
 
-        // 2. Mux Direct Upload per il video (se presente).
+        // 2. Mux Direct Upload per il video, se presente
         var muxUploadId = null;
         var muxUploadUrl = null;
 
         if (videoFile) {
           setLoading(true, STR.preparingVideo);
+
           var mux = await createMuxDirectUpload(submissionId, COMPANY_SLUG_POPUP);
+
           muxUploadId = mux.upload_id;
           muxUploadUrl = mux.upload_url;
+
           originalFileNames.push(videoFile.name);
         }
 
-        // 3. Insert recensione. Se c'e' video, marca provider/status.
+        // 3. Invio recensione alla Edge Function sicura
         setLoading(true, STR.savingReview);
 
         var nowIso = new Date().toISOString();
+        STATE.formSubmittedAt = nowIso;
+
+        var completionTimeSeconds = getCompletionTimeSeconds(nowIso);
+
+        var honeypotValue = "";
+        if (honeypotInput) {
+          honeypotValue = String(honeypotInput.value || "").trim();
+        }
+
         var payload = {
           azienda: COMPANY_SLUG_POPUP,
+
           Titolo: STATE.title,
           Testo: STATE.text,
+
           "Inserisci la tua email": STATE.email,
           "Nome e cognome": STATE.name,
+          "Numero di telefono": STATE.phone,
+
+          email: STATE.email,
+          full_name: STATE.name,
+          phone: STATE.phone,
+
           "Da 1 a 5 stelle come lo valuti?": STATE.rating,
-          status: "pending",
+
+          /*
+           * Lo status finale NON viene deciso dal frontend.
+           * La Edge Function decide published / pending / rejected.
+           */
+          status: null,
+
           "Submitted at": nowIso,
           "Submission ID": submissionId,
           "Respondent's country": STATE.country || null,
-          "Prove di acquisto": originalFileNames.length ? originalFileNames.join(", ") : null,
-          prove_di_acquisto: storagePaths.length ? storagePaths.join(",") : null,
+
+          "Prove di acquisto": originalFileNames.length
+            ? originalFileNames.join(", ")
+            : null,
+
+          prove_di_acquisto: storagePaths.length
+            ? storagePaths.join(",")
+            : null,
+
           video_provider: videoFile ? "mux" : null,
           mux_upload_id: muxUploadId,
-          mux_status: videoFile ? "processing" : null
+          mux_status: videoFile ? "processing" : null,
+
+          source: STATE.source || "organic",
+          review_invite_token: STATE.inviteToken || null,
+
+          form_started_at: STATE.formStartedAt,
+          form_submitted_at: STATE.formSubmittedAt,
+          completion_time_seconds: completionTimeSeconds,
+          honeypot_value: honeypotValue,
+
+          page_url: window.location.href,
+          referrer: document.referrer || null,
+          user_agent_client: navigator.userAgent || null,
+          locale: LOCALE_POPUP
         };
 
-        var insertRes = await supabasePopup
-          .from("lascia_una_recensione")
-          .insert([payload]);
-
-        if (insertRes.error) {
-          console.error("[Welo Review] Insert error", insertRes.error);
-          errorBox.textContent = insertRes.error.message || STR.genericError;
-          nextBtn.disabled = false;
-          backBtn.disabled = false;
-          nextBtn.textContent = STR.send;
-          setLoading(false, "");
-          return;
-        }
+        await submitReviewSecure(payload);
 
         // 4. PUT video su Mux. Il webhook Mux completa asset_id/playback_id/status.
         if (videoFile && muxUploadUrl) {
           setLoading(true, STR.uploadingVideo);
+
           try {
             await putFileToMux(muxUploadUrl, videoFile);
           } catch (muxErr) {
             console.error("[Welo Review] Mux PUT error", muxErr);
             await markReviewMuxErrored(submissionId);
+
             errorBox.textContent = STR.videoUploadFailed;
             nextBtn.disabled = false;
             backBtn.disabled = false;
@@ -1734,11 +1938,15 @@
 
         setLoading(false, "");
         setStep(5);
+
         nextBtn.disabled = false;
         backBtn.disabled = false;
       } catch (err) {
         console.error("[Welo Review] Submit exception", err);
-        errorBox.textContent = STR.genericError;
+
+        errorBox.textContent =
+          (err && err.message) || STR.genericError;
+
         nextBtn.disabled = false;
         backBtn.disabled = false;
         nextBtn.textContent = STR.send;
