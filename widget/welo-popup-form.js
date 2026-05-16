@@ -43,7 +43,7 @@
   // ------------------------------------------------------------------
   var SUPABASE_URL_POPUP = "https://ufqvcojyfsnscuddadnw.supabase.co";
   var SUPABASE_ANON_KEY_POPUP =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InVmcXZjb2p5ZnNuc2N1ZGRhZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MTg2NjksImV4cCI6MjA2MzM5NDY2OX0.iYJVmg9PXxOu0R3z62iRzr4am0q8ZSc8THlB2rE2oQM";
 
   /*
    * IMPORTANTE:
@@ -1111,6 +1111,30 @@
       return file && typeof file.type === "string" && file.type.indexOf("image/") === 0;
     }
 
+    function isMobileUploadStepEnabled() {
+      return window.innerWidth <= 480;
+    }
+
+    function getPreviousStep(step) {
+      /*
+       * Desktop:
+       * step 3 è nascosto perché l'upload è già dentro lo step 2.
+       * Quindi da step 4 bisogna tornare direttamente a step 2.
+       *
+       * Mobile:
+       * step 3 è visibile, quindi da step 4 si torna a step 3.
+       */
+      if (step === 4 && !isMobileUploadStepEnabled()) {
+        return 2;
+      }
+
+      if (step > 1) {
+        return step - 1;
+      }
+
+      return 1;
+    }
+
     function canvasToBlob(canvas, type, quality) {
       return new Promise(function (resolve) {
         if (!canvas.toBlob) {
@@ -1473,6 +1497,15 @@
     }
 
     function setStep(step) {
+      /*
+       * Protezione extra:
+       * su desktop lo step 3 non deve mai diventare lo step attivo,
+       * perché è nascosto via CSS. In quel caso torniamo allo step 2.
+       */
+      if (step === 3 && !isMobileUploadStepEnabled()) {
+        step = 2;
+      }
+
       currentStep = step;
 
       steps.forEach(function (s) {
@@ -1616,7 +1649,7 @@
 
     backBtn.addEventListener("click", function () {
       if (currentStep > 1 && currentStep <= 5) {
-        setStep(currentStep - 1);
+        setStep(getPreviousStep(currentStep));
       }
     });
 
@@ -1640,7 +1673,7 @@
           return;
         }
 
-        var isMobile = window.innerWidth <= 480;
+        var isMobile = isMobileUploadStepEnabled();
         setStep(isMobile ? 3 : 4);
         return;
       }
