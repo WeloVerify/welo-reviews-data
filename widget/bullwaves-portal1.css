@@ -1,6 +1,3 @@
-Sì, questo è il codice completo aggiornato. Ho lasciato invariato tutto il resto e ho aggiunto alla fine un fix più forte per forzare la visibilità del footer/disclaimer, anche se è nascosto da altezza `0`, opacity, overlay o stile della dashboard. 
-
-```css
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* =========================================================
@@ -1387,4 +1384,3 @@ iframe,
     line-height: 1.5 !important;
   }
 }
-```
