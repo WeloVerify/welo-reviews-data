@@ -1,0 +1,1220 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* =========================================================
+   BULLWAVES PORTAL — LIGHT THEME (Stable.)
+   - Inter everywhere
+   - DO NOT override icon fonts (FontAwesome / Glyphicons)
+   ========================================================= */
+
+:root {
+  --bw-text: #1b1b1b;
+  --bw-muted: #959595;
+  --bw-primary: #2453ff;
+  --bw-bg: #ffffff;
+  --bw-bg-soft: #fafafa;
+  --bw-border: #ededed;
+  --bw-border-strong: #d9d9d9;
+  --bw-danger: #f50100;
+  --bw-shadow: 0 10px 30px rgba(27, 27, 27, 0.06);
+  --bw-radius: 12px;
+}
+
+/* --------------------------
+   Global / Base
+--------------------------- */
+
+html,
+body {
+  background: var(--bw-bg) !important;
+  color: var(--bw-text) !important;
+  color-scheme: light !important;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Inter everywhere (safe list) */
+body,
+button,
+input,
+select,
+textarea,
+.form-control,
+.btn,
+.page-container,
+.page-content,
+.page-sidebar,
+.panel,
+.widget,
+.tile,
+table,
+th,
+td,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+label,
+small,
+div,
+ul,
+ol,
+li,
+strong,
+em,
+a {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* IMPORTANT: DO NOT break icon fonts */
+.fa,
+.fas,
+.far,
+.fal,
+.fab {
+  font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+  font-weight: 900 !important;
+}
+.glyphicon {
+  font-family: "Glyphicons Halflings" !important;
+}
+
+a {
+  color: var(--bw-primary) !important;
+  text-decoration: none !important;
+}
+a:hover {
+  text-decoration: underline !important;
+}
+
+p,
+label,
+small,
+span {
+  color: var(--bw-text) !important;
+}
+
+.help-block,
+.text-muted {
+  color: var(--bw-muted) !important;
+}
+
+/* Force white backgrounds globally (removes legacy gradients) */
+.page-container,
+.page-container .page-content,
+.page-container .page-content-wrap,
+.page-container .page-content-wrap .row,
+.page-container .page-content-wrap .row > div,
+.page-container .page-content-wrap .content-frame,
+.page-container .page-content-wrap .content-frame-body,
+.page-container .page-content .content-frame,
+.page-container .page-content .content-frame-body,
+.page-container .page-content .page-content-wrap,
+.page-container .page-content .page-content-wrap .row,
+.page-container .page-content .page-content-wrap .row > div,
+.content-frame,
+.content-frame-body {
+  background-color: var(--bw-bg) !important;
+  background-image: none !important;
+}
+
+/* Main spacing */
+.page-container .page-content {
+  padding: 22px 18px 40px !important;
+  background: var(--bw-bg) !important;
+}
+
+/* --------------------------
+   Top bar / header
+--------------------------- */
+
+.x-navigation.x-navigation-horizontal {
+  background: var(--bw-bg) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--bw-border) !important;
+}
+
+.x-navigation.x-navigation-horizontal > li > a,
+.x-navigation.x-navigation-horizontal li > a,
+.x-navigation.x-navigation-horizontal li > a span {
+  color: var(--bw-text) !important;
+}
+
+/* --------------------------
+   Login / Register pages
+--------------------------- */
+
+body#login,
+body#register,
+body#Login,
+body#Register,
+body#password_reminder,
+body#Password-Reminder,
+body#register_demo_account,
+body#Register-Demo-Account,
+body#email_confirmation {
+  background: var(--bw-bg) !important;
+}
+
+.login-container,
+.registration-container {
+  padding-top: 115px;
+  padding-bottom: 50px;
+  position: relative;
+  z-index: 1;
+  background: var(--bw-bg) !important;
+}
+
+.login-container::before,
+.registration-container::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 55%;
+  height: 55%;
+  max-width: 720px;
+  max-height: 720px;
+  background: url(https://s3.eu-west-1.amazonaws.com/skaleapps.io/Client+CDN/bullwaves/banner-absolute1.png) no-repeat;
+  background-size: contain;
+  z-index: -1;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.login-container::after,
+.registration-container::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 55%;
+  height: 55%;
+  max-width: 720px;
+  max-height: 720px;
+  background: url(https://s3.eu-west-1.amazonaws.com/skaleapps.io/Client+CDN/bullwaves/banner-absolute2.png) no-repeat;
+  background-size: contain;
+  z-index: -1;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.login-container .login-box .login-body,
+.registration-container .registration-box .registration-body {
+  border-radius: 20px !important;
+  background: var(--bw-bg) !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+.login-container .login-box .login-body .login-title,
+.registration-container .registration-box .registration-body .registration-title {
+  text-align: center;
+  font-size: 30px !important;
+  font-weight: 700 !important;
+  color: var(--bw-text) !important;
+}
+
+.login-container .login-box .login-body .login-subtitle,
+.registration-container .registration-box .registration-body .registration-subtitle {
+  text-align: center;
+  color: var(--bw-muted) !important;
+}
+
+.login-container .login-box .login-body label,
+.registration-container .registration-box .registration-body label {
+  color: var(--bw-text) !important;
+  font-weight: 500 !important;
+}
+
+.login-container .login-box .login-body .form-control,
+.registration-container .registration-box .registration-body .form-control {
+  border: 1px solid var(--bw-border-strong) !important;
+  background: var(--bw-bg) !important;
+  color: var(--bw-text) !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.login-container .login-box .login-body .form-control:focus,
+.registration-container .registration-box .registration-body .form-control:focus {
+  border-color: rgba(36, 83, 255, 0.65) !important;
+  box-shadow: 0 0 0 4px rgba(36, 83, 255, 0.12) !important;
+}
+
+.login-container .login-box .login-body .btn,
+.registration-container .registration-box .registration-body .btn {
+  border-radius: 12px !important;
+}
+
+.login-container .login-box .login-body .btn-primary,
+.registration-container .registration-box .registration-body .btn-primary,
+.login-container .login-box .login-body .btn-success,
+.registration-container .registration-box .registration-body .btn-success {
+  background: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+}
+
+/* --------------------------
+   Sidebar
+--------------------------- */
+
+.page-container .page-sidebar {
+  background: var(--bw-bg) !important;
+  border-right: 1px solid var(--bw-border) !important;
+  padding: 14px 14px !important;
+}
+
+.page-sidebar .x-navigation {
+  background: transparent !important;
+}
+
+.page-sidebar .x-navigation li > a {
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 12px 12px !important;
+  color: var(--bw-text) !important;
+  background: transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  transition: 0.2s ease !important;
+}
+
+.page-sidebar .x-navigation li > a span,
+.page-sidebar .x-navigation li > a span.xn-text {
+  color: var(--bw-text) !important;
+  font-weight: 500 !important;
+}
+
+.page-sidebar .x-navigation li > a:hover {
+  background: #efefef !important;
+}
+
+.page-sidebar .x-navigation li > a:hover span,
+.page-sidebar .x-navigation li > a:hover span.xn-text {
+  color: var(--bw-primary) !important;
+}
+
+.page-sidebar .x-navigation li.active > a {
+  background: #efefef !important;
+}
+
+.page-sidebar .x-navigation li.active > a span,
+.page-sidebar .x-navigation li.active > a span.xn-text {
+  color: var(--bw-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Icon color */
+.page-sidebar .x-navigation li > a .fa,
+.page-sidebar .x-navigation li > a i.fa,
+.page-sidebar .x-navigation li > a i.fas,
+.page-sidebar .x-navigation li > a i.far,
+.page-sidebar .x-navigation li > a i.fal,
+.page-sidebar .x-navigation li > a i.fab,
+.page-sidebar .x-navigation li > a .glyphicon {
+  color: var(--bw-text) !important;
+  opacity: 1 !important;
+}
+.page-sidebar .x-navigation li.active > a .fa,
+.page-sidebar .x-navigation li.active > a i.fa,
+.page-sidebar .x-navigation li.active > a i.fas,
+.page-sidebar .x-navigation li.active > a i.far,
+.page-sidebar .x-navigation li.active > a i.fal,
+.page-sidebar .x-navigation li.active > a i.fab,
+.page-sidebar .x-navigation li.active > a .glyphicon {
+  color: var(--bw-primary) !important;
+}
+.page-sidebar .x-navigation li > a:hover .fa,
+.page-sidebar .x-navigation li > a:hover .glyphicon,
+.page-sidebar .x-navigation li > a:hover i.fa,
+.page-sidebar .x-navigation li > a:hover i.fas,
+.page-sidebar .x-navigation li > a:hover i.far,
+.page-sidebar .x-navigation li > a:hover i.fal,
+.page-sidebar .x-navigation li > a:hover i.fab {
+  color: var(--bw-primary) !important;
+}
+
+/* =========================================================
+   FIX — Sidebar dropdowns (Account Settings / Requests)
+========================================================= */
+
+/* 1) Remove any pseudo-elements / decorations that create empty rounded blocks */
+.page-sidebar .x-navigation li > a::before,
+.page-sidebar .x-navigation li > a::after {
+  content: none !important;
+}
+
+/* 2) Kill any extra elements used as "decorations" (common in templates) */
+.page-sidebar .x-navigation li > a .xn-text::before,
+.page-sidebar .x-navigation li > a .xn-text::after {
+  content: none !important;
+}
+
+/* 3) Ensure submenu is hidden by default and only shown when parent is active/open */
+.page-sidebar .x-navigation li > ul {
+  display: none !important;
+  height: auto !important;
+  overflow: hidden !important;
+  margin: 6px 0 0 0 !important;
+  padding: 8px 8px !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+/* show submenu only when open/active (covers common classnames) */
+.page-sidebar .x-navigation li.active > ul,
+.page-sidebar .x-navigation li.open > ul,
+.page-sidebar .x-navigation li.xn-openable.active > ul,
+.page-sidebar .x-navigation li.xn-openable.open > ul {
+  display: block !important;
+}
+
+/* submenu items style */
+.page-sidebar .x-navigation li > ul > li > a {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 10px 10px !important;
+  color: var(--bw-text) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.page-sidebar .x-navigation li > ul > li > a:hover {
+  background: #efefef !important;
+  color: var(--bw-primary) !important;
+}
+
+/* 4) Arrow on the right must be BLACK */
+.page-sidebar .x-navigation li.xn-openable > a .fa-angle-down,
+.page-sidebar .x-navigation li.xn-openable > a .fa-angle-right,
+.page-sidebar .x-navigation li.xn-openable > a .fa-caret-down,
+.page-sidebar .x-navigation li.xn-openable > a .fa-caret-right,
+.page-sidebar .x-navigation li.xn-openable > a i[class*="angle"],
+.page-sidebar .x-navigation li.xn-openable > a i[class*="caret"],
+.page-sidebar .x-navigation li.xn-openable > a .xn-openable-icon,
+.page-sidebar .x-navigation li.xn-openable > a .xn-openable-indicator {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+.page-sidebar .x-navigation li.xn-openable > a span.pull-right,
+.page-sidebar .x-navigation li.xn-openable > a .pull-right {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+.page-sidebar .x-navigation li.xn-openable > a svg {
+  fill: #000 !important;
+  stroke: #000 !important;
+  opacity: 1 !important;
+}
+
+/* --------------------------
+   Widgets / Cards
+--------------------------- */
+
+.page-container .widget,
+.page-container .tile,
+.page-container .panel {
+  border-radius: var(--bw-radius) !important;
+}
+
+.page-container .widget {
+  background: var(--bw-bg) !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow) !important;
+  color: var(--bw-text) !important;
+  padding: 16px 16px !important;
+}
+
+.page-container .widget .widget-title {
+  color: var(--bw-muted) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  text-transform: none !important;
+}
+
+.page-container .widget .widget-int,
+.page-container .widget .widget-big-int {
+  color: var(--bw-text) !important;
+  font-weight: 700 !important;
+  font-size: 34px !important;
+  line-height: 1.1 !important;
+  margin: 8px 0 0 0 !important;
+}
+
+.page-container .widget .widget-subtitle {
+  color: var(--bw-muted) !important;
+  font-size: 13px !important;
+  margin: 8px 0 0 0 !important;
+}
+
+/* Make the top summary cards consistent */
+#balanceWidget,
+#equityWidget,
+#marginWidget,
+#freeMarginWidget,
+#creditWidget,
+#accountStatusWidget {
+  min-height: 150px !important;
+}
+
+/* Remove the unwanted divider line in balance */
+#balanceWidget hr,
+#balanceWidget .hr,
+#balanceWidget .divider,
+#balanceWidget .widget-divider,
+#balanceWidget .widget-separator,
+#balanceWidget .widget-buttons:before,
+#balanceWidget .widget-controls:before,
+#balanceWidget .widget-buttons,
+#balanceWidget .widget-controls {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* BLUE TILES */
+.metatrader-color,
+.webtrader-color,
+#balanceWidget.metatrader-color,
+#balanceWidget.webtrader-color {
+  background: linear-gradient(145deg, #2453ff 0%, #5176ff 100%) !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+/* Force text white on blue cards */
+.metatrader-color *,
+.webtrader-color * {
+  color: #fff !important;
+}
+
+/* If those titles were black, force them white */
+.metatrader-color .widget-title,
+.webtrader-color .widget-title,
+.metatrader-color .widget-int,
+.webtrader-color .widget-int,
+.metatrader-color .widget-subtitle,
+.webtrader-color .widget-subtitle,
+.metatrader-color h1,
+.metatrader-color h2,
+.metatrader-color h3,
+.webtrader-color h1,
+.webtrader-color h2,
+.webtrader-color h3 {
+  color: #fff !important;
+}
+
+/* Remove weird colored borders */
+.metatrader-color,
+.webtrader-color,
+.metatrader-color .widget,
+.webtrader-color .widget,
+.metatrader-color .tile,
+.webtrader-color .tile,
+.metatrader-color .panel,
+.webtrader-color .panel {
+  border-color: transparent !important;
+}
+
+/* Global: kill any remaining "success green" */
+.btn-success,
+.btn.btn-success,
+.label-success,
+.badge-success,
+.progress-bar-success {
+  background-color: var(--bw-primary) !important;
+  border-color: var(--bw-primary) !important;
+  color: #fff !important;
+}
+.text-success {
+  color: var(--bw-primary) !important;
+}
+
+/* Account status progress */
+#accountStatusWidget .progress {
+  height: 7px !important;
+  width: 100% !important;
+  margin: 14px 0 !important;
+  background: #efefef !important;
+  border-radius: 999px !important;
+}
+#accountStatusWidget .progress-bar-success {
+  background-color: var(--bw-primary) !important;
+}
+
+/* --------------------------
+   Account Status icons
+--------------------------- */
+
+#accountStatusWidget .widget-buttons a,
+#accountStatusWidget .widget-buttons button,
+#accountStatusWidget .widget-buttons span,
+#accountStatusWidget .widget-buttons i {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+#accountStatusWidget .widget-buttons i.fa,
+#accountStatusWidget .widget-buttons i.fas,
+#accountStatusWidget .widget-buttons i.far,
+#accountStatusWidget .widget-buttons i.fal,
+#accountStatusWidget .widget-buttons i.fab {
+  font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+  font-weight: 900 !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  color: var(--bw-primary) !important;
+}
+
+#accountStatusWidget .widget-buttons .glyphicon,
+#accountStatusWidget .widget-buttons i.glyphicon,
+#accountStatusWidget .widget-buttons span.glyphicon {
+  font-family: "Glyphicons Halflings" !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  color: var(--bw-primary) !important;
+}
+
+#accountStatusWidget .widget-buttons svg {
+  width: 18px !important;
+  height: 18px !important;
+  fill: var(--bw-primary) !important;
+}
+
+#accountStatusWidget .widget-buttons .text-danger,
+#accountStatusWidget .widget-buttons i.text-danger,
+#accountStatusWidget .widget-buttons span.text-danger,
+#accountStatusWidget .widget-buttons .fa.text-danger,
+#accountStatusWidget .widget-buttons .glyphicon.text-danger {
+  color: var(--bw-danger) !important;
+}
+
+#accountStatusWidget
+  .widget-buttons
+  a
+  span[data-original-title='Documentation Not Verified'] {
+  color: var(--bw-danger) !important;
+}
+
+/* Links inside widget subtitle */
+#equityWidget .widget-subtitle a,
+.widget .widget-subtitle a {
+  color: var(--bw-primary) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+#equityWidget .widget-subtitle a:hover,
+.widget .widget-subtitle a:hover {
+  text-decoration: underline !important;
+}
+
+/* Margin widget dots */
+#marginWidget .owl-theme .owl-controls .owl-page span {
+  margin: 4px !important;
+  opacity: 1 !important;
+  width: 6px !important;
+  height: 6px !important;
+  background: #d9d9d9 !important;
+}
+#marginWidget .owl-theme .owl-controls .owl-page.active span {
+  background: var(--bw-primary) !important;
+}
+
+/* --------------------------
+   Panels / Tables
+--------------------------- */
+
+.page-container .panel {
+  background: var(--bw-bg) !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow) !important;
+}
+
+.panel-default .panel-heading {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 14px 16px !important;
+}
+
+.panel .panel-title {
+  color: var(--bw-text) !important;
+  font-weight: 700 !important;
+}
+
+.panel-body,
+.panel-body.panel-body-table .table-responsive,
+.panel-body .table-responsive {
+  background: var(--bw-bg) !important;
+  border-radius: var(--bw-radius) !important;
+  padding: 14px 16px !important;
+  border: 0 !important;
+}
+
+.panel-body .table > thead > tr > th,
+.panel-body .table > thead > tr {
+  background: #efefef !important;
+  color: var(--bw-text) !important;
+  border: 0 !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd),
+.table-striped > tbody > tr:nth-child(odd) > td,
+.table-striped > tbody > tr > td,
+.panel-body.panel-body-table .table tr > td {
+  background: transparent !important;
+  color: var(--bw-text) !important;
+  border: 0 !important;
+}
+
+.table-bordered,
+.dataTable {
+  border: none !important;
+}
+
+#exposure_table td[colspan='6'] {
+  text-align: center;
+  font-size: 14px;
+  padding: 20px;
+  color: var(--bw-muted) !important;
+}
+
+/* --------------------------
+   Refresh button / controls
+--------------------------- */
+
+a.refreshWidgets {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #fff !important;
+  border: 1px solid var(--bw-border-strong) !important;
+  color: var(--bw-text) !important;
+  padding: 7px 12px !important;
+  border-radius: 10px !important;
+  text-decoration: none !important;
+}
+a.refreshWidgets span {
+  color: var(--bw-text) !important;
+}
+a.refreshWidgets:hover {
+  background: #efefef !important;
+}
+a.refreshWidgets::after {
+  content: '' !important;
+}
+
+ul.panel-controls > li > a {
+  display: inline-flex !important;
+  justify-content: center;
+  align-items: center;
+  width: auto !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--bw-border-strong) !important;
+  padding: 6px 10px !important;
+  background: #fff !important;
+}
+ul.panel-controls > li > a:hover {
+  background: #efefef !important;
+}
+
+/* --------------------------
+   Footer / Disclaimer (visible + selectable)
+--------------------------- */
+
+.x-navigation.disclaimer-color,
+.x-navigation.footer-color,
+.disclaimer-color,
+.footer-color {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+
+  color: #1b1b1b !important;
+
+  position: relative !important;
+  z-index: 20 !important;
+
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+/* Force footer/disclaimer text to be visible */
+.x-navigation.disclaimer-color *,
+.x-navigation.footer-color *,
+.disclaimer-color *,
+.footer-color *,
+.x-navigation.disclaimer-color a,
+.x-navigation.footer-color a,
+.disclaimer-color a,
+.footer-color a,
+.x-navigation.disclaimer-color span,
+.x-navigation.footer-color span,
+.disclaimer-color span,
+.footer-color span,
+.x-navigation.disclaimer-color p,
+.x-navigation.footer-color p,
+.disclaimer-color p,
+.footer-color p,
+.x-navigation.disclaimer-color li,
+.x-navigation.footer-color li,
+.disclaimer-color li,
+.footer-color li,
+.x-navigation.disclaimer-color div,
+.x-navigation.footer-color div,
+.disclaimer-color div,
+.footer-color div,
+.x-navigation.disclaimer-color small,
+.x-navigation.footer-color small,
+.disclaimer-color small,
+.footer-color small,
+.x-navigation.disclaimer-color strong,
+.x-navigation.footer-color strong,
+.disclaimer-color strong,
+.footer-color strong {
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  color: #1b1b1b !important;
+  -webkit-text-fill-color: #1b1b1b !important;
+
+  background: transparent !important;
+  text-shadow: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+/* Keep footer links blue and selectable */
+.x-navigation.disclaimer-color a,
+.x-navigation.footer-color a,
+.disclaimer-color a,
+.footer-color a {
+  color: var(--bw-primary) !important;
+  -webkit-text-fill-color: var(--bw-primary) !important;
+  text-decoration: none !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.x-navigation.disclaimer-color a:hover,
+.x-navigation.footer-color a:hover,
+.disclaimer-color a:hover,
+.footer-color a:hover {
+  text-decoration: underline !important;
+}
+
+/* Remove hidden/transparent pseudo layers in footer */
+.x-navigation.disclaimer-color::before,
+.x-navigation.disclaimer-color::after,
+.x-navigation.footer-color::before,
+.x-navigation.footer-color::after,
+.disclaimer-color::before,
+.disclaimer-color::after,
+.footer-color::before,
+.footer-color::after,
+.x-navigation.disclaimer-color *::before,
+.x-navigation.disclaimer-color *::after,
+.x-navigation.footer-color *::before,
+.x-navigation.footer-color *::after,
+.disclaimer-color *::before,
+.disclaimer-color *::after,
+.footer-color *::before,
+.footer-color *::after {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* Extra safety if template hides footer items */
+.x-navigation.disclaimer-color li,
+.x-navigation.footer-color li,
+.disclaimer-color li,
+.footer-color li {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.x-navigation.disclaimer-color p,
+.x-navigation.footer-color p,
+.disclaimer-color p,
+.footer-color p {
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  margin: 0 0 8px 0 !important;
+}
+
+/* --------------------------
+   Responsive
+--------------------------- */
+
+@media (max-width: 1199px) {
+  .login-container,
+  .registration-container {
+    padding-top: 70px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .profile-data {
+    display: none !important;
+  }
+  .x-navigation.x-navigation-horizontal {
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .page-container .page-sidebar {
+    background: var(--bw-bg) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .login-container,
+  .registration-container {
+    padding-top: 110px;
+  }
+  .login-container::after,
+  .registration-container::after {
+    opacity: 0.1;
+  }
+  .page-container .page-content {
+    padding: 18px 12px 30px !important;
+  }
+  .x-navigation.x-navigation-horizontal li > ul.xn-drop-left {
+    height: 300px;
+  }
+}
+
+.x-navigation.x-navigation-horizontal li > ul.xn-drop-left::-webkit-scrollbar {
+  width: 6px;
+}
+.x-navigation.x-navigation-horizontal li > ul.xn-drop-left::-webkit-scrollbar-thumb {
+  background-color: var(--bw-primary);
+  border-radius: 10px;
+}
+
+/* Deposit button visible + color #0437F4 */
+#balanceWidget .btn-deposit,
+#balanceWidget .btn.btn-success,
+#balanceWidget .btn-success,
+#balanceWidget button.btn-success,
+#balanceWidget a.btn-success,
+#balanceWidget input.btn-success,
+#balanceWidget input[type="submit"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+
+  background: #0437F4 !important;
+  border-color: #0437F4 !important;
+  color: #fff !important;
+
+  min-height: 38px !important;
+  padding: 8px 18px !important;
+  border-radius: 999px !important;
+}
+
+/* =========================================================
+   ✅ NEW FIXES — ONLY requested changes (DO NOT touch rest)
+   1) Sidebar font 15px + remove underline stroke on hover (sidebar only)
+   2) Mobile sidebar full height + scroll
+   3) Mobile "Your Balance" compact + not huge + remove white line
+   4) Logout popup always white (SweetAlert / Message-box / Modal)
+========================================================= */
+
+/* 1) SIDEBAR: font size 15px (main + submenu) */
+.page-sidebar .x-navigation li > a,
+.page-sidebar .x-navigation li > a span,
+.page-sidebar .x-navigation li > a span.xn-text,
+.page-sidebar .x-navigation li > ul > li > a,
+.page-sidebar .x-navigation li > ul > li > a span,
+.page-sidebar .x-navigation li > ul > li > a span.xn-text {
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+}
+
+/* 1b) SIDEBAR: remove underline/stroke ONLY on menu hover/focus/active */
+.page-sidebar .x-navigation li > a,
+.page-sidebar .x-navigation li > a:hover,
+.page-sidebar .x-navigation li > a:focus,
+.page-sidebar .x-navigation li > a:active {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.page-sidebar .x-navigation li > a:hover *,
+.page-sidebar .x-navigation li > a:focus *,
+.page-sidebar .x-navigation li > a:active * {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* 2) MOBILE SIDEBAR: must reach bottom + scroll (no stop) */
+@media (max-width: 991px) {
+  .page-container .page-sidebar {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+  }
+  .page-sidebar .x-navigation {
+    min-height: 100% !important;
+  }
+}
+
+/* 3) MOBILE "Your Balance": compact + no huge empty area + remove small white line */
+@media (max-width: 767px) {
+  #balanceWidget {
+    min-height: unset !important;
+    height: auto !important;
+    padding: 14px 14px !important;
+    margin-bottom: 12px !important;
+  }
+
+  #balanceWidget .widget-title {
+    margin: 0 0 8px 0 !important;
+    line-height: 1.1 !important;
+  }
+  #balanceWidget .widget-int,
+  #balanceWidget .widget-big-int {
+    font-size: 30px !important;
+    margin-top: 6px !important;
+  }
+  #balanceWidget .widget-subtitle {
+    margin-top: 8px !important;
+  }
+
+  #balanceWidget::before,
+  #balanceWidget::after,
+  #balanceWidget .widget-controls::before,
+  #balanceWidget .widget-buttons::before,
+  #balanceWidget .widget-controls::after,
+  #balanceWidget .widget-buttons::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  #balanceWidget hr,
+  #balanceWidget .divider,
+  #balanceWidget .widget-divider,
+  #balanceWidget .widget-separator {
+    display: none !important;
+    border: 0 !important;
+    height: 0 !important;
+  }
+}
+
+/* 4) LOGOUT POPUP: always white */
+.swal2-popup {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+.swal2-title,
+.swal2-html-container,
+.swal2-content,
+.swal2-popup * {
+  color: #111111 !important;
+}
+
+.message-box,
+.message-box .mb-container,
+.message-box .mb-container .mb-middle,
+.message-box .mb-container .mb-middle .mb-title,
+.message-box .mb-container .mb-middle .mb-content,
+.message-box .mb-container .mb-middle .mb-footer {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+.message-box * {
+  color: #111111 !important;
+}
+
+.modal .modal-content,
+.modal-dialog .modal-content,
+#logoutModal .modal-content {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+.modal .modal-content *,
+.modal-dialog .modal-content *,
+#logoutModal .modal-content * {
+  color: #111111 !important;
+}
+
+.swal2-container,
+.modal-backdrop,
+.message-box.open {
+  background: rgba(0, 0, 0, 0.55) !important;
+}
+
+/* =========================================================
+   ✅ FIX MOBILE iOS — White overlay covering #balanceWidget
+   - Only affects #balanceWidget
+   - Only on mobile
+   - More aggressive: neutralize absolute/fixed layers & huge heights
+========================================================= */
+
+@media (max-width: 767px) {
+  /* Make the widget a safe stacking context */
+  #balanceWidget {
+    position: relative !important;
+    z-index: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important; /* important: don't let internal absolute blocks "mask" content */
+  }
+
+  /* Common Skale/Template culprits: controls/buttons/content wrappers that go absolute and become a giant white layer */
+  #balanceWidget .widget-controls,
+  #balanceWidget .widget-buttons,
+  #balanceWidget .widget-content,
+  #balanceWidget .widget-data,
+  #balanceWidget .widget-item-left,
+  #balanceWidget .widget-item-right,
+  #balanceWidget .widget-item {
+    position: static !important;
+    float: none !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  /* Controls on Balance widget not needed: remove completely */
+  #balanceWidget .widget-controls {
+    display: none !important;
+  }
+
+  /* Buttons container must NOT create a full-cover block */
+  #balanceWidget .widget-buttons {
+    display: block !important;
+    width: 100% !important;
+    margin: 12px 0 0 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hard-kill any pseudo overlays inside balance widget */
+  #balanceWidget *::before,
+  #balanceWidget *::after {
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  /* Hide empty divs that can stretch to huge height on iOS */
+  #balanceWidget > div:empty,
+  #balanceWidget .widget-content > div:empty,
+  #balanceWidget .widget-data > div:empty {
+    display: none !important;
+  }
+
+  /* Keep real content always above */
+  #balanceWidget .widget-title,
+  #balanceWidget .widget-int,
+  #balanceWidget .widget-big-int,
+  #balanceWidget .widget-subtitle,
+  #balanceWidget .widget-data,
+  #balanceWidget .btn,
+  #balanceWidget button,
+  #balanceWidget a.btn,
+  #balanceWidget a.btn-success,
+  #balanceWidget .btn-success,
+  #balanceWidget .btn-deposit {
+    position: relative !important;
+    z-index: 3 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Remove any dividers/hrs again (extra safety) */
+  #balanceWidget hr,
+  #balanceWidget .divider,
+  #balanceWidget .widget-divider,
+  #balanceWidget .widget-separator,
+  #balanceWidget .hr {
+    display: none !important;
+    height: 0 !important;
+    border: 0 !important;
+  }
+}
+
+/* =========================================================
+   ✅ FIX MOBILE — overlay/box bianco sopra "Your Balance"
+   Culprit: #accountStatusWidget + pseudo-element on #widgets .row
+   (Only on mobile)
+========================================================= */
+
+@media (max-width: 767px) {
+  /* 1) Remove the phantom overlay/padding layer created by a row pseudo-element */
+  #widgets > .row::before,
+  #widgets > .row::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* 2) Hide the widget that becomes a big empty block overlay on mobile */
+  #accountStatusWidget {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* 3) Ensure Balance widget always stays on top */
+  #balanceWidget {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+}
