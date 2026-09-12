@@ -272,7 +272,7 @@
         .join(",");
 
       const params = new URLSearchParams();
-      params.set("select", "*");
+      params.set("select", JSON.stringify(STAR_FIELD));
       params.set("status", "in.(Approved,approved)");
       params.set("or", `(${companyFilter})`);
 
