@@ -1,42 +1,29 @@
 
-/*
- * Bullwaves Fight Night 2026
- * Premium Prize Wheel
- *
- * Vanilla JavaScript
- * Native Webflow Form Integration
- *
- * No backend required.
- *
- * Browser storage is best effort only.
- * Claim IDs must be verified by support
- * against the original Webflow submission.
- */
-
 (function () {
   'use strict';
 
   /*
-   * CONFIGURATION
+   * BULLWAVES FIGHT NIGHT
+   * PREMIUM PRIZE WHEEL
+   *
+   * Vanilla JavaScript
+   * Native Webflow Form
+   * Responsive mobile experience
+   *
+   * Replace the previous wheel script.
+   * Do not load both versions.
    */
 
   const CONFIG = {
-
     storageKey: 'bw-fight-night-2026-v2',
 
-    duration: 5900,
+    spinDuration: 5600,
 
     /*
      * FIRST WHEEL PROBABILITIES
-     *
-     * All prizes are always displayed.
-     *
-     * These weights determine which prize
-     * can actually be selected.
      */
 
     categoryWeights: {
-
       Trader: {
         ticket: 0,
         bonus: 70,
@@ -66,17 +53,13 @@
         bonus: 0,
         challenge: 100
       }
-
     },
 
     /*
      * SECOND WHEEL PROBABILITIES
-     *
-     * All five challenge sizes are displayed.
      */
 
     challengeWeights: {
-
       Trader: {
         '5000': 0,
         '10000': 60,
@@ -116,12 +99,7 @@
         '50000': 0,
         '100000': 0
       }
-
     },
-
-    /*
-     * CHALLENGE RETAIL PRICES
-     */
 
     challengePrices: {
       '5000': 59,
@@ -131,22 +109,11 @@
       '100000': 549
     },
 
-    /*
-     * SUPPORT LINKS
-     */
-
     support: {
       broker: 'https://www.bullwaves.com/contact-us',
       prime: 'https://www.prime.bullwaves.com/contact-us'
     }
-
   };
-
-  /*
-   * PRIZE ORDER
-   *
-   * Do not filter these arrays by probability.
-   */
 
   const CATEGORY_ORDER = [
     'ticket',
@@ -162,63 +129,34 @@
     '100000'
   ];
 
-  const money = value =>
-    '$' + Number(value).toLocaleString('en-US');
+  const money = n =>
+    '$' + Number(n).toLocaleString('en-US');
 
   /*
    * PRIZE INFORMATION
    */
 
   const PRIZES = {
-
     ticket: {
-
-      short: [
-        '1 VIP',
-        'TICKET'
-      ],
-
       name: '1 VIP Ticket',
-
-      value: '$1,100 VALUE',
-
-      details:
-        'Experience A1 Combat × Bullwaves live in Dubai.'
-
+      lines: ['1 VIP', 'TICKET'],
+      value: '$1,100',
+      detail: 'Experience A1 Combat live in Dubai.'
     },
 
     bonus: {
-
-      short: [
-        '$800',
-        'BONUS'
-      ],
-
       name: '$800 Trading Bonus',
-
-      value: '$800 TRADING CREDIT',
-
-      details:
-        'Tradable bonus for your Bullwaves account.'
-
+      lines: ['$800', 'BONUS'],
+      value: '$800',
+      detail: 'Tradable Bullwaves account credit, not cash.'
     },
 
     challenge: {
-
-      short: [
-        'PRIME',
-        'CHALLENGE'
-      ],
-
       name: 'Bullwaves Prime Challenge',
-
-      value: 'UP TO $550 VALUE',
-
-      details:
-        'Win a challenge account of up to $100,000.'
-
+      lines: ['PRIME', 'CHALLENGE'],
+      value: 'UP TO $550',
+      detail: 'A challenge account of up to $100,000.'
     }
-
   };
 
   /*
@@ -226,23 +164,18 @@
    */
 
   function random() {
-
     if (!window.crypto || !crypto.getRandomValues) {
       throw new Error(
-        'Secure random generation is unavailable.'
+        'Secure randomness is unavailable.'
       );
     }
 
-    return (
-      crypto.getRandomValues(
-        new Uint32Array(1)
-      )[0] / 4294967296
-    );
-
+    return crypto.getRandomValues(
+      new Uint32Array(1)
+    )[0] / 4294967296;
   }
 
   function choose(weights) {
-
     const pool = Object.entries(weights).filter(
       ([, weight]) =>
         Number.isFinite(weight) && weight > 0
@@ -250,27 +183,24 @@
 
     if (!pool.length) {
       throw new Error(
-        'No valid prize probabilities configured.'
+        'No winning probabilities are configured.'
       );
     }
 
     let point = random() * pool.reduce(
-      (total, [, weight]) => total + weight,
+      (sum, [, weight]) => sum + weight,
       0
     );
 
     for (const [key, weight] of pool) {
-
       point -= weight;
 
       if (point < 0) {
         return key;
       }
-
     }
 
     return pool[pool.length - 1][0];
-
   }
 
   /*
@@ -278,14 +208,9 @@
    */
 
   function makeID() {
-
-    const bytes = crypto.getRandomValues(
-      new Uint8Array(8)
-    );
-
     const hex = Array.from(
-      bytes,
-      byte => byte.toString(16).padStart(2, '0')
+      crypto.getRandomValues(new Uint8Array(8)),
+      b => b.toString(16).padStart(2, '0')
     ).join('').toUpperCase();
 
     return (
@@ -294,136 +219,93 @@
       '-' +
       hex.slice(8)
     );
-
   }
 
   /*
    * BROWSER STORAGE
    */
 
-  function isValid(entry) {
-
+  function validEntry(e) {
     return (
-
-      entry &&
-
-      entry.version === 2 &&
-
-      /^BW26-[0-9A-F]{8}-[0-9A-F]{8}$/.test(
-        entry.id
-      ) &&
-
-      CONFIG.categoryWeights[entry.type] &&
-
-      CONFIG.categoryWeights[entry.type][
-        entry.category
-      ] > 0 &&
-
+      e &&
+      e.version === 2 &&
+      /^BW26-[0-9A-F]{8}-[0-9A-F]{8}$/.test(e.id) &&
+      CONFIG.categoryWeights[e.type] &&
+      CONFIG.categoryWeights[e.type][e.category] > 0 &&
       (
-        entry.category !== 'challenge' ||
-
-        CONFIG.challengeWeights[entry.type][
-          entry.challenge
-        ] > 0
+        e.category !== 'challenge' ||
+        CONFIG.challengeWeights[e.type][e.challenge] > 0
       ) &&
-
       [
         'challenge',
         'ready',
+        'sending',
         'submitted'
-      ].includes(entry.stage) &&
-
+      ].includes(e.stage) &&
       [
         'first',
         'last',
         'email',
         'date'
       ].every(
-        key => typeof entry[key] === 'string'
+        key => typeof e[key] === 'string'
       )
-
     );
-
   }
 
   function readEntry() {
-
-    let local = null;
-
-    let cookie = null;
+    let local;
+    let cookie;
 
     try {
-
       local = JSON.parse(
-        localStorage.getItem(
-          CONFIG.storageKey
-        )
+        localStorage.getItem(CONFIG.storageKey)
       );
-
     } catch (_) {}
 
     try {
-
-      const item = document.cookie
+      const part = document.cookie
         .split('; ')
         .find(
-          part =>
-            part.startsWith(
-              CONFIG.storageKey + '='
-            )
+          x => x.startsWith(CONFIG.storageKey + '=')
         );
 
-      if (item) {
-
+      if (part) {
         cookie = JSON.parse(
           decodeURIComponent(
-            item.slice(
-              CONFIG.storageKey.length + 1
-            )
+            part.slice(CONFIG.storageKey.length + 1)
           )
         );
-
       }
-
     } catch (_) {}
 
     return [local, cookie]
-      .filter(isValid)
+      .filter(validEntry)
       .sort(
         (a, b) =>
-          (b.updated || 0) -
-          (a.updated || 0)
+          (b.updated || 0) - (a.updated || 0)
       )[0] || null;
-
   }
 
   function saveEntry(entry) {
-
     entry.updated = Date.now();
 
-    const data = JSON.stringify(entry);
+    const json = JSON.stringify(entry);
 
     let saved = false;
 
     try {
-
       localStorage.setItem(
         CONFIG.storageKey,
-        data
+        json
       );
 
       saved =
-        localStorage.getItem(
-          CONFIG.storageKey
-        ) === data;
-
+        localStorage.getItem(CONFIG.storageKey) === json;
     } catch (_) {}
 
     try {
-
-      const encoded = encodeURIComponent(
-        data
-      );
+      const encoded = encodeURIComponent(json);
 
       document.cookie =
         CONFIG.storageKey +
@@ -440,136 +322,142 @@
         saved ||
         document.cookie
           .split('; ')
-          .includes(
-            CONFIG.storageKey + '=' + encoded
-          );
-
+          .includes(CONFIG.storageKey + '=' + encoded);
     } catch (_) {}
 
     return saved;
-
   }
 
   /*
-   * PREMIUM STYLES
-   *
-   * Responsive desktop, tablet and mobile.
+   * PREMIUM CSS
    */
 
   function addStyles() {
-
     if (
-      document.getElementById(
-        'bw-wheel-premium-styles'
-      )
+      document.getElementById('bwf-wheel-styles')
     ) {
       return;
     }
 
-    const style = document.createElement(
-      'style'
-    );
+    const style = document.createElement('style');
 
-    style.id = 'bw-wheel-premium-styles';
+    style.id = 'bwf-wheel-styles';
 
     style.textContent = `
 
-      /*
-       * GLOBAL
-       */
-
-      .bw-wheel-modal,
-      .bw-wheel-modal * {
+      .bwf-dialog,
+      .bwf-dialog * {
         box-sizing: border-box;
       }
 
-      .bw-wheel-modal {
+      /*
+       * MODAL
+       */
+
+      .bwf-dialog {
         position: fixed;
         inset: 0;
 
-        width: min(780px, calc(100vw - 24px));
-        max-width: 780px;
+        width: min(790px, calc(100vw - 24px));
+
+        height: min(94dvh, 900px);
         max-height: 94dvh;
+        max-width: none;
 
         margin: auto;
         padding: 0;
 
-        overflow-x: hidden;
-        overflow-y: auto;
+        overflow: hidden;
 
-        border: 1px solid #26365b;
-        border-radius: 26px;
+        border: 1px solid #2d3f69;
+        border-radius: 24px;
 
-        background: #070b16;
+        background: #090e1b;
         color: #fff;
 
         font-family: Inter, Arial, sans-serif;
 
         box-shadow:
-          0 35px 130px rgba(0, 0, 0, .75);
+          0 28px 110px #000d;
+      }
+
+      .bwf-dialog:not([open]) {
+        display: none;
+      }
+
+      .bwf-dialog[open] {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .bwf-dialog::backdrop {
+        background: #000d;
+        backdrop-filter: blur(10px);
+      }
+
+      /*
+       * SCROLLABLE CONTENT
+       *
+       * Only this area scrolls.
+       * The bottom CTA stays visible.
+       */
+
+      .bwf-scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+
+        overflow-y: auto;
+        overflow-x: hidden;
 
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
-      }
 
-      .bw-wheel-modal::backdrop {
-        background: rgba(0, 0, 0, .85);
-        backdrop-filter: blur(12px);
-      }
-
-      .bw-wheel-panel {
-        position: relative;
-        width: 100%;
-
-        padding:
-          38px
-          clamp(18px, 4vw, 42px)
-          28px;
-
-        text-align: center;
+        scrollbar-width: thin;
+        scrollbar-color: #4762a7 #0b1021;
 
         background:
           radial-gradient(
-            ellipse at 50% 0%,
-            rgba(24, 52, 123, .4),
-            transparent 55%
+            ellipse at top,
+            #1b326580,
+            transparent 62%
           );
+      }
+
+      .bwf-inner {
+        padding: 38px 34px 24px;
+        text-align: center;
       }
 
       /*
        * CLOSE BUTTON
        */
 
-      .bw-wheel-close {
+      .bwf-close {
         position: absolute;
-        top: 14px;
-        right: 15px;
-        z-index: 10;
+        z-index: 25;
 
-        width: 38px;
-        height: 38px;
+        top: 13px;
+        right: 13px;
 
         display: grid;
         place-items: center;
 
-        border: 1px solid rgba(255,255,255,.15);
+        width: 38px;
+        height: 38px;
+
+        border: 1px solid #ffffff35;
         border-radius: 50%;
 
-        background: rgba(255,255,255,.06);
+        background: #1a2130;
         color: #fff;
 
-        font-size: 26px;
-        line-height: 1;
+        font: 28px/1 Inter, Arial, sans-serif;
 
         cursor: pointer;
       }
 
-      .bw-wheel-close:hover {
-        background: rgba(255,255,255,.13);
-      }
-
-      .bw-wheel-close:disabled {
-        opacity: .3;
+      .bwf-close:disabled {
+        opacity: .35;
         cursor: wait;
       }
 
@@ -577,170 +465,162 @@
        * HEADER
        */
 
-      .bw-wheel-kicker {
-        color: #8ea9ff;
+      .bwf-kicker {
+        color: #a9beff;
 
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
 
-        letter-spacing: .23em;
-        line-height: 1.5;
+        letter-spacing: .22em;
       }
 
-      .bw-wheel-modal h2 {
-        max-width: 650px;
+      .bwf-heading {
+        margin: 15px auto 10px;
+        max-width: 670px;
 
-        margin: 12px auto 10px;
-
-        color: #fff;
-
-        font-size: clamp(30px, 5vw, 49px);
+        font-size: clamp(32px, 5.4vw, 51px);
         line-height: 1.08;
 
         letter-spacing: -.055em;
         font-weight: 800;
 
-        overflow-wrap: break-word;
+        overflow-wrap: anywhere;
       }
 
-      .bw-wheel-intro {
-        max-width: 550px;
+      .bwf-intro {
+        max-width: 540px;
+        margin: 0 auto 21px;
 
-        margin: 0 auto 23px;
-
-        color: #b3bfd7;
+        color: #bac5da;
 
         font-size: 13px;
-        line-height: 1.65;
-      }
-
-      .bw-wheel-content {
-        width: 100%;
-        min-width: 0;
+        line-height: 1.6;
       }
 
       /*
        * PRIZE CARDS
-       *
-       * IMPORTANT
-       *
-       * No disabled appearance.
-       * No eligibility message.
-       * All prizes look identical.
        */
 
-      .bw-wheel-prizes {
+      .bwf-cards {
         display: grid;
 
         grid-template-columns:
           repeat(3, minmax(0, 1fr));
 
-        gap: 9px;
+        gap: 10px;
 
-        width: 100%;
-        margin: 18px 0 24px;
+        margin: 16px 0 24px;
       }
 
-      .bw-wheel-prizes.five {
+      .bwf-cards.five {
         grid-template-columns:
           repeat(5, minmax(0, 1fr));
       }
 
-      .bw-wheel-prize {
+      .bwf-card {
+        min-width: 0;
+        min-height: 122px;
+
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
 
-        min-width: 0;
-        min-height: 112px;
+        padding: 14px 9px;
 
-        padding: 16px 9px;
-
-        border: 1px solid rgba(105,141,255,.28);
-        border-radius: 15px;
+        border: 1px solid #688bff59;
+        border-radius: 16px;
 
         background:
           linear-gradient(
-            160deg,
-            #172751,
-            #101624 85%
+            155deg,
+            #1d305d,
+            #111a2d 77%
           );
 
-        text-align: center;
-
-        transition:
-          border-color .2s ease,
-          transform .2s ease;
+        box-shadow:
+          inset 0 1px #ffffff13;
       }
 
-      .bw-wheel-prize:hover {
-        border-color: rgba(105,141,255,.65);
-        transform: translateY(-2px);
+      .bwf-card-title {
+        font-size: clamp(11px, 1.6vw, 13px);
+        font-weight: 700;
+        line-height: 1.3;
+
+        color: #f4f7ff;
       }
 
-      .bw-wheel-prize-name {
-        color: #fff;
+      /*
+       * ACCENTUATED PRIZE VALUE
+       */
 
-        font-size: clamp(11px, 1.8vw, 13px);
-        line-height: 1.35;
+      .bwf-card-value {
+        margin: 8px 0 5px;
 
-        font-weight: 750;
-
-        overflow-wrap: break-word;
-      }
-
-      .bw-wheel-prize-value {
-        margin-top: 8px;
-
-        color: #a5bfff;
-
-        font-size: 10px;
-        line-height: 1.35;
+        font-size: clamp(21px, 3.1vw, 29px);
+        line-height: 1;
 
         font-weight: 800;
-        letter-spacing: .035em;
+        letter-spacing: -.055em;
+
+        color: #fff;
+
+        text-shadow:
+          0 0 22px #4074ff7c;
       }
 
-      .bw-wheel-prize-note {
-        margin-top: 7px;
-
-        color: #a6aec4;
-
+      .bwf-card-caption {
         font-size: 10px;
-        line-height: 1.4;
+        line-height: 1.45;
+
+        color: #afbfdf;
+      }
+
+      /*
+       * CHALLENGE CARDS
+       */
+
+      .bwf-cards.five .bwf-card {
+        min-height: 104px;
+        padding: 12px 5px;
+      }
+
+      .bwf-cards.five .bwf-card-value {
+        font-size: clamp(16px, 2.3vw, 23px);
       }
 
       /*
        * WHEEL
        */
 
-      .bw-wheel-stage {
+      .bwf-stage {
         position: relative;
 
-        width: min(100%, 425px);
+        width: min(100%, 420px);
         aspect-ratio: 1;
 
-        margin: 0 auto 20px;
-        padding: 9px;
+        margin: 0 auto 14px;
+        padding: 8px;
 
-        border: 1px solid rgba(110,149,255,.4);
+        border: 1px solid #7e9fff85;
         border-radius: 50%;
 
         background:
           radial-gradient(
             circle,
-            #26385a 0%,
-            #101a31 60%,
-            #4270ff 100%
+            #142b66,
+            #070f25 73%,
+            #3765f8
           );
 
         box-shadow:
-          0 0 0 6px rgba(255,255,255,.03),
-          0 0 65px rgba(0,54,255,.27);
+          0 0 0 5px #ffffff08,
+          0 0 60px #164dff50;
+
+        scroll-margin: 16px;
       }
 
-      .bw-wheel-disc {
+      .bwf-disc {
         display: block;
 
         width: 100%;
@@ -751,9 +631,12 @@
         will-change: transform;
       }
 
-      .bw-wheel-pointer {
-        position: absolute;
+      /*
+       * WHEEL POINTER
+       */
 
+      .bwf-pointer {
+        position: absolute;
         z-index: 2;
 
         top: -11px;
@@ -765,49 +648,83 @@
         height: 0;
 
         border-left:
-          17px solid transparent;
+          16px solid transparent;
 
         border-right:
-          17px solid transparent;
+          16px solid transparent;
 
         border-top:
-          33px solid #fff;
+          31px solid #fff;
 
         filter:
-          drop-shadow(0 2px 8px #000);
+          drop-shadow(0 2px 5px #000);
       }
 
       /*
-       * WHEEL DESCRIPTION
+       * FOOTNOTES
        */
 
-      .bw-wheel-eligibility {
-        max-width: 470px;
-
-        margin: 8px auto 17px;
-
-        color: #97a6c4;
+      .bwf-wheel-note,
+      .bwf-footnote {
+        color: #99a8c7;
 
         font-size: 11px;
-        line-height: 1.6;
+        line-height: 1.5;
+      }
+
+      .bwf-wheel-note {
+        margin: 0 0 12px;
+      }
+
+      .bwf-footnote {
+        margin: 18px 0 2px;
+      }
+
+      /*
+       * STICKY BOTTOM CTA
+       *
+       * This stays outside the scroll area.
+       * It remains visible on desktop and mobile.
+       */
+
+      .bwf-dock {
+        position: relative;
+        z-index: 22;
+
+        flex: 0 0 auto;
+
+        padding:
+          13px 24px
+          max(13px, env(safe-area-inset-bottom));
+
+        background:
+          linear-gradient(
+            180deg,
+            #111c35,
+            #0a1122
+          );
+
+        border-top:
+          1px solid #8eaaff32;
+
+        box-shadow:
+          0 -18px 32px #070b187d;
+      }
+
+      .bwf-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 10px;
+        flex-wrap: wrap;
       }
 
       /*
        * BUTTONS
        */
 
-      .bw-wheel-actions {
-        display: flex;
-        flex-wrap: wrap;
-
-        justify-content: center;
-
-        gap: 10px;
-
-        width: 100%;
-      }
-
-      .bw-wheel-button {
+      .bwf-button {
         display: inline-flex;
 
         align-items: center;
@@ -815,16 +732,16 @@
 
         min-height: 51px;
 
-        padding: 13px 24px;
+        padding: 13px 28px;
 
-        border: 1px solid #235aff;
+        border: 1px solid #416cff;
         border-radius: 100px;
 
         background: #0036ff;
         color: #fff;
 
         font:
-          700 13px Inter, Arial, sans-serif;
+          700 14px/1.3 Inter, Arial, sans-serif;
 
         text-align: center;
         text-decoration: none;
@@ -832,177 +749,173 @@
         cursor: pointer;
 
         box-shadow:
-          0 8px 35px rgba(0,54,255,.27);
+          0 6px 24px #0036ff55;
 
         transition:
-          background .2s ease,
-          transform .2s ease;
+          background .2s,
+          transform .2s;
       }
 
-      .bw-wheel-button:hover {
-        background: #2254ff;
+      .bwf-button:hover {
+        background: #2558ff;
         transform: translateY(-1px);
       }
 
-      .bw-wheel-button:disabled {
-        opacity: .6;
+      .bwf-button:disabled {
+        opacity: .55;
         cursor: wait;
         transform: none;
       }
 
-      .bw-wheel-button.bw-wheel-secondary {
-        background: rgba(255,255,255,.05);
-
-        border-color:
-          rgba(255,255,255,.2);
-
+      .bwf-button.secondary {
+        background: #ffffff10;
+        border-color: #ffffff37;
         box-shadow: none;
       }
 
-      .bw-wheel-button.bw-wheel-secondary:hover {
-        background: rgba(255,255,255,.1);
+      .bwf-button.secondary:hover {
+        background: #ffffff1d;
       }
 
       /*
        * STATUS
        */
 
-      .bw-wheel-status {
-        color: #a6bbef;
+      .bwf-status {
+        margin: 8px 0 0;
+        min-height: 0;
 
-        min-height: 17px;
-
-        font-size: 12px;
-        line-height: 1.55;
-
-        margin: 8px 0 14px;
-      }
-
-      .bw-wheel-footnote {
-        color: #78859d;
+        color: #b7c9ff;
 
         font-size: 11px;
-        line-height: 1.5;
+        line-height: 1.45;
 
-        margin: 22px 0 0;
+        text-align: center;
       }
 
       /*
        * WINNING SCREEN
        */
 
-      .bw-wheel-win {
-        width: 100%;
+      .bwf-win {
+        margin: 22px 0;
+        padding: 25px 16px;
 
-        margin: 22px auto;
-        padding: 28px 18px;
-
-        border: 1px solid rgba(120,154,255,.4);
-        border-radius: 19px;
+        border: 1px solid #7197ff81;
+        border-radius: 18px;
 
         background:
           radial-gradient(
-            circle at 50% 0%,
-            rgba(23,76,169,.27),
-            #0b1324 68%
+            circle at top,
+            #1b4ca552,
+            #0e192b 78%
           );
       }
 
-      .bw-wheel-win-label {
-        display: block;
-
-        color: #a3baff;
-
-        font-size: 11px;
+      .bwf-win-kicker {
+        font-size: 10px;
         font-weight: 800;
 
         letter-spacing: .14em;
+        color: #a8bfff;
       }
 
-      .bw-wheel-win-title {
-        margin: 12px 0;
+      .bwf-win-title {
+        margin: 10px 0;
 
-        color: #fff;
-
-        font-size: clamp(27px, 5vw, 42px);
-        font-weight: 800;
-
+        font-size: clamp(27px, 5vw, 41px);
         line-height: 1.08;
-        letter-spacing: -.05em;
 
-        overflow-wrap: break-word;
-      }
-
-      .bw-wheel-win-value {
-        color: #83a6ff;
-
-        font-size: 14px;
+        letter-spacing: -.04em;
         font-weight: 800;
+
+        overflow-wrap: anywhere;
       }
 
-      .bw-wheel-win-details {
-        color: #b0bad2;
+      .bwf-win-value {
+        font-size: 24px;
+        font-weight: 800;
 
+        color: #c1d0ff;
+      }
+
+      .bwf-win-detail,
+      .bwf-help {
         font-size: 12px;
         line-height: 1.6;
 
-        margin: 9px 0 0;
+        color: #b0bdd5;
       }
 
       /*
        * CLAIM ID
        */
 
-      .bw-wheel-claim-id {
+      .bwf-id {
         padding: 12px;
 
-        border: 1px dashed #6179bb;
+        border: 1px dashed #6c89cc;
         border-radius: 10px;
 
-        background: #0d1730;
-        color: #e8eeff;
+        background: #0e1a33;
+        color: #e3edff;
 
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
 
         overflow-wrap: anywhere;
+
         user-select: all;
-      }
-
-      .bw-wheel-help {
-        color: #aeb9d0;
-
-        font-size: 12px;
-        line-height: 1.65;
       }
 
       /*
        * CLAIM MESSAGE
        */
 
-      .bw-wheel-message {
+      .bwf-message {
         display: block;
 
         width: 100%;
-        min-height: 112px;
+        min-height: 125px;
+
+        margin: 14px 0;
 
         resize: vertical;
 
-        padding: 13px;
-        margin: 15px 0;
+        padding: 12px;
 
-        border: 1px solid rgba(255,255,255,.15);
+        border: 1px solid #ffffff35;
         border-radius: 12px;
 
-        background: #0e1524;
-        color: #dfe7ff;
+        background: #0c1629;
+        color: #e3ebff;
 
         font:
           12px/1.5 Inter, Arial, sans-serif;
       }
 
-      .bw-wheel-inline-status {
-        color: #a7b2c9;
+      /*
+       * CONFETTI
+       */
+
+      .bwf-confetti {
+        position: absolute;
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+
+        pointer-events: none;
+
+        z-index: 23;
+      }
+
+      /*
+       * FORM STATUS
+       */
+
+      .bwf-inline {
+        color: #a9b9da;
 
         font:
           12px/1.5 Inter, Arial, sans-serif;
@@ -1012,31 +925,19 @@
        * TABLET
        */
 
-      @media screen and (max-width: 767px) {
+      @media (max-width: 767px) {
 
-        .bw-wheel-modal {
-          width: calc(100vw - 24px);
-
-          max-height: 94dvh;
-
-          border-radius: 20px;
+        .bwf-inner {
+          padding: 36px 19px 18px;
         }
 
-        .bw-wheel-panel {
-          padding: 34px 20px 24px;
-        }
-
-        .bw-wheel-modal h2 {
-          font-size: clamp(30px, 6vw, 43px);
-        }
-
-        .bw-wheel-prizes.five {
+        .bwf-cards.five {
           grid-template-columns:
             repeat(3, minmax(0, 1fr));
         }
 
-        .bw-wheel-stage {
-          width: min(100%, 370px);
+        .bwf-stage {
+          width: min(100%, 360px);
         }
 
       }
@@ -1045,68 +946,64 @@
        * MOBILE
        */
 
-      @media screen and (max-width: 580px) {
+      @media (max-width: 580px) {
 
-        .bw-wheel-modal {
-          width: calc(100vw - 16px);
+        .bwf-dialog {
+          width: calc(100vw - 12px);
 
-          max-height: 94dvh;
+          height: calc(100dvh - 18px);
+          max-height: calc(100dvh - 18px);
 
           border-radius: 18px;
         }
 
-        .bw-wheel-panel {
-          padding: 32px 15px 22px;
+        .bwf-inner {
+          padding: 34px 13px 17px;
         }
 
-        .bw-wheel-close {
-          top: 10px;
-          right: 10px;
+        .bwf-close {
+          top: 9px;
+          right: 9px;
 
-          width: 34px;
-          height: 34px;
+          width: 33px;
+          height: 33px;
 
-          font-size: 23px;
+          font-size: 24px;
         }
 
-        .bw-wheel-kicker {
-          padding: 0 30px;
-
+        .bwf-kicker {
           font-size: 9px;
-          letter-spacing: .17em;
+          letter-spacing: .15em;
+
+          padding: 0 28px;
         }
 
-        .bw-wheel-modal h2 {
-          margin-top: 16px;
+        .bwf-heading {
+          font-size: clamp(27px, 7.4vw, 38px);
 
-          font-size: clamp(28px, 8vw, 38px);
-
-          line-height: 1.08;
+          margin: 12px 0 8px;
         }
 
-        .bw-wheel-intro {
-          margin-bottom: 18px;
-
+        .bwf-intro {
           font-size: 12px;
-          line-height: 1.6;
+          margin-bottom: 14px;
         }
 
         /*
-         * First wheel prizes.
+         * THREE PRIZE CARDS
          *
-         * One column for readability.
+         * Compact vertical layout.
          */
 
-        .bw-wheel-prizes {
+        .bwf-cards {
           grid-template-columns: 1fr;
 
           gap: 7px;
 
-          margin: 14px 0 22px;
+          margin: 12px 0 18px;
         }
 
-        .bw-wheel-prizes:not(.five)
-        .bw-wheel-prize {
+        .bwf-cards:not(.five) .bwf-card {
           display: grid;
 
           grid-template-columns:
@@ -1114,86 +1011,74 @@
 
           align-items: center;
 
-          min-height: 0;
+          column-gap: 10px;
 
-          padding: 11px 13px;
+          min-height: 62px;
+
+          padding: 10px 12px;
 
           text-align: left;
         }
 
-        .bw-wheel-prizes:not(.five)
-        .bw-wheel-prize-name {
+        .bwf-cards:not(.five)
+        .bwf-card-title {
           font-size: 12px;
         }
 
-        .bw-wheel-prizes:not(.five)
-        .bw-wheel-prize-value {
-          margin: 0 0 0 10px;
+        .bwf-cards:not(.five)
+        .bwf-card-value {
+          margin: 0;
 
-          font-size: 10px;
+          font-size: 25px;
 
           text-align: right;
         }
 
-        .bw-wheel-prizes:not(.five)
-        .bw-wheel-prize-note {
+        .bwf-cards:not(.five)
+        .bwf-card-caption {
           grid-column: 1 / -1;
 
-          margin-top: 5px;
+          margin-top: 3px;
 
           font-size: 10px;
         }
 
         /*
-         * Challenge prizes.
-         *
-         * Two columns.
+         * FIVE CHALLENGE CARDS
          */
 
-        .bw-wheel-prizes.five {
+        .bwf-cards.five {
           grid-template-columns:
             repeat(2, minmax(0, 1fr));
-
-          gap: 7px;
         }
 
-        .bw-wheel-prizes.five
-        .bw-wheel-prize {
-          min-height: 68px;
-
-          padding: 10px 8px;
+        .bwf-cards.five .bwf-card {
+          min-height: 75px;
+          padding: 9px 7px;
         }
 
-        .bw-wheel-prizes.five
-        .bw-wheel-prize:last-child {
+        .bwf-cards.five
+        .bwf-card:last-child {
           grid-column: 1 / -1;
         }
 
-        .bw-wheel-prizes.five
-        .bw-wheel-prize-name {
-          font-size: 11px;
-        }
+        .bwf-cards.five
+        .bwf-card-value {
+          font-size: 21px;
 
-        .bw-wheel-prizes.five
-        .bw-wheel-prize-value {
-          margin-top: 5px;
-
-          font-size: 10px;
+          margin: 6px 0 3px;
         }
 
         /*
-         * Smaller wheel.
+         * MOBILE WHEEL
          */
 
-        .bw-wheel-stage {
+        .bwf-stage {
           width: min(100%, 300px);
-
-          padding: 7px;
-
-          margin-bottom: 16px;
+          padding: 6px;
         }
 
-        .bw-wheel-pointer {
+        .bwf-pointer {
           top: -8px;
 
           border-left-width: 13px;
@@ -1202,38 +1087,28 @@
         }
 
         /*
-         * Mobile buttons.
+         * MOBILE STICKY BUTTONS
          */
 
-        .bw-wheel-actions {
+        .bwf-dock {
+          padding:
+            11px 13px
+            max(12px, env(safe-area-inset-bottom));
+        }
+
+        .bwf-actions {
           flex-direction: column;
 
-          gap: 9px;
+          gap: 8px;
         }
 
-        .bw-wheel-button {
+        .bwf-button {
           width: 100%;
-          min-height: 49px;
-
-          padding: 13px 16px;
-
-          font-size: 13px;
+          min-height: 50px;
         }
 
-        .bw-wheel-win {
-          padding: 24px 14px;
-        }
-
-        .bw-wheel-win-title {
-          font-size: clamp(27px, 7vw, 36px);
-        }
-
-        .bw-wheel-claim-id {
-          font-size: 12px;
-        }
-
-        .bw-wheel-message {
-          font-size: 12px;
+        .bwf-win-title {
+          font-size: 29px;
         }
 
       }
@@ -1242,27 +1117,18 @@
        * SMALL PHONES
        */
 
-      @media screen and (max-width: 380px) {
+      @media (max-width: 370px) {
 
-        .bw-wheel-panel {
-          padding-left: 12px;
-          padding-right: 12px;
+        .bwf-stage {
+          width: min(100%, 260px);
         }
 
-        .bw-wheel-modal h2 {
+        .bwf-card-value {
+          font-size: 22px !important;
+        }
+
+        .bwf-heading {
           font-size: 27px;
-        }
-
-        .bw-wheel-stage {
-          width: min(100%, 255px);
-        }
-
-        .bw-wheel-prize-name {
-          font-size: 11px;
-        }
-
-        .bw-wheel-prize-value {
-          font-size: 9px;
         }
 
       }
@@ -1273,8 +1139,7 @@
 
       @media (prefers-reduced-motion: reduce) {
 
-        .bw-wheel-button,
-        .bw-wheel-prize {
+        .bwf-button {
           transition: none;
         }
 
@@ -1283,7 +1148,6 @@
     `;
 
     document.head.append(style);
-
   }
 
   /*
@@ -1291,14 +1155,13 @@
    */
 
   function init() {
-
     const section = document.getElementById(
       'bw-dubai-section'
     );
 
     if (
       !section ||
-      section.dataset.bwWheelReady
+      section.dataset.bwfReady
     ) {
       return;
     }
@@ -1339,29 +1202,25 @@
       !success ||
       !failure
     ) {
-
       console.error(
-        'Bullwaves wheel: place the original embed inside a native Webflow Form Block.'
+        'Bullwaves: keep the original embed inside a native Webflow Form Block.'
       );
 
       return;
-
     }
 
     if (
       form.getAttribute('action') ||
       form.getAttribute('data-redirect')
     ) {
-
       console.error(
-        'Bullwaves wheel: remove custom form action and success redirect.'
+        'Bullwaves: remove the custom form action and redirect.'
       );
 
       return;
-
     }
 
-    section.dataset.bwWheelReady = 'true';
+    section.dataset.bwfReady = 'true';
 
     addStyles();
 
@@ -1369,53 +1228,49 @@
      * PARTICIPANT TYPE
      */
 
-    const profileField =
-      document.createElement('div');
-
-    profileField.className = 'bw-field';
-
-    profileField.innerHTML = `
-
-      <label
-        class="bw-label"
-        for="bw-participant-type">
-
-        Which best describes you?
-
-      </label>
-
-      <select
-        id="bw-participant-type"
-        name="Participant Type"
-        data-name="Participant Type"
-        class="bw-input w-select"
-        required>
-
-        <option value="">
-          Select your profile
-        </option>
-
-      </select>
-
-    `;
-
-    const profile =
-      profileField.querySelector('select');
-
-    Object.keys(CONFIG.categoryWeights).forEach(
-      type => {
-
-        profile.add(
-          new Option(type, type)
-        );
-
-      }
+    let profile = section.querySelector(
+      '#bw-participant-type'
     );
 
-    nativeSubmit.before(profileField);
+    if (!profile) {
+      const field = document.createElement('div');
+
+      field.className = 'bw-field';
+
+      field.innerHTML = `
+        <label
+          class="bw-label"
+          for="bw-participant-type">
+          Which best describes you?
+        </label>
+
+        <select
+          id="bw-participant-type"
+          name="Participant Type"
+          data-name="Participant Type"
+          class="bw-input w-select"
+          required>
+
+          <option value="">
+            Select your profile
+          </option>
+
+        </select>
+      `;
+
+      nativeSubmit.before(field);
+
+      profile = field.querySelector('select');
+
+      Object.keys(
+        CONFIG.categoryWeights
+      ).forEach(
+        type => profile.add(new Option(type, type))
+      );
+    }
 
     /*
-     * PRESERVE NATIVE WEBFLOW SUBMIT
+     * KEEP NATIVE WEBFLOW SUBMIT
      */
 
     nativeSubmit.hidden = true;
@@ -1424,8 +1279,11 @@
 
     nativeSubmit.tabIndex = -1;
 
-    const launch =
-      document.createElement('button');
+    /*
+     * LAUNCH BUTTON
+     */
+
+    const launch = document.createElement('button');
 
     launch.type = 'button';
 
@@ -1435,25 +1293,19 @@
 
     nativeSubmit.before(launch);
 
-    const inlineStatus =
-      document.createElement('p');
+    const inline = document.createElement('p');
 
-    inlineStatus.className =
-      'bw-wheel-inline-status';
+    inline.className = 'bwf-inline';
 
-    inlineStatus.setAttribute(
-      'role',
-      'status'
-    );
+    inline.setAttribute('role', 'status');
 
-    launch.after(inlineStatus);
+    launch.after(inline);
 
     /*
-     * SUCCESS REOPEN BUTTON
+     * REOPEN BUTTON
      */
 
-    const reopen =
-      document.createElement('button');
+    const reopen = document.createElement('button');
 
     reopen.type = 'button';
 
@@ -1467,101 +1319,151 @@
      * CREATE MODAL
      */
 
-    const modal =
-      document.createElement('dialog');
+    const dialog = document.createElement('dialog');
 
-    modal.className = 'bw-wheel-modal';
+    dialog.className = 'bwf-dialog';
 
-    modal.setAttribute(
+    dialog.setAttribute(
       'aria-labelledby',
-      'bw-wheel-heading'
+      'bwf-heading'
     );
 
-    modal.innerHTML = `
+    dialog.innerHTML = `
 
-      <div class="bw-wheel-panel">
+      <button
+        class="bwf-close"
+        type="button"
+        aria-label="Close prize window">
+        ×
+      </button>
 
-        <button
-          class="bw-wheel-close"
-          type="button"
-          aria-label="Close prize window">
+      <div class="bwf-scroll">
 
-          ×
+        <div class="bwf-inner">
 
-        </button>
+          <div class="bwf-kicker">
+            A1 COMBAT × BULLWAVES
+          </div>
 
-        <div class="bw-wheel-kicker">
+          <h2
+            class="bwf-heading"
+            id="bwf-heading">
+          </h2>
 
-          A1 COMBAT × BULLWAVES
+          <p class="bwf-intro"></p>
+
+          <div class="bwf-content"></div>
+
+          <p class="bwf-footnote">
+            DUBAI · 28 NOVEMBER 2026
+          </p>
 
         </div>
 
-        <h2 id="bw-wheel-heading"></h2>
+      </div>
 
-        <p class="bw-wheel-intro"></p>
+      <div class="bwf-dock">
 
-        <div class="bw-wheel-content"></div>
+        <div class="bwf-actions"></div>
 
         <p
-          class="bw-wheel-status"
+          class="bwf-status"
           role="status"
           aria-live="polite">
         </p>
 
-        <div class="bw-wheel-actions"></div>
-
-        <p class="bw-wheel-footnote">
-
-          DUBAI · 28 NOVEMBER 2026
-
-        </p>
-
       </div>
+
+      <canvas
+        class="bwf-confetti"
+        aria-hidden="true">
+      </canvas>
 
     `;
 
-    document.body.append(modal);
+    document.body.append(dialog);
 
-    const $ = selector =>
-      modal.querySelector(selector);
+    /*
+     * ELEMENT REFERENCES
+     */
 
-    const heading =
-      $('#bw-wheel-heading');
+    const scroll = dialog.querySelector(
+      '.bwf-scroll'
+    );
 
-    const intro =
-      $('.bw-wheel-intro');
+    const heading = dialog.querySelector(
+      '.bwf-heading'
+    );
 
-    const content =
-      $('.bw-wheel-content');
+    const intro = dialog.querySelector(
+      '.bwf-intro'
+    );
 
-    const actions =
-      $('.bw-wheel-actions');
+    const content = dialog.querySelector(
+      '.bwf-content'
+    );
 
-    const status =
-      $('.bw-wheel-status');
+    const actions = dialog.querySelector(
+      '.bwf-actions'
+    );
 
-    const close =
-      $('.bw-wheel-close');
+    const status = dialog.querySelector(
+      '.bwf-status'
+    );
+
+    const close = dialog.querySelector(
+      '.bwf-close'
+    );
+
+    const confettiCanvas = dialog.querySelector(
+      '.bwf-confetti'
+    );
 
     let entry = readEntry();
 
-    let spinning = false;
+    let busy = false;
 
     let submitting = false;
 
-    let allowNativeSubmit = false;
+    let nativeAllowed = false;
 
     let timeoutID = null;
 
     let previousOverflow = '';
 
-    let focusBeforeModal = null;
+    let previousFocus = null;
+
+    let confettiFrame = 0;
 
     /*
-     * UI HELPERS
+     * CLEAR CONFETTI
+     */
+
+    function clearConfetti() {
+      if (confettiFrame) {
+        cancelAnimationFrame(confettiFrame);
+      }
+
+      confettiFrame = 0;
+
+      const ctx = confettiCanvas.getContext('2d');
+
+      if (ctx) {
+        ctx.clearRect(
+          0,
+          0,
+          confettiCanvas.width,
+          confettiCanvas.height
+        );
+      }
+    }
+
+    /*
+     * RESET SCREEN
      */
 
     function reset(title, description) {
+      clearConfetti();
 
       heading.textContent = title;
 
@@ -1573,163 +1475,135 @@
 
       status.textContent = '';
 
+      scroll.scrollTop = 0;
     }
 
-    function addButton(
+    /*
+     * CREATE BUTTON
+     */
+
+    function button(
       label,
       callback,
       secondary
     ) {
+      const el = document.createElement('button');
 
-      const element =
-        document.createElement('button');
+      el.type = 'button';
 
-      element.type = 'button';
+      el.className =
+        'bwf-button' +
+        (secondary ? ' secondary' : '');
 
-      element.className =
-        'bw-wheel-button' +
-        (
-          secondary
-            ? ' bw-wheel-secondary'
-            : ''
-        );
+      el.textContent = label;
 
-      element.textContent = label;
+      el.addEventListener('click', callback);
 
-      element.addEventListener(
-        'click',
-        callback
-      );
+      actions.append(el);
 
-      actions.append(element);
-
-      return element;
-
+      return el;
     }
 
-    function setSpinning(value) {
+    /*
+     * BUSY STATE
+     */
 
-      spinning = value;
+    function setBusy(value) {
+      busy = value;
 
       close.disabled = value;
 
+      actions.querySelectorAll('button').forEach(
+        el => {
+          el.disabled = value;
+        }
+      );
     }
 
-    function open() {
+    /*
+     * OPEN MODAL
+     */
 
-      if (modal.open) {
+    function open() {
+      if (dialog.open) {
         return;
       }
 
-      focusBeforeModal =
-        document.activeElement;
+      previousFocus = document.activeElement;
 
       previousOverflow =
         document.body.style.overflow;
 
-      document.body.style.overflow =
-        'hidden';
+      document.body.style.overflow = 'hidden';
 
-      modal.showModal();
+      dialog.showModal();
 
       close.focus();
-
     }
 
-    function dismiss() {
+    /*
+     * CLOSE MODAL
+     */
 
-      if (!spinning) {
-        modal.close();
+    close.addEventListener('click', () => {
+      if (!busy) {
+        dialog.close();
       }
+    });
 
-    }
-
-    close.addEventListener(
-      'click',
-      dismiss
-    );
-
-    modal.addEventListener(
-      'cancel',
-      event => {
-
-        if (spinning) {
-          event.preventDefault();
-        }
-
+    dialog.addEventListener('cancel', event => {
+      if (busy) {
+        event.preventDefault();
       }
-    );
+    });
 
-    modal.addEventListener(
-      'close',
-      () => {
+    dialog.addEventListener('close', () => {
+      clearConfetti();
 
-        document.body.style.overflow =
-          previousOverflow;
+      document.body.style.overflow =
+        previousOverflow;
 
-        if (
-          focusBeforeModal &&
-          focusBeforeModal.isConnected
-        ) {
-
-          focusBeforeModal.focus();
-
-        }
-
+      if (
+        previousFocus &&
+        previousFocus.isConnected
+      ) {
+        previousFocus.focus();
       }
-    );
+    });
 
     /*
      * PRIZE INFORMATION
      */
 
     function prizeName() {
-
       return entry.category === 'challenge'
-
         ? money(entry.challenge) +
           ' Bullwaves Prime Challenge'
-
         : PRIZES[entry.category].name;
-
     }
 
     function prizeValue() {
-
       if (entry.category === 'challenge') {
-
         return (
-          'Retail value ' +
           money(
-            CONFIG.challengePrices[
-              entry.challenge
-            ]
+            CONFIG.challengePrices[entry.challenge]
           ) +
-          ', not cash'
+          ' retail value, not cash'
         );
-
       }
 
       if (entry.category === 'bonus') {
-
-        return (
-          '$800 tradable account bonus, not cash'
-        );
-
+        return '$800 tradable account bonus, not cash';
       }
 
-      return (
-        'VIP Ticket value $1,100. One ticket included'
-      );
-
+      return 'One VIP Ticket, stated value $1,100';
     }
 
     /*
-     * WEBFLOW FORM FIELDS
+     * RESTORE FORM
      */
 
     function restoreForm() {
-
       first.value = entry.first;
 
       last.value = entry.last;
@@ -1737,379 +1611,284 @@
       email.value = entry.email;
 
       profile.value = entry.type;
-
     }
 
-    function hiddenField(name, value) {
+    /*
+     * WEBFLOW HIDDEN FIELDS
+     */
 
-      let input = Array.from(
-        form.elements
-      ).find(
+    function hidden(name, value) {
+      let el = Array.from(form.elements).find(
         item => item.name === name
       );
 
-      if (!input) {
+      if (!el) {
+        el = document.createElement('input');
 
-        input =
-          document.createElement('input');
+        el.type = 'hidden';
 
-        input.type = 'hidden';
+        el.name = name;
 
-        input.name = name;
+        el.dataset.name = name;
 
-        input.dataset.name = name;
-
-        form.append(input);
-
+        form.append(el);
       }
 
-      input.value = value;
-
+      el.value = value;
     }
 
-    function prepareSubmission() {
+    /*
+     * PREPARE WEBFLOW SUBMISSION
+     */
 
+    function prepareSubmission() {
       restoreForm();
 
-      hiddenField(
+      hidden(
         'Prize Category',
-
         entry.category === 'challenge'
           ? 'Bullwaves Prime Challenge'
           : PRIZES[entry.category].name
       );
 
-      hiddenField(
+      hidden(
         'Prize Details',
         prizeName()
       );
 
-      hiddenField(
+      hidden(
         'Prize Value',
         prizeValue()
       );
 
-      hiddenField(
+      hidden(
         'Claim ID',
         entry.id
       );
 
-      hiddenField(
+      hidden(
         'Participation Date',
         entry.date
       );
-
     }
 
-    function paragraph(
-      className,
-      text
-    ) {
+    /*
+     * TEXT HELPER
+     */
 
-      const element =
-        document.createElement('p');
+    function text(className, value) {
+      const el = document.createElement('p');
 
-      element.className = className;
+      el.className = className;
 
-      element.textContent = text;
+      el.textContent = value;
 
-      content.append(element);
+      content.append(el);
 
-      return element;
-
+      return el;
     }
 
     /*
      * PRIZE CARDS
      *
-     * ALWAYS SHOW ALL PRIZES.
-     *
-     * No unavailable messages.
-     * No disabled appearance.
-     * No probability-based visual changes.
+     * Always display all prizes.
+     * Never show individual eligibility.
      */
 
-    function showTiles(
-      keys,
-      challenge
-    ) {
-
-      const grid =
-        document.createElement('div');
+    function showCards(keys, challenge) {
+      const grid = document.createElement('div');
 
       grid.className =
-        'bw-wheel-prizes' +
-        (
-          challenge
-            ? ' five'
-            : ''
-        );
+        'bwf-cards' +
+        (challenge ? ' five' : '');
 
       keys.forEach(key => {
+        const card = document.createElement('div');
 
-        const tile =
-          document.createElement('div');
+        card.className = 'bwf-card';
 
-        /*
-         * Every prize uses exactly
-         * the same visual style.
-         */
+        const title = document.createElement('div');
 
-        tile.className =
-          'bw-wheel-prize';
+        title.className = 'bwf-card-title';
 
-        const name =
-          document.createElement('div');
-
-        name.className =
-          'bw-wheel-prize-name';
-
-        name.textContent = challenge
-
+        title.textContent = challenge
           ? money(key) + ' Challenge'
-
           : PRIZES[key].name;
 
-        const value =
-          document.createElement('div');
+        const value = document.createElement('div');
 
-        value.className =
-          'bw-wheel-prize-value';
+        value.className = 'bwf-card-value';
 
         value.textContent = challenge
-
-          ? money(
-              CONFIG.challengePrices[key]
-            ) + ' RETAIL VALUE'
-
+          ? money(CONFIG.challengePrices[key])
           : PRIZES[key].value;
 
-        const note =
-          document.createElement('div');
+        const caption = document.createElement('div');
 
-        note.className =
-          'bw-wheel-prize-note';
+        caption.className = 'bwf-card-caption';
 
-        /*
-         * Only show prize descriptions.
-         *
-         * Never show eligibility
-         * or internal probabilities.
-         */
+        caption.textContent = challenge
+          ? 'Retail value, not cash'
+          : PRIZES[key].detail;
 
-        note.textContent = challenge
-
-          ? 'Challenge account, not cash'
-
-          : PRIZES[key].details;
-
-        tile.append(
-          name,
+        card.append(
+          title,
           value,
-          note
+          caption
         );
 
-        grid.append(tile);
-
+        grid.append(card);
       });
 
       content.append(grid);
-
     }
 
     /*
-     * CANVAS WHEEL
+     * DRAW WHEEL
      */
 
-    function drawWheel(
-      keys,
-      challenge
-    ) {
+    function wheel(keys, challenge) {
+      const stage = document.createElement('div');
 
-      const stage =
-        document.createElement('div');
+      stage.className = 'bwf-stage';
 
-      stage.className =
-        'bw-wheel-stage';
+      const pointer = document.createElement('div');
 
-      const pointer =
-        document.createElement('div');
-
-      pointer.className =
-        'bw-wheel-pointer';
+      pointer.className = 'bwf-pointer';
 
       pointer.setAttribute(
         'aria-hidden',
         'true'
       );
 
-      const canvas =
-        document.createElement('canvas');
+      const canvas = document.createElement('canvas');
 
-      canvas.className =
-        'bw-wheel-disc';
+      canvas.className = 'bwf-disc';
 
-      canvas.width = 900;
+      canvas.width = 960;
 
-      canvas.height = 900;
+      canvas.height = 960;
 
-      canvas.setAttribute(
-        'role',
-        'img'
-      );
+      canvas.setAttribute('role', 'img');
 
       canvas.setAttribute(
         'aria-label',
-
-        'Prize wheel showing ' +
-
-        keys.map(
-          key => challenge
-
-            ? money(key) + ' Challenge'
-
-            : PRIZES[key].name
-
-        ).join(', ')
+        'Prize wheel: ' +
+          keys.map(
+            key => challenge
+              ? money(key) + ' Challenge'
+              : PRIZES[key].name
+          ).join(', ')
       );
 
-      const ctx =
-        canvas.getContext('2d');
+      const ctx = canvas.getContext('2d');
 
       if (!ctx) {
-
         throw new Error(
-          'Canvas is not available in this browser.'
+          'Canvas is unavailable.'
         );
-
       }
 
       const step =
-        2 * Math.PI / keys.length;
+        Math.PI * 2 / keys.length;
 
       const colors = [
-        '#104cff',
-        '#142a68',
-        '#2046a1',
-        '#101f4f',
-        '#264dc0'
+        '#1453ff',
+        '#203677',
+        '#1740bd',
+        '#112759',
+        '#2454c9'
       ];
 
-      keys.forEach(
-        (key, index) => {
+      keys.forEach((key, i) => {
+        const start =
+          -Math.PI / 2 + i * step;
 
-          const start =
-            -Math.PI / 2 +
-            index * step;
+        /*
+         * SECTOR
+         */
 
-          /*
-           * SECTOR
-           */
+        ctx.beginPath();
 
-          ctx.beginPath();
+        ctx.moveTo(
+          480,
+          480
+        );
 
-          ctx.moveTo(
-            450,
-            450
-          );
+        ctx.arc(
+          480,
+          480,
+          451,
+          start,
+          start + step
+        );
 
-          ctx.arc(
-            450,
-            450,
-            430,
-            start,
-            start + step
-          );
+        ctx.closePath();
 
-          ctx.closePath();
+        ctx.fillStyle =
+          colors[i % colors.length];
 
-          ctx.fillStyle =
-            colors[index];
+        ctx.fill();
 
-          ctx.fill();
+        ctx.strokeStyle = '#7295ff';
 
-          ctx.strokeStyle =
-            '#8baaff';
+        ctx.lineWidth = 3;
 
-          ctx.lineWidth = 3;
+        ctx.stroke();
 
-          ctx.stroke();
+        /*
+         * SECTOR LABEL
+         */
 
-          /*
-           * SECTOR TEXT
-           */
+        ctx.save();
 
-          ctx.save();
+        ctx.translate(
+          480,
+          480
+        );
 
-          ctx.translate(
-            450,
-            450
-          );
+        ctx.rotate(
+          start + step / 2
+        );
 
-          ctx.rotate(
-            start + step / 2
-          );
+        ctx.translate(
+          300,
+          0
+        );
 
-          ctx.translate(
-            283,
-            0
-          );
+        ctx.rotate(
+          Math.PI / 2
+        );
 
-          ctx.rotate(
-            Math.PI / 2
-          );
+        ctx.textAlign = 'center';
 
-          ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
 
-          ctx.fillStyle = '#fff';
-
-          /*
-           * Bigger labels for mobile.
-           */
-
-          let words;
-
-          if (challenge) {
-
-            words = [
+        const lines = challenge
+          ? [
               money(key),
               'CHALLENGE'
-            ];
+            ]
+          : PRIZES[key].lines;
 
-          } else {
+        lines.forEach((line, n) => {
+          ctx.font =
+            n === 0
+              ? '800 44px Inter, Arial, sans-serif'
+              : '700 37px Inter, Arial, sans-serif';
 
-            words =
-              PRIZES[key].short;
-
-          }
-
-          words.forEach(
-            (text, line) => {
-
-              ctx.font =
-                line === 0
-
-                  ? '800 46px Inter, Arial, sans-serif'
-
-                  : '700 37px Inter, Arial, sans-serif';
-
-              ctx.fillText(
-                text,
-                0,
-                (
-                  line -
-                  (words.length - 1) / 2
-                ) * 52,
-                245
-              );
-
-            }
+          ctx.fillText(
+            line,
+            0,
+            (
+              n - (lines.length - 1) / 2
+            ) * 53,
+            260
           );
+        });
 
-          ctx.restore();
-
-        }
-      );
+        ctx.restore();
+      });
 
       /*
        * CENTER CIRCLE
@@ -2118,27 +1897,25 @@
       ctx.beginPath();
 
       ctx.arc(
-        450,
-        450,
-        88,
+        480,
+        480,
+        90,
         0,
-        2 * Math.PI
+        Math.PI * 2
       );
 
-      ctx.fillStyle =
-        '#070d20';
+      ctx.fillStyle = '#091126';
 
       ctx.fill();
 
-      ctx.strokeStyle =
-        '#a1b8ff';
+      ctx.strokeStyle = '#abc1ff';
 
       ctx.lineWidth = 4;
 
       ctx.stroke();
 
       /*
-       * CENTER TEXT
+       * CENTER LOGO TEXT
        */
 
       ctx.fillStyle = '#fff';
@@ -2146,18 +1923,18 @@
       ctx.textAlign = 'center';
 
       ctx.font =
-        '800 28px Inter, Arial, sans-serif';
+        '800 29px Inter, Arial, sans-serif';
 
       ctx.fillText(
         'BULL',
-        450,
-        440
+        480,
+        472
       );
 
       ctx.fillText(
         'WAVES',
-        450,
-        475
+        480,
+        508
       );
 
       stage.append(
@@ -2167,125 +1944,389 @@
 
       content.append(stage);
 
-      /*
-       * No eligibility information.
-       * No unavailable prize labels.
-       */
-
-      paragraph(
-        'bw-wheel-eligibility',
-
+      text(
+        'bwf-wheel-note',
         challenge
-
-          ? 'Five challenge sizes. One winning account.'
-
-          : 'Three incredible prizes. One winning spin.'
+          ? 'Five challenge sizes, one winning account.'
+          : 'Prize availability and odds vary by participant type.'
       );
 
-      return canvas;
-
+      return {
+        canvas,
+        stage
+      };
     }
 
     /*
-     * WHEEL ANIMATION
+     * CENTER WHEEL AUTOMATICALLY
+     *
+     * This is the important scroll behavior.
+     *
+     * The content scrolls inside the popup.
+     * The sticky CTA remains at the bottom.
      */
 
-    async function spin(
-      canvas,
+    async function centerWheel(stage) {
+      await new Promise(
+        resolve =>
+          requestAnimationFrame(
+            () => requestAnimationFrame(resolve)
+          )
+      );
+
+      const rect = stage.getBoundingClientRect();
+
+      const viewport = scroll.getBoundingClientRect();
+
+      const offset =
+        rect.top - viewport.top;
+
+      /*
+       * Center the wheel in the visible
+       * area above the sticky button.
+       */
+
+      const target =
+        scroll.scrollTop +
+        offset -
+        (
+          scroll.clientHeight - rect.height
+        ) / 2;
+
+      const reduced = matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
+
+      scroll.scrollTo({
+        top: Math.max(0, target),
+        behavior: reduced
+          ? 'instant'
+          : 'smooth'
+      });
+
+      /*
+       * Allow smooth scrolling to begin
+       * before the wheel starts spinning.
+       */
+
+      if (!reduced) {
+        await new Promise(
+          resolve => setTimeout(resolve, 480)
+        );
+      }
+    }
+
+    /*
+     * CONFETTI
+     *
+     * Lightweight canvas animation.
+     * No external libraries.
+     * Only 42 particles.
+     */
+
+    function confetti(stage) {
+      return new Promise(resolve => {
+        const ctx = confettiCanvas.getContext('2d');
+
+        if (!ctx) {
+          resolve();
+          return;
+        }
+
+        const rect = dialog.getBoundingClientRect();
+
+        const wheelRect =
+          stage.getBoundingClientRect();
+
+        const width = dialog.clientWidth;
+
+        const height = dialog.clientHeight;
+
+        const dpr = Math.min(
+          window.devicePixelRatio || 1,
+          2
+        );
+
+        /*
+         * High resolution canvas.
+         */
+
+        confettiCanvas.width =
+          Math.round(width * dpr);
+
+        confettiCanvas.height =
+          Math.round(height * dpr);
+
+        ctx.setTransform(
+          dpr,
+          0,
+          0,
+          dpr,
+          0,
+          0
+        );
+
+        /*
+         * Confetti originates from the wheel.
+         */
+
+        const x0 =
+          wheelRect.left -
+          rect.left +
+          wheelRect.width / 2;
+
+        const y0 =
+          wheelRect.top -
+          rect.top +
+          wheelRect.height * .34;
+
+        const palette = [
+          '#ffffff',
+          '#8eb1ff',
+          '#386aff',
+          '#c2d5ff',
+          '#cbbdff'
+        ];
+
+        /*
+         * Create a small number of particles.
+         */
+
+        const pieces = Array.from(
+          { length: 42 },
+          () => ({
+            vx: (Math.random() - .5) * 330,
+
+            vy:
+              -60 -
+              Math.random() * 200,
+
+            drift:
+              (Math.random() - .5) * 28,
+
+            angle:
+              Math.random() * Math.PI * 2,
+
+            spin:
+              (Math.random() - .5) * 9,
+
+            w:
+              3 + Math.random() * 4,
+
+            h:
+              5 + Math.random() * 6,
+
+            color:
+              palette[
+                Math.floor(
+                  Math.random() * palette.length
+                )
+              ]
+          })
+        );
+
+        const start = performance.now();
+
+        /*
+         * ANIMATION LOOP
+         */
+
+        function frame(now) {
+          const elapsed =
+            now - start;
+
+          const t =
+            elapsed / 1000;
+
+          ctx.clearRect(
+            0,
+            0,
+            width,
+            height
+          );
+
+          pieces.forEach(p => {
+            const x =
+              x0 +
+              p.vx * t +
+              Math.sin(t * 3 + p.angle) *
+                p.drift;
+
+            const y =
+              y0 +
+              p.vy * t +
+              230 * t * t;
+
+            if (y > height + 20) {
+              return;
+            }
+
+            ctx.save();
+
+            /*
+             * Fade out gradually.
+             */
+
+            ctx.globalAlpha =
+              Math.max(
+                0,
+                Math.min(
+                  1,
+                  (1750 - elapsed) / 450
+                )
+              );
+
+            ctx.translate(x, y);
+
+            ctx.rotate(
+              p.angle + p.spin * t
+            );
+
+            ctx.fillStyle = p.color;
+
+            ctx.fillRect(
+              -p.w / 2,
+              -p.h / 2,
+              p.w,
+              p.h
+            );
+
+            ctx.restore();
+          });
+
+          if (
+            elapsed < 1750 &&
+            dialog.open
+          ) {
+            confettiFrame =
+              requestAnimationFrame(frame);
+
+          } else {
+            clearConfetti();
+
+            resolve();
+          }
+        }
+
+        confettiFrame =
+          requestAnimationFrame(frame);
+      });
+    }
+
+    /*
+     * SPIN ANIMATION
+     */
+
+    async function animate(
+      selection,
       keys,
       winner
     ) {
+      /*
+       * Immediately indicate that
+       * the button has been pressed.
+       */
 
-      setSpinning(true);
-
-      actions.querySelectorAll(
-        'button'
-      ).forEach(
-        button => {
-          button.disabled = true;
-        }
-      );
+      setBusy(true);
 
       status.textContent =
-        'Revealing your prize…';
+        'Your prize is being revealed…';
 
-      const angle =
+      /*
+       * First scroll to the wheel.
+       */
+
+      await centerWheel(selection.stage);
+
+      /*
+       * Calculate exact landing position.
+       */
+
+      const rotation =
         360 * 7 -
-
         (
           keys.indexOf(winner) + .5
-        ) *
-
-        (
+        ) * (
           360 / keys.length
         );
 
-      const reduced =
-        window.matchMedia &&
+      const reduced = matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
 
-        matchMedia(
-          '(prefers-reduced-motion: reduce)'
-        ).matches;
+      /*
+       * Animate the wheel.
+       */
 
       if (
         !reduced &&
-        canvas.animate
+        selection.canvas.animate
       ) {
-
         const animation =
-          canvas.animate(
-
+          selection.canvas.animate(
             [
               {
-                transform:
-                  'rotate(0deg)'
+                transform: 'rotate(0deg)'
               },
 
               {
                 transform:
                   'rotate(' +
-                  angle +
+                  rotation +
                   'deg)'
               }
             ],
 
             {
-              duration:
-                CONFIG.duration,
+              duration: CONFIG.spinDuration,
 
               easing:
                 'cubic-bezier(.16,.02,.10,1)',
 
-              fill:
-                'forwards'
+              fill: 'forwards'
             }
-
           );
 
         try {
-
           await animation.finished;
-
         } catch (_) {}
 
-        canvas.style.transform =
+        selection.canvas.style.transform =
           'rotate(' +
-          angle +
+          rotation +
           'deg)';
 
         animation.cancel();
 
       } else {
-
-        canvas.style.transform =
+        selection.canvas.style.transform =
           'rotate(' +
-          angle +
+          rotation +
           'deg)';
-
       }
 
-      setSpinning(false);
+      /*
+       * ANNOUNCE THE RESULT
+       */
 
+      status.textContent =
+        'You won ' +
+        (
+          keys === CHALLENGE_ORDER
+            ? money(winner) + ' Challenge'
+            : PRIZES[winner].name
+        ) +
+        '!';
+
+      /*
+       * CONFETTI
+       */
+
+      if (!reduced) {
+        await confetti(selection.stage);
+      }
+
+      setBusy(false);
     }
 
     /*
@@ -2293,161 +2334,143 @@
      */
 
     function firstWheel() {
-
       reset(
         'Your next big win starts here.',
-
-        'Three extraordinary prizes. One spin. Find out what is waiting for you.'
+        'Three extraordinary prizes. One spin. Discover your reward.'
       );
 
-      const type =
-        profile.value;
-
-      const weights =
-        CONFIG.categoryWeights[type];
+      const type = profile.value;
 
       /*
-       * ALL THREE PRIZES.
-       *
-       * Never filter by probability.
+       * Always show all three prizes.
        */
 
-      const keys =
-        CATEGORY_ORDER;
-
-      showTiles(
-        keys,
+      showCards(
+        CATEGORY_ORDER,
         false
       );
 
-      const canvas =
-        drawWheel(
-          keys,
-          false
-        );
+      const selection = wheel(
+        CATEGORY_ORDER,
+        false
+      );
 
-      addButton(
+      /*
+       * STICKY SPIN BUTTON
+       */
+
+      button(
         'Spin to Win',
 
         async () => {
+          if (busy) {
+            return;
+          }
 
-          const existing =
-            readEntry();
+          const previous = readEntry();
 
-          if (existing) {
-
-            entry = existing;
+          if (previous) {
+            entry = previous;
 
             restoreForm();
 
             resume();
 
             return;
-
           }
 
-          let category;
-
-          let challenge;
+          /*
+           * Determine both results
+           * before starting the animation.
+           */
 
           try {
+            const category = choose(
+              CONFIG.categoryWeights[type]
+            );
 
-            category =
-              choose(weights);
-
-            challenge =
+            const challenge =
               category === 'challenge'
-
                 ? choose(
                     CONFIG.challengeWeights[type]
                   )
-
                 : null;
 
-          } catch (_) {
+            entry = {
+              version: 2,
 
+              id: makeID(),
+
+              first: first.value.trim(),
+
+              last: last.value.trim(),
+
+              email:
+                email.value.trim().toLowerCase(),
+
+              type,
+
+              category,
+
+              challenge,
+
+              stage:
+                category === 'challenge'
+                  ? 'challenge'
+                  : 'ready',
+
+              date:
+                new Date().toISOString()
+            };
+
+          } catch (_) {
             status.textContent =
               'The draw is temporarily unavailable. Please contact support.';
 
             return;
-
           }
 
           /*
-           * Save both results before
-           * starting the animation.
+           * Save before animation.
            */
 
-          entry = {
-
-            version: 2,
-
-            id: makeID(),
-
-            first:
-              first.value.trim(),
-
-            last:
-              last.value.trim(),
-
-            email:
-              email.value
-                .trim()
-                .toLowerCase(),
-
-            type,
-
-            category,
-
-            challenge,
-
-            stage:
-              category === 'challenge'
-
-                ? 'challenge'
-
-                : 'ready',
-
-            date:
-              new Date().toISOString()
-
-          };
-
           if (!saveEntry(entry)) {
-
             entry = null;
 
             status.textContent =
-              'Please enable browser storage so your prize can be saved before spinning.';
+              'Please enable browser storage so we can save your prize.';
 
             return;
-
           }
 
           launch.textContent =
             'View My Prize';
 
-          await spin(
-            canvas,
-            keys,
-            category
+          /*
+           * Center wheel, spin and celebrate.
+           */
+
+          await animate(
+            selection,
+            CATEGORY_ORDER,
+            entry.category
           );
 
-          if (
-            entry.stage === 'challenge'
-          ) {
+          /*
+           * Continue to second wheel
+           * or submit registration.
+           */
 
+          if (
+            entry.category === 'challenge'
+          ) {
             secondWheel();
 
           } else {
-
             submitEntry();
-
           }
-
         }
       );
-
     }
 
     /*
@@ -2455,62 +2478,61 @@
      */
 
     function secondWheel() {
-
       reset(
         'You won a Prime Challenge!',
-
-        'One more spin to reveal your challenge account size.'
+        'Spin again to reveal your challenge account size.'
       );
 
       /*
-       * ALL FIVE CHALLENGE SIZES.
-       *
-       * Never filter by probability.
+       * Always show all five sizes.
        */
 
-      const keys =
-        CHALLENGE_ORDER;
-
-      showTiles(
-        keys,
+      showCards(
+        CHALLENGE_ORDER,
         true
       );
 
-      const canvas =
-        drawWheel(
-          keys,
-          true
-        );
+      const selection = wheel(
+        CHALLENGE_ORDER,
+        true
+      );
 
-      addButton(
+      /*
+       * STICKY SECOND SPIN BUTTON
+       */
+
+      button(
         'Reveal My Challenge',
 
         async () => {
+          if (busy) {
+            return;
+          }
 
           entry.stage = 'ready';
 
           if (!saveEntry(entry)) {
-
             entry.stage = 'challenge';
 
             status.textContent =
-              'Your browser could not save your progress. Please enable storage and retry.';
+              'Please enable storage and try again.';
 
             return;
-
           }
 
-          await spin(
-            canvas,
-            keys,
+          /*
+           * Center wheel, spin and celebrate.
+           */
+
+          await animate(
+            selection,
+            CHALLENGE_ORDER,
             entry.challenge
           );
 
           submitEntry();
-
         }
       );
-
     }
 
     /*
@@ -2518,119 +2540,112 @@
      */
 
     function prizePanel() {
+      const panel = document.createElement('div');
 
-      const panel =
-        document.createElement('div');
+      panel.className = 'bwf-win';
 
-      panel.className =
-        'bw-wheel-win';
+      const kicker = document.createElement('div');
 
-      const label =
-        document.createElement('span');
+      kicker.className = 'bwf-win-kicker';
 
-      label.className =
-        'bw-wheel-win-label';
+      kicker.textContent = 'YOUR WINNING PRIZE';
 
-      label.textContent =
-        'YOUR WINNING PRIZE';
+      const title = document.createElement('div');
 
-      const name =
-        document.createElement('div');
+      title.className = 'bwf-win-title';
 
-      name.className =
-        'bw-wheel-win-title';
+      title.textContent = prizeName();
 
-      name.textContent =
-        prizeName();
+      const value = document.createElement('div');
 
-      const value =
-        document.createElement('div');
-
-      value.className =
-        'bw-wheel-win-value';
+      value.className = 'bwf-win-value';
 
       value.textContent =
         entry.category === 'challenge'
-
           ? money(
-              CONFIG.challengePrices[
-                entry.challenge
-              ]
-            ) + ' RETAIL VALUE'
+              CONFIG.challengePrices[entry.challenge]
+            ) + ' VALUE'
+          : PRIZES[entry.category].value + ' VALUE';
 
-          : PRIZES[
-              entry.category
-            ].value;
+      const detail = document.createElement('p');
 
-      const details =
-        document.createElement('p');
+      detail.className = 'bwf-win-detail';
 
-      details.className =
-        'bw-wheel-win-details';
-
-      details.textContent =
-        prizeValue();
+      detail.textContent = prizeValue();
 
       panel.append(
-        label,
-        name,
+        kicker,
+        title,
         value,
-        details
+        detail
       );
 
       content.append(panel);
-
     }
 
     /*
      * REGISTRATION STATUS
      */
 
-    function pending(
-      message,
-      retry
-    ) {
-
+    function pending(message, retry) {
       reset(
         'Your prize is saved.',
-
-        'Your reward and Claim ID will not change if you retry.'
+        'Your reward and Claim ID will remain the same.'
       );
 
       prizePanel();
 
-      paragraph(
-        'bw-wheel-claim-id',
+      text(
+        'bwf-id',
         entry.id
       );
 
-      status.textContent =
-        message;
+      status.textContent = message;
 
       if (retry) {
-
-        addButton(
+        button(
           'Retry Registration',
           submitEntry
         );
 
-      }
+      } else {
+        button(
+          'Contact Support',
 
+          () => window.open(
+            entry.category === 'challenge'
+              ? CONFIG.support.prime
+              : CONFIG.support.broker,
+
+            '_blank',
+
+            'noopener,noreferrer'
+          ),
+
+          true
+        );
+      }
     }
 
-    function submissionFailed(message) {
+    /*
+     * SUBMISSION FAILURE
+     */
 
+    function submissionFailed(message) {
       clearTimeout(timeoutID);
 
       submitting = false;
 
-      setSpinning(false);
+      setBusy(false);
+
+      entry.stage = 'ready';
+
+      saveEntry(entry);
 
       pending(
         message,
         true
       );
-
     }
 
     /*
@@ -2638,174 +2653,125 @@
      */
 
     function submitEntry() {
-
-      if (submitting) {
+      if (
+        submitting ||
+        busy
+      ) {
         return;
       }
 
       prepareSubmission();
 
       if (!form.checkValidity()) {
-
         pending(
-          'Please complete all required fields in the form and try again.',
+          'Please complete the required fields before retrying.',
           true
         );
 
         return;
-
       }
 
       if (
-
         !window.Webflow ||
-
-        typeof window.Webflow.require !==
-          'function' ||
-
+        typeof window.Webflow.require !== 'function' ||
         !window.Webflow.require('forms')
-
       ) {
-
         pending(
-          'Registration is available only on the published Webflow site. Your prize remains saved.',
+          'Registration is available on the published Webflow site. Your prize is saved.',
           true
         );
 
         return;
-
       }
 
+      entry.stage = 'sending';
+
+      saveEntry(entry);
+
       pending(
-        'Submitting your registration to Webflow…',
+        'Sending your registration to Webflow…',
         false
       );
 
       submitting = true;
 
-      setSpinning(true);
+      setBusy(true);
 
-      success.style.display =
-        'none';
+      success.style.display = 'none';
 
-      failure.style.display =
-        'none';
+      failure.style.display = 'none';
 
-      allowNativeSubmit = true;
+      nativeAllowed = true;
 
       try {
-
-        form.requestSubmit(
-          nativeSubmit
-        );
+        form.requestSubmit(nativeSubmit);
 
       } catch (_) {
-
         submissionFailed(
-          'We could not submit your form. Your prize is saved, please try again.'
+          'Your form could not be sent. Please try again.'
         );
 
       } finally {
-
-        allowNativeSubmit =
-          false;
-
+        nativeAllowed = false;
       }
+
+      /*
+       * Do not automatically resubmit
+       * if Webflow confirmation is delayed.
+       */
 
       if (submitting) {
+        timeoutID = setTimeout(
+          () => {
+            setBusy(false);
 
-        timeoutID =
-          setTimeout(
-            () => {
+            status.textContent =
+              'Confirmation is taking longer than expected. Your prize is saved. Please contact support before trying again to avoid duplicate entries.';
+          },
 
-              setSpinning(false);
-
-              status.textContent =
-                'Confirmation is taking longer than expected. Your prize is saved. Contact support before trying to register again to avoid duplicates.';
-
-              addButton(
-                'Contact Support',
-
-                () => {
-
-                  const url =
-                    entry.category === 'challenge'
-
-                      ? CONFIG.support.prime
-
-                      : CONFIG.support.broker;
-
-                  window.open(
-                    url,
-                    '_blank',
-                    'noopener,noreferrer'
-                  );
-
-                },
-
-                true
-              );
-
-            },
-
-            45000
-          );
-
+          45000
+        );
       }
-
     }
 
     /*
-     * WEBFLOW SUCCESS AND ERROR OBSERVER
+     * WEBFLOW SUCCESS OBSERVER
      */
 
-    const visible = element =>
-
-      !element.hidden &&
-
-      getComputedStyle(
-        element
-      ).display !== 'none';
+    const visible = el =>
+      el &&
+      !el.hidden &&
+      getComputedStyle(el).display !== 'none';
 
     new MutationObserver(
       () => {
-
         if (!submitting) {
           return;
         }
 
         if (visible(success)) {
-
-          clearTimeout(
-            timeoutID
-          );
+          clearTimeout(timeoutID);
 
           submitting = false;
 
-          setSpinning(false);
+          setBusy(false);
 
-          entry.stage =
-            'submitted';
+          entry.stage = 'submitted';
 
           saveEntry(entry);
 
           finalScreen();
 
         } else if (visible(failure)) {
-
           submissionFailed(
-            'Webflow could not save your entry. Please retry, your prize and Claim ID will remain the same.'
+            'Webflow could not save your entry. Your prize and Claim ID are unchanged.'
           );
-
         }
-
       }
     ).observe(
-
       block,
 
       {
-
         attributes: true,
 
         attributeFilter: [
@@ -2817,60 +2783,48 @@
         childList: true,
 
         subtree: true
-
       }
-
     );
 
     /*
-     * FINAL PRIZE SCREEN
+     * FINAL WINNING SCREEN
      */
 
     function finalScreen() {
-
       reset(
         'Congratulations!',
-
-        'Your entry has been received. Here is your reward.'
+        'Your registration has been received. Claim your prize with our team.'
       );
 
       prizePanel();
 
-      paragraph(
-        'bw-wheel-claim-id',
+      text(
+        'bwf-id',
         entry.id
       );
 
-      paragraph(
-        'bw-wheel-help',
-
-        'Copy the message, open the support chat and paste it there. Our team will check your registration before awarding the prize.'
+      text(
+        'bwf-help',
+        'Copy this message and paste it into our support chat. The team will verify your registration before awarding the prize.'
       );
 
       /*
-       * SUPPORT CLAIM MESSAGE
+       * SUPPORT MESSAGE
        */
 
       const message = [
-
         'Hello ' +
-
           (
             entry.category === 'challenge'
-
               ? 'Bullwaves Prime'
-
               : 'Bullwaves'
           ) +
-
           ' Support,',
 
         '',
 
         'I participated in the A1 Combat × Bullwaves Dubai giveaway and won ' +
-
           prizeName() +
-
           '.',
 
         '',
@@ -2880,17 +2834,13 @@
           ' ' +
           entry.last,
 
-        'Email: ' +
-          entry.email,
+        'Email: ' + entry.email,
 
-        'Prize: ' +
-          prizeName(),
+        'Prize: ' + prizeName(),
 
-        'Prize value: ' +
-          prizeValue(),
+        'Prize value: ' + prizeValue(),
 
-        'Claim ID: ' +
-          entry.id,
+        'Claim ID: ' + entry.id,
 
         '',
 
@@ -2899,40 +2849,34 @@
         '',
 
         'Thank you!'
-
       ].join('\n');
 
-      const textarea =
-        document.createElement('textarea');
+      const textarea = document.createElement('textarea');
 
-      textarea.className =
-        'bw-wheel-message';
+      textarea.className = 'bwf-message';
 
       textarea.readOnly = true;
 
       textarea.setAttribute(
         'aria-label',
-        'Copy your support claim message'
+        'Your claim message'
       );
 
-      textarea.value =
-        message;
+      textarea.value = message;
 
-      content.append(
-        textarea
-      );
+      content.append(textarea);
 
       /*
-       * COPY MESSAGE
+       * COPY MESSAGE BUTTON
+       *
+       * Also stays in the bottom dock.
        */
 
-      addButton(
+      button(
         'Copy Claim Message',
 
         async () => {
-
           try {
-
             await navigator.clipboard.writeText(
               message
             );
@@ -2941,7 +2885,6 @@
               'Message copied!';
 
           } catch (_) {
-
             textarea.focus();
 
             textarea.select();
@@ -2949,23 +2892,13 @@
             let copied = false;
 
             try {
-
-              copied =
-                document.execCommand(
-                  'copy'
-                );
-
+              copied = document.execCommand('copy');
             } catch (_) {}
 
-            status.textContent =
-              copied
-
-                ? 'Message copied!'
-
-                : 'Select and copy the message above, then paste it into the support chat.';
-
+            status.textContent = copied
+              ? 'Message copied!'
+              : 'Copy the message above and paste it into support chat.';
           }
-
         }
       );
 
@@ -2973,43 +2906,34 @@
        * SUPPORT LINK
        */
 
-      const support =
-        document.createElement('a');
+      const support = document.createElement('a');
 
       support.className =
-        'bw-wheel-button bw-wheel-secondary';
+        'bwf-button secondary';
 
       support.textContent =
         'Contact Support';
 
       support.href =
         entry.category === 'challenge'
-
           ? CONFIG.support.prime
-
           : CONFIG.support.broker;
 
-      support.target =
-        '_blank';
+      support.target = '_blank';
 
-      support.rel =
-        'noopener noreferrer';
+      support.rel = 'noopener noreferrer';
 
-      actions.append(
-        support
-      );
+      actions.append(support);
 
       launch.textContent =
         'View My Prize';
-
     }
 
     /*
-     * RESTORE EXISTING PARTICIPATION
+     * RESUME EXISTING PARTICIPATION
      */
 
     function resume() {
-
       if (submitting) {
         return;
       }
@@ -3017,24 +2941,27 @@
       if (
         entry.stage === 'submitted'
       ) {
-
         finalScreen();
 
       } else if (
         entry.stage === 'challenge'
       ) {
-
         secondWheel();
 
-      } else {
+      } else if (
+        entry.stage === 'sending'
+      ) {
+        pending(
+          'Your submission may still be processing. Contact support with your Claim ID before trying again.',
+          false
+        );
 
+      } else {
         pending(
           'Your prize is saved. Complete registration to claim it.',
           true
         );
-
       }
-
     }
 
     /*
@@ -3042,19 +2969,18 @@
      */
 
     function start() {
-
-      if (
-        spinning ||
-        submitting
-      ) {
+      if (busy) {
         return;
       }
 
-      entry =
-        readEntry() || entry;
+      if (submitting) {
+        open();
+        return;
+      }
+
+      entry = readEntry() || entry;
 
       if (entry) {
-
         restoreForm();
 
         open();
@@ -3062,7 +2988,6 @@
         resume();
 
         return;
-
       }
 
       first.value =
@@ -3078,13 +3003,11 @@
         return;
       }
 
-      inlineStatus.textContent =
-        '';
+      inline.textContent = '';
 
       open();
 
       firstWheel();
-
     }
 
     /*
@@ -3102,19 +3025,14 @@
     );
 
     /*
-     * Intercept unsolicited submissions.
-     *
-     * The authorized native submission
-     * is still handled by Webflow.
+     * Preserve native Webflow submission.
      */
 
     form.addEventListener(
-
       'submit',
 
       event => {
-
-        if (allowNativeSubmit) {
+        if (nativeAllowed) {
           return;
         }
 
@@ -3123,11 +3041,9 @@
         event.stopImmediatePropagation();
 
         start();
-
       },
 
       true
-
     );
 
     /*
@@ -3135,57 +3051,44 @@
      */
 
     form.addEventListener(
-
       'keydown',
 
       event => {
-
         if (
-
           event.key === 'Enter' &&
-
           event.target.matches(
             'input:not([type="submit"])'
           )
-
         ) {
-
           event.preventDefault();
 
           start();
-
         }
-
       }
-
     );
 
     /*
-     * RESTORE SAVED PRIZE
+     * RESTORE PREVIOUS PRIZE
      */
 
     if (entry) {
-
       restoreForm();
 
       launch.textContent =
         'View My Prize';
 
-      inlineStatus.textContent =
+      inline.textContent =
         'Your existing prize is saved in this browser.';
-
     }
-
   }
 
   /*
-   * INITIALIZE AFTER DOM IS READY
+   * DOM READY
    */
 
   if (
     document.readyState === 'loading'
   ) {
-
     document.addEventListener(
       'DOMContentLoaded',
       init,
@@ -3193,9 +3096,7 @@
     );
 
   } else {
-
     init();
-
   }
 
 })();
