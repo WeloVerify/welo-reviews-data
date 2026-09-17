@@ -11,32 +11,27 @@
 
     categoryWeights: {
       Trader: {
-        ticket: 35,
-        bonus: 35,
+        ticket: 70,
         challenge: 30
       },
 
       Affiliate: {
         ticket: 60,
-        bonus: 0,
         challenge: 40
       },
 
       'Software / Tech Company': {
         ticket: 0,
-        bonus: 0,
         challenge: 100
       },
 
       'PSP Company': {
         ticket: 0,
-        bonus: 0,
         challenge: 100
       },
 
       Other: {
         ticket: 0,
-        bonus: 0,
         challenge: 100
       }
     },
@@ -89,20 +84,11 @@
       '25000': 199,
       '50000': 299,
       '100000': 549
-    },
-
-    support: {
-      broker:
-        'https://www.bullwaves.com/contact-us',
-
-      prime:
-        'https://www.prime.bullwaves.com/contact-us'
     }
   };
 
   const CATEGORY_ORDER = [
     'ticket',
-    'bonus',
     'challenge'
   ];
 
@@ -121,14 +107,6 @@
       value: '$1,100',
       detail:
         'Experience A1 Combat live in Dubai.'
-    },
-
-    bonus: {
-      name: '$800 Trading Bonus',
-      lines: ['$800', 'BONUS'],
-      value: '$800',
-      detail:
-        'Tradable Bullwaves account credit, not cash.'
     },
 
     challenge: {
@@ -575,7 +553,7 @@
 
         grid-template-columns:
           repeat(
-            3,
+            2,
             minmax(0,1fr)
           );
 
@@ -1145,38 +1123,6 @@
           anywhere;
 
         user-select: all;
-      }
-
-      .bwf-message {
-        display: block;
-
-        width: 100%;
-
-        min-height: 125px;
-
-        margin:
-          14px 0;
-
-        resize: vertical;
-
-        padding: 12px;
-
-        border:
-          1px solid
-          #ffffff35;
-
-        border-radius: 12px;
-
-        background:
-          #0c1629;
-
-        color: #e3ebff;
-
-        font:
-          12px/1.5
-          Inter,
-          Arial,
-          sans-serif;
       }
 
       .bwf-confetti {
@@ -2060,15 +2006,6 @@
         );
       }
 
-      if (
-        entry.category ===
-        'bonus'
-      ) {
-        return (
-          '$800 tradable account bonus, not cash'
-        );
-      }
-
       return (
         'One VIP Ticket, stated value $1,100'
       );
@@ -2530,7 +2467,7 @@
               'Five challenge sizes, one winning account.'
             )
           : (
-              'Prize availability and odds vary by participant type.'
+              'Two premium prizes. One winning spin.'
             )
       );
 
@@ -2955,7 +2892,7 @@
       reset(
         'Your next big win starts here.',
 
-        'Three extraordinary prizes. One spin. Discover your reward.'
+        'Two premium prizes. One spin. Discover your reward.'
       );
 
       const type =
@@ -3050,7 +2987,7 @@
 
           } catch (_) {
             status.textContent =
-              'The draw is temporarily unavailable. Please contact support.';
+              'The draw is temporarily unavailable. Please try again in a moment.';
 
             return;
           }
@@ -3228,15 +3165,10 @@
       reset(
         'Your prize is saved.',
 
-        'Your reward and Claim ID will remain the same.'
+        'Your result has been securely kept while we complete your registration.'
       );
 
       prizePanel();
-
-      text(
-        'bwf-id',
-        entry.id
-      );
 
       status.textContent =
         message;
@@ -3245,29 +3177,6 @@
         button(
           'Retry Registration',
           submitEntry
-        );
-
-      } else {
-        button(
-          'Contact Support',
-
-          () =>
-            window.open(
-              entry.category ===
-              'challenge'
-                ? CONFIG
-                    .support
-                    .prime
-                : CONFIG
-                    .support
-                    .broker,
-
-              '_blank',
-
-              'noopener,noreferrer'
-            ),
-
-          true
         );
       }
     }
@@ -3377,7 +3286,7 @@
               setBusy(false);
 
               status.textContent =
-                'Confirmation is taking longer than expected. Your prize is saved. Please contact support before trying again to avoid duplicate entries.';
+                'Confirmation is taking longer than expected. Your prize is saved. Please wait a moment and avoid submitting again.';
             },
 
             45000
@@ -3422,7 +3331,7 @@
           visible(failure)
         ) {
           submissionFailed(
-            'Webflow could not save your entry. Your prize and Claim ID are unchanged.'
+            'Webflow could not save your entry. Your prize is unchanged.'
           );
         }
       }
@@ -3448,158 +3357,21 @@
       reset(
         'Congratulations!',
 
-        'Your registration has been received. Claim your prize with our team.'
+        'Your prize has been confirmed and your registration is complete.'
       );
 
       prizePanel();
 
       text(
-        'bwf-id',
-        entry.id
-      );
-
-      text(
         'bwf-help',
 
-        'Copy this message and paste it into our support chat. The team will verify your registration before awarding the prize.'
+        'We have registered ' +
+        entry.email +
+        '. Our support team will contact you within 48 hours with the next steps to receive your prize. Please keep an eye on your inbox, including your spam or junk folder.'
       );
 
-      const message = [
-        'Hello ' +
-        (
-          entry.category ===
-          'challenge'
-            ? 'Bullwaves Prime'
-            : 'Bullwaves'
-        ) +
-        ' Support,',
-
-        '',
-
-        'I participated in the A1 Combat × Bullwaves Dubai giveaway and won ' +
-        prizeName() +
-        '.',
-
-        '',
-
-        'Name: ' +
-        entry.first +
-        ' ' +
-        entry.last,
-
-        'Email: ' +
-        entry.email,
-
-        'Prize: ' +
-        prizeName(),
-
-        'Prize value: ' +
-        prizeValue(),
-
-        'Claim ID: ' +
-        entry.id,
-
-        '',
-
-        'I would like to claim my prize. Could you please help me with the next steps?',
-
-        '',
-
-        'Thank you!'
-
-      ].join('\n');
-
-      const textarea =
-        document.createElement(
-          'textarea'
-        );
-
-      textarea.className =
-        'bwf-message';
-
-      textarea.readOnly =
-        true;
-
-      textarea.setAttribute(
-        'aria-label',
-        'Your claim message'
-      );
-
-      textarea.value =
-        message;
-
-      content.append(
-        textarea
-      );
-
-      button(
-        'Copy Claim Message',
-
-        async () => {
-          try {
-            await navigator
-              .clipboard
-              .writeText(
-                message
-              );
-
-            status.textContent =
-              'Message copied!';
-
-          } catch (_) {
-            textarea.focus();
-
-            textarea.select();
-
-            let copied =
-              false;
-
-            try {
-              copied =
-                document.execCommand(
-                  'copy'
-                );
-
-            } catch (_) {}
-
-            status.textContent =
-              copied
-                ? 'Message copied!'
-                : 'Copy the message above and paste it into support chat.';
-          }
-        }
-      );
-
-      const support =
-        document.createElement(
-          'a'
-        );
-
-      support.className =
-        'bwf-button secondary';
-
-      support.textContent =
-        'Contact Support';
-
-      support.href =
-        entry.category ===
-        'challenge'
-          ? CONFIG
-              .support
-              .prime
-          : CONFIG
-              .support
-              .broker;
-
-      support.target =
-        '_blank';
-
-      support.rel =
-        'noopener noreferrer';
-
-      actions.append(
-        support
-      );
+      status.textContent =
+        'No further action is required from you.';
 
       launch.textContent =
         'View My Prize';
@@ -3627,7 +3399,7 @@
         'sending'
       ) {
         pending(
-          'Your submission may still be processing. Contact support with your Claim ID before trying again.',
+          'Your registration may still be processing. Your prize is saved and no further action is required right now.',
           false
         );
 
