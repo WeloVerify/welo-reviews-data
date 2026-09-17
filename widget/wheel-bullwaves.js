@@ -11,15 +11,15 @@
 
     categoryWeights: {
       Trader: {
-        ticket: 0,
-        bonus: 70,
+        ticket: 35,
+        bonus: 35,
         challenge: 30
       },
 
       Affiliate: {
-        ticket: 80,
+        ticket: 60,
         bonus: 0,
-        challenge: 20
+        challenge: 40
       },
 
       'Software / Tech Company': {
@@ -570,8 +570,6 @@
         line-height: 1.6;
       }
 
-      /* PRIZE CARDS */
-
       .bwf-cards {
         display: grid;
 
@@ -698,16 +696,6 @@
           );
       }
 
-      /*
-       * WHEEL
-       *
-       * The stage and canvas are
-       * explicitly forced to 1:1.
-       *
-       * This prevents the oval
-       * effect on mobile browsers.
-       */
-
       .bwf-stage {
         position: relative;
 
@@ -793,10 +781,6 @@
           50% 50%;
       }
 
-      /*
-       * POINTER
-       */
-
       .bwf-pointer {
         position: absolute;
 
@@ -827,10 +811,6 @@
 
         pointer-events: none;
       }
-
-      /*
-       * CENTER LOGO
-       */
 
       .bwf-center-logo {
         position: absolute;
@@ -938,10 +918,6 @@
         margin:
           18px 0 2px;
       }
-
-      /*
-       * FIXED ACTION AREA
-       */
 
       .bwf-dock {
         position: relative;
@@ -1077,10 +1053,6 @@
         text-align: center;
       }
 
-      /*
-       * WIN SCREEN
-       */
-
       .bwf-win {
         margin:
           22px 0;
@@ -1207,10 +1179,6 @@
           sans-serif;
       }
 
-      /*
-       * CONFETTI
-       */
-
       .bwf-confetti {
         position: absolute;
 
@@ -1234,10 +1202,6 @@
           Arial,
           sans-serif;
       }
-
-      /*
-       * TABLET
-       */
 
       @media
       (max-width: 767px) {
@@ -1271,10 +1235,6 @@
         }
 
       }
-
-      /*
-       * MOBILE
-       */
 
       @media
       (max-width: 580px) {
@@ -1335,10 +1295,6 @@
 
           font-size: 12px;
         }
-
-        /*
-         * PRIZE CARDS
-         */
 
         .bwf-cards {
           grid-template-columns:
@@ -1425,11 +1381,6 @@
           font-size: 21px;
         }
 
-        /*
-         * PERFECTLY ROUND
-         * MOBILE WHEEL
-         */
-
         .bwf-stage {
           width:
             min(
@@ -1496,10 +1447,6 @@
             25px;
         }
 
-        /*
-         * MOBILE DOCK
-         */
-
         .bwf-dock {
           padding:
             10px 12px
@@ -1530,10 +1477,6 @@
 
       }
 
-      /*
-       * SMALL PHONES
-       */
-
       @media
       (max-width: 370px) {
 
@@ -1548,8 +1491,7 @@
             calc(100vw - 54px)
             !important;
 
-          height:
-            auto !important;
+          height: auto !important;
 
           aspect-ratio:
             1 / 1 !important;
@@ -1687,10 +1629,6 @@
 
     addStyles();
 
-    /*
-     * PROFILE FIELD
-     */
-
     let profile =
       section.querySelector(
         '#bw-participant-type'
@@ -1747,20 +1685,12 @@
       });
     }
 
-    /*
-     * NATIVE SUBMIT
-     */
-
     nativeSubmit.hidden = true;
 
     nativeSubmit.style.display =
       'none';
 
     nativeSubmit.tabIndex = -1;
-
-    /*
-     * LAUNCH BUTTON
-     */
 
     const launch =
       document.createElement(
@@ -1794,10 +1724,6 @@
 
     launch.after(inline);
 
-    /*
-     * SUCCESS REOPEN BUTTON
-     */
-
     const reopen =
       document.createElement(
         'button'
@@ -1812,10 +1738,6 @@
       'View My Prize';
 
     success.append(reopen);
-
-    /*
-     * DIALOG
-     */
 
     const dialog =
       document.createElement(
@@ -1953,10 +1875,6 @@
 
     let confettiFrame = 0;
 
-    /*
-     * CONFETTI RESET
-     */
-
     function clearConfetti() {
       if (confettiFrame) {
         cancelAnimationFrame(
@@ -1979,10 +1897,6 @@
         );
       }
     }
-
-    /*
-     * UI RESET
-     */
 
     function reset(
       title,
@@ -2057,10 +1971,6 @@
         });
     }
 
-    /*
-     * OPEN
-     */
-
     function open() {
       if (dialog.open) {
         return;
@@ -2081,10 +1991,6 @@
 
       close.focus();
     }
-
-    /*
-     * CLOSE
-     */
 
     close.addEventListener(
       'click',
@@ -2121,10 +2027,6 @@
         }
       }
     );
-
-    /*
-     * PRIZE DATA
-     */
 
     function prizeName() {
       return (
@@ -2172,10 +2074,6 @@
       );
     }
 
-    /*
-     * FORM RESTORE
-     */
-
     function restoreForm() {
       first.value =
         entry.first;
@@ -2189,10 +2087,6 @@
       profile.value =
         entry.type;
     }
-
-    /*
-     * HIDDEN FIELD
-     */
 
     function hidden(
       name,
@@ -2285,10 +2179,6 @@
 
       return element;
     }
-
-    /*
-     * CARDS
-     */
 
     function showCards(
       keys,
@@ -2383,10 +2273,6 @@
       content.append(grid);
     }
 
-    /*
-     * WHEEL
-     */
-
     function wheel(
       keys,
       challenge
@@ -2476,10 +2362,6 @@
             -Math.PI / 2 +
             index * step;
 
-          /*
-           * SEGMENT
-           */
-
           ctx.beginPath();
 
           ctx.moveTo(
@@ -2511,10 +2393,6 @@
           ctx.lineWidth = 3;
 
           ctx.stroke();
-
-          /*
-           * LABEL
-           */
 
           ctx.save();
 
@@ -2583,13 +2461,6 @@
         }
       );
 
-      /*
-       * CENTER BACKGROUND
-       *
-       * Logo itself is HTML so it
-       * stays sharp and upright.
-       */
-
       ctx.beginPath();
 
       ctx.arc(
@@ -2611,10 +2482,6 @@
       ctx.lineWidth = 4;
 
       ctx.stroke();
-
-      /*
-       * LOGO OVERLAY
-       */
 
       const logo =
         document.createElement(
@@ -2673,10 +2540,6 @@
         challenge
       };
     }
-
-    /*
-     * CENTER WHEEL
-     */
 
     async function centerWheel(
       stage
@@ -2738,10 +2601,6 @@
         );
       }
     }
-
-    /*
-     * CONFETTI
-     */
 
     function confetti(
       stage
@@ -2981,10 +2840,6 @@
       );
     }
 
-    /*
-     * SPIN
-     */
-
     async function animate(
       selection,
       keys,
@@ -3095,10 +2950,6 @@
 
       setBusy(false);
     }
-
-    /*
-     * FIRST WHEEL
-     */
 
     function firstWheel() {
       reset(
@@ -3237,10 +3088,6 @@
       );
     }
 
-    /*
-     * SECOND WHEEL
-     */
-
     function secondWheel() {
       reset(
         'You won a Prime Challenge!',
@@ -3292,10 +3139,6 @@
         }
       );
     }
-
-    /*
-     * PRIZE PANEL
-     */
 
     function prizePanel() {
       const panel =
@@ -3378,10 +3221,6 @@
       );
     }
 
-    /*
-     * PENDING
-     */
-
     function pending(
       message,
       retry
@@ -3454,10 +3293,6 @@
         true
       );
     }
-
-    /*
-     * WEBFLOW SUBMIT
-     */
 
     function submitEntry() {
       if (
@@ -3608,10 +3443,6 @@
         subtree: true
       }
     );
-
-    /*
-     * FINAL SCREEN
-     */
 
     function finalScreen() {
       reset(
@@ -3774,10 +3605,6 @@
         'View My Prize';
     }
 
-    /*
-     * RESUME
-     */
-
     function resume() {
       if (submitting) {
         return;
@@ -3811,10 +3638,6 @@
         );
       }
     }
-
-    /*
-     * START
-     */
 
     function start() {
       if (busy) {
