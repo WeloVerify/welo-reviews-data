@@ -1,27 +1,13 @@
-
 (function () {
   'use strict';
-
-  /*
-   * BULLWAVES FIGHT NIGHT
-   * PREMIUM PRIZE WHEEL
-   *
-   * Vanilla JavaScript
-   * Native Webflow Form
-   * Responsive mobile experience
-   *
-   * Replace the previous wheel script.
-   * Do not load both versions.
-   */
 
   const CONFIG = {
     storageKey: 'bw-fight-night-2026-v2',
 
     spinDuration: 5600,
 
-    /*
-     * FIRST WHEEL PROBABILITIES
-     */
+    logo:
+      'https://cdn.prod.website-files.com/67176a06e72aae95337ce8a0/67176a06e72aae95337ce8e2_footer-logo.webp',
 
     categoryWeights: {
       Trader: {
@@ -54,10 +40,6 @@
         challenge: 100
       }
     },
-
-    /*
-     * SECOND WHEEL PROBABILITIES
-     */
 
     challengeWeights: {
       Trader: {
@@ -110,8 +92,11 @@
     },
 
     support: {
-      broker: 'https://www.bullwaves.com/contact-us',
-      prime: 'https://www.prime.bullwaves.com/contact-us'
+      broker:
+        'https://www.bullwaves.com/contact-us',
+
+      prime:
+        'https://www.prime.bullwaves.com/contact-us'
     }
   };
 
@@ -129,56 +114,57 @@
     '100000'
   ];
 
-  const money = n =>
-    '$' + Number(n).toLocaleString('en-US');
-
-  /*
-   * PRIZE INFORMATION
-   */
-
   const PRIZES = {
     ticket: {
       name: '1 VIP Ticket',
       lines: ['1 VIP', 'TICKET'],
       value: '$1,100',
-      detail: 'Experience A1 Combat live in Dubai.'
+      detail:
+        'Experience A1 Combat live in Dubai.'
     },
 
     bonus: {
       name: '$800 Trading Bonus',
       lines: ['$800', 'BONUS'],
       value: '$800',
-      detail: 'Tradable Bullwaves account credit, not cash.'
+      detail:
+        'Tradable Bullwaves account credit, not cash.'
     },
 
     challenge: {
       name: 'Bullwaves Prime Challenge',
       lines: ['PRIME', 'CHALLENGE'],
       value: 'UP TO $550',
-      detail: 'A challenge account of up to $100,000.'
+      detail:
+        'A challenge account of up to $100,000.'
     }
   };
 
-  /*
-   * RANDOM GENERATION
-   */
+  const money = value =>
+    '$' + Number(value).toLocaleString('en-US');
 
   function random() {
-    if (!window.crypto || !crypto.getRandomValues) {
+    if (
+      !window.crypto ||
+      !crypto.getRandomValues
+    ) {
       throw new Error(
         'Secure randomness is unavailable.'
       );
     }
 
-    return crypto.getRandomValues(
-      new Uint32Array(1)
-    )[0] / 4294967296;
+    return (
+      crypto.getRandomValues(
+        new Uint32Array(1)
+      )[0] / 4294967296
+    );
   }
 
   function choose(weights) {
     const pool = Object.entries(weights).filter(
       ([, weight]) =>
-        Number.isFinite(weight) && weight > 0
+        Number.isFinite(weight) &&
+        weight > 0
     );
 
     if (!pool.length) {
@@ -187,12 +173,18 @@
       );
     }
 
-    let point = random() * pool.reduce(
-      (sum, [, weight]) => sum + weight,
-      0
-    );
+    let point =
+      random() *
+      pool.reduce(
+        (sum, [, weight]) =>
+          sum + weight,
+        0
+      );
 
-    for (const [key, weight] of pool) {
+    for (
+      const [key, weight]
+      of pool
+    ) {
       point -= weight;
 
       if (point < 0) {
@@ -200,18 +192,24 @@
       }
     }
 
-    return pool[pool.length - 1][0];
+    return pool[
+      pool.length - 1
+    ][0];
   }
-
-  /*
-   * CLAIM ID
-   */
 
   function makeID() {
     const hex = Array.from(
-      crypto.getRandomValues(new Uint8Array(8)),
-      b => b.toString(16).padStart(2, '0')
-    ).join('').toUpperCase();
+      crypto.getRandomValues(
+        new Uint8Array(8)
+      ),
+
+      byte =>
+        byte
+          .toString(16)
+          .padStart(2, '0')
+    )
+      .join('')
+      .toUpperCase();
 
     return (
       'BW26-' +
@@ -221,34 +219,48 @@
     );
   }
 
-  /*
-   * BROWSER STORAGE
-   */
-
-  function validEntry(e) {
+  function validEntry(entry) {
     return (
-      e &&
-      e.version === 2 &&
-      /^BW26-[0-9A-F]{8}-[0-9A-F]{8}$/.test(e.id) &&
-      CONFIG.categoryWeights[e.type] &&
-      CONFIG.categoryWeights[e.type][e.category] > 0 &&
+      entry &&
+
+      entry.version === 2 &&
+
+      /^BW26-[0-9A-F]{8}-[0-9A-F]{8}$/
+        .test(entry.id) &&
+
+      CONFIG.categoryWeights[
+        entry.type
+      ] &&
+
+      CONFIG.categoryWeights[
+        entry.type
+      ][entry.category] > 0 &&
+
       (
-        e.category !== 'challenge' ||
-        CONFIG.challengeWeights[e.type][e.challenge] > 0
+        entry.category !==
+          'challenge' ||
+
+        CONFIG.challengeWeights[
+          entry.type
+        ][entry.challenge] > 0
       ) &&
+
       [
         'challenge',
         'ready',
         'sending',
         'submitted'
-      ].includes(e.stage) &&
+      ].includes(entry.stage) &&
+
       [
         'first',
         'last',
         'email',
         'date'
       ].every(
-        key => typeof e[key] === 'string'
+        key =>
+          typeof entry[key] ===
+          'string'
       )
     );
   }
@@ -259,38 +271,54 @@
 
     try {
       local = JSON.parse(
-        localStorage.getItem(CONFIG.storageKey)
+        localStorage.getItem(
+          CONFIG.storageKey
+        )
       );
     } catch (_) {}
 
     try {
-      const part = document.cookie
-        .split('; ')
-        .find(
-          x => x.startsWith(CONFIG.storageKey + '=')
-        );
+      const part =
+        document.cookie
+          .split('; ')
+          .find(
+            value =>
+              value.startsWith(
+                CONFIG.storageKey +
+                '='
+              )
+          );
 
       if (part) {
         cookie = JSON.parse(
           decodeURIComponent(
-            part.slice(CONFIG.storageKey.length + 1)
+            part.slice(
+              CONFIG.storageKey
+                .length + 1
+            )
           )
         );
       }
     } catch (_) {}
 
-    return [local, cookie]
+    return [
+      local,
+      cookie
+    ]
       .filter(validEntry)
       .sort(
         (a, b) =>
-          (b.updated || 0) - (a.updated || 0)
+          (b.updated || 0) -
+          (a.updated || 0)
       )[0] || null;
   }
 
   function saveEntry(entry) {
-    entry.updated = Date.now();
+    entry.updated =
+      Date.now();
 
-    const json = JSON.stringify(entry);
+    const json =
+      JSON.stringify(entry);
 
     let saved = false;
 
@@ -301,11 +329,15 @@
       );
 
       saved =
-        localStorage.getItem(CONFIG.storageKey) === json;
+        localStorage.getItem(
+          CONFIG.storageKey
+        ) === json;
+
     } catch (_) {}
 
     try {
-      const encoded = encodeURIComponent(json);
+      const encoded =
+        encodeURIComponent(json);
 
       document.cookie =
         CONFIG.storageKey +
@@ -313,7 +345,8 @@
         encoded +
         '; Max-Age=31536000; Path=/; SameSite=Lax' +
         (
-          location.protocol === 'https:'
+          location.protocol ===
+          'https:'
             ? '; Secure'
             : ''
         );
@@ -322,26 +355,33 @@
         saved ||
         document.cookie
           .split('; ')
-          .includes(CONFIG.storageKey + '=' + encoded);
+          .includes(
+            CONFIG.storageKey +
+            '=' +
+            encoded
+          );
+
     } catch (_) {}
 
     return saved;
   }
 
-  /*
-   * PREMIUM CSS
-   */
-
   function addStyles() {
     if (
-      document.getElementById('bwf-wheel-styles')
+      document.getElementById(
+        'bwf-wheel-styles'
+      )
     ) {
       return;
     }
 
-    const style = document.createElement('style');
+    const style =
+      document.createElement(
+        'style'
+      );
 
-    style.id = 'bwf-wheel-styles';
+    style.id =
+      'bwf-wheel-styles';
 
     style.textContent = `
 
@@ -350,17 +390,22 @@
         box-sizing: border-box;
       }
 
-      /*
-       * MODAL
-       */
-
       .bwf-dialog {
         position: fixed;
         inset: 0;
 
-        width: min(790px, calc(100vw - 24px));
+        width:
+          min(
+            790px,
+            calc(100vw - 24px)
+          );
 
-        height: min(94dvh, 900px);
+        height:
+          min(
+            94dvh,
+            900px
+          );
+
         max-height: 94dvh;
         max-width: none;
 
@@ -369,13 +414,18 @@
 
         overflow: hidden;
 
-        border: 1px solid #2d3f69;
+        border:
+          1px solid #2d3f69;
+
         border-radius: 24px;
 
         background: #090e1b;
         color: #fff;
 
-        font-family: Inter, Arial, sans-serif;
+        font-family:
+          Inter,
+          Arial,
+          sans-serif;
 
         box-shadow:
           0 28px 110px #000d;
@@ -392,15 +442,13 @@
 
       .bwf-dialog::backdrop {
         background: #000d;
-        backdrop-filter: blur(10px);
-      }
 
-      /*
-       * SCROLLABLE CONTENT
-       *
-       * Only this area scrolls.
-       * The bottom CTA stays visible.
-       */
+        backdrop-filter:
+          blur(10px);
+
+        -webkit-backdrop-filter:
+          blur(10px);
+      }
 
       .bwf-scroll {
         flex: 1 1 auto;
@@ -409,11 +457,17 @@
         overflow-y: auto;
         overflow-x: hidden;
 
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
+        overscroll-behavior:
+          contain;
 
-        scrollbar-width: thin;
-        scrollbar-color: #4762a7 #0b1021;
+        -webkit-overflow-scrolling:
+          touch;
+
+        scrollbar-width:
+          thin;
+
+        scrollbar-color:
+          #4762a7 #0b1021;
 
         background:
           radial-gradient(
@@ -424,16 +478,17 @@
       }
 
       .bwf-inner {
-        padding: 38px 34px 24px;
+        width: 100%;
+
+        padding:
+          38px 34px 24px;
+
         text-align: center;
       }
 
-      /*
-       * CLOSE BUTTON
-       */
-
       .bwf-close {
         position: absolute;
+
         z-index: 25;
 
         top: 13px;
@@ -445,25 +500,30 @@
         width: 38px;
         height: 38px;
 
-        border: 1px solid #ffffff35;
+        padding: 0;
+
+        border:
+          1px solid #ffffff35;
+
         border-radius: 50%;
 
         background: #1a2130;
         color: #fff;
 
-        font: 28px/1 Inter, Arial, sans-serif;
+        font:
+          28px/1
+          Inter,
+          Arial,
+          sans-serif;
 
         cursor: pointer;
       }
 
       .bwf-close:disabled {
         opacity: .35;
+
         cursor: wait;
       }
-
-      /*
-       * HEADER
-       */
 
       .bwf-kicker {
         color: #a9beff;
@@ -475,21 +535,34 @@
       }
 
       .bwf-heading {
-        margin: 15px auto 10px;
         max-width: 670px;
 
-        font-size: clamp(32px, 5.4vw, 51px);
+        margin:
+          15px auto 10px;
+
+        font-size:
+          clamp(
+            32px,
+            5.4vw,
+            51px
+          );
+
         line-height: 1.08;
 
-        letter-spacing: -.055em;
+        letter-spacing:
+          -.055em;
+
         font-weight: 800;
 
-        overflow-wrap: anywhere;
+        overflow-wrap:
+          anywhere;
       }
 
       .bwf-intro {
         max-width: 540px;
-        margin: 0 auto 21px;
+
+        margin:
+          0 auto 21px;
 
         color: #bac5da;
 
@@ -497,24 +570,29 @@
         line-height: 1.6;
       }
 
-      /*
-       * PRIZE CARDS
-       */
+      /* PRIZE CARDS */
 
       .bwf-cards {
         display: grid;
 
         grid-template-columns:
-          repeat(3, minmax(0, 1fr));
+          repeat(
+            3,
+            minmax(0,1fr)
+          );
 
         gap: 10px;
 
-        margin: 16px 0 24px;
+        margin:
+          16px 0 24px;
       }
 
       .bwf-cards.five {
         grid-template-columns:
-          repeat(5, minmax(0, 1fr));
+          repeat(
+            5,
+            minmax(0,1fr)
+          );
       }
 
       .bwf-card {
@@ -522,13 +600,23 @@
         min-height: 122px;
 
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
 
-        padding: 14px 9px;
+        flex-direction:
+          column;
 
-        border: 1px solid #688bff59;
+        align-items:
+          center;
+
+        justify-content:
+          center;
+
+        padding:
+          14px 9px;
+
+        border:
+          1px solid
+          #688bff59;
+
         border-radius: 16px;
 
         background:
@@ -539,71 +627,122 @@
           );
 
         box-shadow:
-          inset 0 1px #ffffff13;
+          inset
+          0 1px
+          #ffffff13;
       }
 
       .bwf-card-title {
-        font-size: clamp(11px, 1.6vw, 13px);
-        font-weight: 700;
-        line-height: 1.3;
-
         color: #f4f7ff;
+
+        font-size:
+          clamp(
+            11px,
+            1.6vw,
+            13px
+          );
+
+        font-weight: 700;
+
+        line-height: 1.3;
       }
 
-      /*
-       * ACCENTUATED PRIZE VALUE
-       */
-
       .bwf-card-value {
-        margin: 8px 0 5px;
-
-        font-size: clamp(21px, 3.1vw, 29px);
-        line-height: 1;
-
-        font-weight: 800;
-        letter-spacing: -.055em;
+        margin:
+          8px 0 5px;
 
         color: #fff;
 
+        font-size:
+          clamp(
+            21px,
+            3.1vw,
+            29px
+          );
+
+        line-height: 1;
+
+        font-weight: 800;
+
+        letter-spacing:
+          -.055em;
+
         text-shadow:
-          0 0 22px #4074ff7c;
+          0 0 22px
+          #4074ff7c;
       }
 
       .bwf-card-caption {
-        font-size: 10px;
-        line-height: 1.45;
-
         color: #afbfdf;
+
+        font-size: 10px;
+
+        line-height: 1.45;
       }
 
-      /*
-       * CHALLENGE CARDS
-       */
-
-      .bwf-cards.five .bwf-card {
+      .bwf-cards.five
+      .bwf-card {
         min-height: 104px;
-        padding: 12px 5px;
+
+        padding:
+          12px 5px;
       }
 
-      .bwf-cards.five .bwf-card-value {
-        font-size: clamp(16px, 2.3vw, 23px);
+      .bwf-cards.five
+      .bwf-card-value {
+        font-size:
+          clamp(
+            16px,
+            2.3vw,
+            23px
+          );
       }
 
       /*
        * WHEEL
+       *
+       * The stage and canvas are
+       * explicitly forced to 1:1.
+       *
+       * This prevents the oval
+       * effect on mobile browsers.
        */
 
       .bwf-stage {
         position: relative;
 
-        width: min(100%, 420px);
-        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
 
-        margin: 0 auto 14px;
+        width:
+          min(
+            420px,
+            calc(100% - 8px)
+          );
+
+        max-width: 420px;
+
+        height: auto !important;
+
+        aspect-ratio:
+          1 / 1 !important;
+
+        flex:
+          0 0 auto;
+
+        margin:
+          0 auto 14px;
+
         padding: 8px;
 
-        border: 1px solid #7e9fff85;
-        border-radius: 50%;
+        overflow: visible;
+
+        border:
+          1px solid
+          #7e9fff85;
+
+        border-radius:
+          50%;
 
         background:
           radial-gradient(
@@ -614,35 +753,60 @@
           );
 
         box-shadow:
-          0 0 0 5px #ffffff08,
-          0 0 60px #164dff50;
+          0 0 0 5px
+          #ffffff08,
+          0 0 60px
+          #164dff50;
 
-        scroll-margin: 16px;
+        scroll-margin:
+          18px;
+
+        contain:
+          layout paint;
       }
 
       .bwf-disc {
+        position: relative;
+
+        z-index: 1;
+
         display: block;
 
-        width: 100%;
-        height: 100%;
+        width: 100% !important;
 
-        border-radius: 50%;
+        max-width: 100% !important;
 
-        will-change: transform;
+        height: auto !important;
+
+        aspect-ratio:
+          1 / 1 !important;
+
+        object-fit: contain;
+
+        border-radius:
+          50%;
+
+        will-change:
+          transform;
+
+        transform-origin:
+          50% 50%;
       }
 
       /*
-       * WHEEL POINTER
+       * POINTER
        */
 
       .bwf-pointer {
         position: absolute;
-        z-index: 2;
+
+        z-index: 7;
 
         top: -11px;
         left: 50%;
 
-        transform: translateX(-50%);
+        transform:
+          translateX(-50%);
 
         width: 0;
         height: 0;
@@ -657,45 +821,143 @@
           31px solid #fff;
 
         filter:
-          drop-shadow(0 2px 5px #000);
+          drop-shadow(
+            0 2px 5px #000
+          );
+
+        pointer-events: none;
       }
 
       /*
-       * FOOTNOTES
+       * CENTER LOGO
        */
+
+      .bwf-center-logo {
+        position: absolute;
+
+        z-index: 6;
+
+        top: 50%;
+        left: 50%;
+
+        transform:
+          translate(
+            -50%,
+            -50%
+          );
+
+        display: flex;
+
+        align-items:
+          center;
+
+        justify-content:
+          center;
+
+        width:
+          clamp(
+            76px,
+            26%,
+            112px
+          );
+
+        aspect-ratio:
+          1 / 1;
+
+        padding:
+          clamp(
+            14px,
+            4%,
+            22px
+          );
+
+        border:
+          1px solid
+          rgba(
+            171,
+            193,
+            255,
+            .72
+          );
+
+        border-radius: 50%;
+
+        background:
+          radial-gradient(
+            circle at
+            50% 35%,
+            #121d39,
+            #070d1d 72%
+          );
+
+        box-shadow:
+          0 8px 30px
+          rgba(
+            0,
+            0,
+            0,
+            .45
+          ),
+          0 0 25px
+          rgba(
+            47,
+            94,
+            255,
+            .22
+          );
+
+        pointer-events: none;
+      }
+
+      .bwf-center-logo img {
+        display: block;
+
+        width: 100%;
+        max-width: 100%;
+
+        height: auto;
+
+        object-fit: contain;
+      }
 
       .bwf-wheel-note,
       .bwf-footnote {
         color: #99a8c7;
 
         font-size: 11px;
+
         line-height: 1.5;
       }
 
       .bwf-wheel-note {
-        margin: 0 0 12px;
+        margin:
+          0 0 12px;
       }
 
       .bwf-footnote {
-        margin: 18px 0 2px;
+        margin:
+          18px 0 2px;
       }
 
       /*
-       * STICKY BOTTOM CTA
-       *
-       * This stays outside the scroll area.
-       * It remains visible on desktop and mobile.
+       * FIXED ACTION AREA
        */
 
       .bwf-dock {
         position: relative;
+
         z-index: 22;
 
         flex: 0 0 auto;
 
         padding:
           13px 24px
-          max(13px, env(safe-area-inset-bottom));
+          max(
+            13px,
+            env(
+              safe-area-inset-bottom
+            )
+          );
 
         background:
           linear-gradient(
@@ -705,43 +967,55 @@
           );
 
         border-top:
-          1px solid #8eaaff32;
+          1px solid
+          #8eaaff32;
 
         box-shadow:
-          0 -18px 32px #070b187d;
+          0 -18px 32px
+          #070b187d;
       }
 
       .bwf-actions {
         display: flex;
+
         align-items: center;
         justify-content: center;
 
         gap: 10px;
+
         flex-wrap: wrap;
       }
 
-      /*
-       * BUTTONS
-       */
-
       .bwf-button {
-        display: inline-flex;
+        display:
+          inline-flex;
 
-        align-items: center;
-        justify-content: center;
+        align-items:
+          center;
+
+        justify-content:
+          center;
 
         min-height: 51px;
 
-        padding: 13px 28px;
+        padding:
+          13px 28px;
 
-        border: 1px solid #416cff;
+        border:
+          1px solid
+          #416cff;
+
         border-radius: 100px;
 
         background: #0036ff;
+
         color: #fff;
 
         font:
-          700 14px/1.3 Inter, Arial, sans-serif;
+          700 14px/1.3
+          Inter,
+          Arial,
+          sans-serif;
 
         text-align: center;
         text-decoration: none;
@@ -749,7 +1023,8 @@
         cursor: pointer;
 
         box-shadow:
-          0 6px 24px #0036ff55;
+          0 6px 24px
+          #0036ff55;
 
         transition:
           background .2s,
@@ -757,51 +1032,66 @@
       }
 
       .bwf-button:hover {
-        background: #2558ff;
-        transform: translateY(-1px);
+        background:
+          #2558ff;
+
+        transform:
+          translateY(-1px);
       }
 
       .bwf-button:disabled {
         opacity: .55;
+
         cursor: wait;
+
         transform: none;
       }
 
       .bwf-button.secondary {
-        background: #ffffff10;
-        border-color: #ffffff37;
+        background:
+          #ffffff10;
+
+        border-color:
+          #ffffff37;
+
         box-shadow: none;
       }
 
       .bwf-button.secondary:hover {
-        background: #ffffff1d;
+        background:
+          #ffffff1d;
       }
 
-      /*
-       * STATUS
-       */
-
       .bwf-status {
-        margin: 8px 0 0;
         min-height: 0;
+
+        margin:
+          8px 0 0;
 
         color: #b7c9ff;
 
         font-size: 11px;
+
         line-height: 1.45;
 
         text-align: center;
       }
 
       /*
-       * WINNING SCREEN
+       * WIN SCREEN
        */
 
       .bwf-win {
-        margin: 22px 0;
-        padding: 25px 16px;
+        margin:
+          22px 0;
 
-        border: 1px solid #7197ff81;
+        padding:
+          25px 16px;
+
+        border:
+          1px solid
+          #7197ff81;
+
         border-radius: 18px;
 
         background:
@@ -813,85 +1103,108 @@
       }
 
       .bwf-win-kicker {
+        color: #a8bfff;
+
         font-size: 10px;
+
         font-weight: 800;
 
         letter-spacing: .14em;
-        color: #a8bfff;
       }
 
       .bwf-win-title {
-        margin: 10px 0;
+        margin:
+          10px 0;
 
-        font-size: clamp(27px, 5vw, 41px);
+        font-size:
+          clamp(
+            27px,
+            5vw,
+            41px
+          );
+
         line-height: 1.08;
 
-        letter-spacing: -.04em;
+        letter-spacing:
+          -.04em;
+
         font-weight: 800;
 
-        overflow-wrap: anywhere;
+        overflow-wrap:
+          anywhere;
       }
 
       .bwf-win-value {
-        font-size: 24px;
-        font-weight: 800;
-
         color: #c1d0ff;
+
+        font-size: 24px;
+
+        font-weight: 800;
       }
 
       .bwf-win-detail,
       .bwf-help {
-        font-size: 12px;
-        line-height: 1.6;
-
         color: #b0bdd5;
-      }
 
-      /*
-       * CLAIM ID
-       */
+        font-size: 12px;
+
+        line-height: 1.6;
+      }
 
       .bwf-id {
         padding: 12px;
 
-        border: 1px dashed #6c89cc;
+        border:
+          1px dashed
+          #6c89cc;
+
         border-radius: 10px;
 
-        background: #0e1a33;
+        background:
+          #0e1a33;
+
         color: #e3edff;
 
         font-size: 13px;
+
         font-weight: 700;
 
-        overflow-wrap: anywhere;
+        overflow-wrap:
+          anywhere;
 
         user-select: all;
       }
-
-      /*
-       * CLAIM MESSAGE
-       */
 
       .bwf-message {
         display: block;
 
         width: 100%;
+
         min-height: 125px;
 
-        margin: 14px 0;
+        margin:
+          14px 0;
 
         resize: vertical;
 
         padding: 12px;
 
-        border: 1px solid #ffffff35;
+        border:
+          1px solid
+          #ffffff35;
+
         border-radius: 12px;
 
-        background: #0c1629;
+        background:
+          #0c1629;
+
         color: #e3ebff;
 
         font:
-          12px/1.5 Inter, Arial, sans-serif;
+          12px/1.5
+          Inter,
+          Arial,
+          sans-serif;
       }
 
       /*
@@ -900,44 +1213,61 @@
 
       .bwf-confetti {
         position: absolute;
+
         inset: 0;
 
+        z-index: 23;
+
         width: 100%;
+
         height: 100%;
 
         pointer-events: none;
-
-        z-index: 23;
       }
-
-      /*
-       * FORM STATUS
-       */
 
       .bwf-inline {
         color: #a9b9da;
 
         font:
-          12px/1.5 Inter, Arial, sans-serif;
+          12px/1.5
+          Inter,
+          Arial,
+          sans-serif;
       }
 
       /*
        * TABLET
        */
 
-      @media (max-width: 767px) {
+      @media
+      (max-width: 767px) {
 
         .bwf-inner {
-          padding: 36px 19px 18px;
+          padding:
+            36px 19px 18px;
         }
 
         .bwf-cards.five {
           grid-template-columns:
-            repeat(3, minmax(0, 1fr));
+            repeat(
+              3,
+              minmax(0,1fr)
+            );
         }
 
         .bwf-stage {
-          width: min(100%, 360px);
+          width:
+            min(
+              350px,
+              calc(100% - 8px)
+            );
+
+          max-width: 350px;
+
+          height: auto !important;
+
+          aspect-ratio:
+            1 / 1 !important;
         }
 
       }
@@ -946,19 +1276,25 @@
        * MOBILE
        */
 
-      @media (max-width: 580px) {
+      @media
+      (max-width: 580px) {
 
         .bwf-dialog {
-          width: calc(100vw - 12px);
+          width:
+            calc(100vw - 12px);
 
-          height: calc(100dvh - 18px);
-          max-height: calc(100dvh - 18px);
+          height:
+            calc(100dvh - 18px);
+
+          max-height:
+            calc(100dvh - 18px);
 
           border-radius: 18px;
         }
 
         .bwf-inner {
-          padding: 34px 13px 17px;
+          padding:
+            34px 13px 17px;
         }
 
         .bwf-close {
@@ -972,50 +1308,65 @@
         }
 
         .bwf-kicker {
-          font-size: 9px;
-          letter-spacing: .15em;
+          padding:
+            0 28px;
 
-          padding: 0 28px;
+          font-size: 9px;
+
+          letter-spacing:
+            .15em;
         }
 
         .bwf-heading {
-          font-size: clamp(27px, 7.4vw, 38px);
+          margin:
+            12px 0 8px;
 
-          margin: 12px 0 8px;
+          font-size:
+            clamp(
+              27px,
+              7.4vw,
+              38px
+            );
         }
 
         .bwf-intro {
+          margin-bottom:
+            14px;
+
           font-size: 12px;
-          margin-bottom: 14px;
         }
 
         /*
-         * THREE PRIZE CARDS
-         *
-         * Compact vertical layout.
+         * PRIZE CARDS
          */
 
         .bwf-cards {
-          grid-template-columns: 1fr;
+          grid-template-columns:
+            1fr;
 
           gap: 7px;
 
-          margin: 12px 0 18px;
+          margin:
+            12px 0 18px;
         }
 
-        .bwf-cards:not(.five) .bwf-card {
+        .bwf-cards:not(.five)
+        .bwf-card {
           display: grid;
 
           grid-template-columns:
-            minmax(0, 1fr) auto;
+            minmax(0,1fr)
+            auto;
 
-          align-items: center;
+          align-items:
+            center;
 
           column-gap: 10px;
 
           min-height: 62px;
 
-          padding: 10px 12px;
+          padding:
+            10px 12px;
 
           text-align: left;
         }
@@ -1036,75 +1387,141 @@
 
         .bwf-cards:not(.five)
         .bwf-card-caption {
-          grid-column: 1 / -1;
+          grid-column:
+            1 / -1;
 
           margin-top: 3px;
 
           font-size: 10px;
         }
 
-        /*
-         * FIVE CHALLENGE CARDS
-         */
-
         .bwf-cards.five {
           grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(
+              2,
+              minmax(0,1fr)
+            );
         }
 
-        .bwf-cards.five .bwf-card {
+        .bwf-cards.five
+        .bwf-card {
           min-height: 75px;
-          padding: 9px 7px;
+
+          padding:
+            9px 7px;
         }
 
         .bwf-cards.five
         .bwf-card:last-child {
-          grid-column: 1 / -1;
+          grid-column:
+            1 / -1;
         }
 
         .bwf-cards.five
         .bwf-card-value {
-          font-size: 21px;
+          margin:
+            6px 0 3px;
 
-          margin: 6px 0 3px;
+          font-size: 21px;
         }
 
         /*
+         * PERFECTLY ROUND
          * MOBILE WHEEL
          */
 
         .bwf-stage {
-          width: min(100%, 300px);
+          width:
+            min(
+              292px,
+              calc(100vw - 58px)
+            ) !important;
+
+          max-width:
+            calc(100vw - 58px)
+            !important;
+
+          height: auto !important;
+
+          aspect-ratio:
+            1 / 1 !important;
+
           padding: 6px;
+
+          border-radius:
+            50% !important;
+        }
+
+        .bwf-disc {
+          display: block;
+
+          width:
+            100% !important;
+
+          max-width:
+            100% !important;
+
+          height:
+            auto !important;
+
+          aspect-ratio:
+            1 / 1 !important;
+
+          border-radius:
+            50% !important;
+        }
+
+        .bwf-center-logo {
+          width:
+            clamp(
+              70px,
+              26%,
+              82px
+            );
+
+          padding:
+            15px;
         }
 
         .bwf-pointer {
           top: -8px;
 
-          border-left-width: 13px;
-          border-right-width: 13px;
-          border-top-width: 25px;
+          border-left-width:
+            13px;
+
+          border-right-width:
+            13px;
+
+          border-top-width:
+            25px;
         }
 
         /*
-         * MOBILE STICKY BUTTONS
+         * MOBILE DOCK
          */
 
         .bwf-dock {
           padding:
-            11px 13px
-            max(12px, env(safe-area-inset-bottom));
+            10px 12px
+            max(
+              11px,
+              env(
+                safe-area-inset-bottom
+              )
+            );
         }
 
         .bwf-actions {
-          flex-direction: column;
+          flex-direction:
+            column;
 
           gap: 8px;
         }
 
         .bwf-button {
           width: 100%;
-          min-height: 50px;
+
+          min-height: 48px;
         }
 
         .bwf-win-title {
@@ -1117,14 +1534,47 @@
        * SMALL PHONES
        */
 
-      @media (max-width: 370px) {
+      @media
+      (max-width: 370px) {
 
         .bwf-stage {
-          width: min(100%, 260px);
+          width:
+            min(
+              250px,
+              calc(100vw - 54px)
+            ) !important;
+
+          max-width:
+            calc(100vw - 54px)
+            !important;
+
+          height:
+            auto !important;
+
+          aspect-ratio:
+            1 / 1 !important;
+        }
+
+        .bwf-disc {
+          width:
+            100% !important;
+
+          height:
+            auto !important;
+
+          aspect-ratio:
+            1 / 1 !important;
+        }
+
+        .bwf-center-logo {
+          width: 66px;
+
+          padding: 13px;
         }
 
         .bwf-card-value {
-          font-size: 22px !important;
+          font-size:
+            22px !important;
         }
 
         .bwf-heading {
@@ -1133,11 +1583,9 @@
 
       }
 
-      /*
-       * REDUCED MOTION
-       */
-
-      @media (prefers-reduced-motion: reduce) {
+      @media
+      (prefers-reduced-motion:
+      reduce) {
 
         .bwf-button {
           transition: none;
@@ -1150,14 +1598,11 @@
     document.head.append(style);
   }
 
-  /*
-   * INITIALIZATION
-   */
-
   function init() {
-    const section = document.getElementById(
-      'bw-dubai-section'
-    );
+    const section =
+      document.getElementById(
+        'bw-dubai-section'
+      );
 
     if (
       !section ||
@@ -1166,31 +1611,43 @@
       return;
     }
 
-    const form = section.closest('form');
+    const form =
+      section.closest('form');
 
-    const block = section.closest('.w-form');
+    const block =
+      section.closest('.w-form');
 
-    const first = section.querySelector(
-      '#bw-first-name'
-    );
+    const first =
+      section.querySelector(
+        '#bw-first-name'
+      );
 
-    const last = section.querySelector(
-      '#bw-last-name'
-    );
+    const last =
+      section.querySelector(
+        '#bw-last-name'
+      );
 
-    const email = section.querySelector(
-      '#bw-email'
-    );
+    const email =
+      section.querySelector(
+        '#bw-email'
+      );
 
-    const nativeSubmit = section.querySelector(
-      '[type="submit"]'
-    );
+    const nativeSubmit =
+      section.querySelector(
+        '[type="submit"]'
+      );
 
-    const success = block &&
-      block.querySelector('.w-form-done');
+    const success =
+      block &&
+      block.querySelector(
+        '.w-form-done'
+      );
 
-    const failure = block &&
-      block.querySelector('.w-form-fail');
+    const failure =
+      block &&
+      block.querySelector(
+        '.w-form-fail'
+      );
 
     if (
       !form ||
@@ -1210,8 +1667,13 @@
     }
 
     if (
-      form.getAttribute('action') ||
-      form.getAttribute('data-redirect')
+      form.getAttribute(
+        'action'
+      ) ||
+
+      form.getAttribute(
+        'data-redirect'
+      )
     ) {
       console.error(
         'Bullwaves: remove the custom form action and redirect.'
@@ -1220,27 +1682,34 @@
       return;
     }
 
-    section.dataset.bwfReady = 'true';
+    section.dataset.bwfReady =
+      'true';
 
     addStyles();
 
     /*
-     * PARTICIPANT TYPE
+     * PROFILE FIELD
      */
 
-    let profile = section.querySelector(
-      '#bw-participant-type'
-    );
+    let profile =
+      section.querySelector(
+        '#bw-participant-type'
+      );
 
     if (!profile) {
-      const field = document.createElement('div');
+      const field =
+        document.createElement(
+          'div'
+        );
 
-      field.className = 'bw-field';
+      field.className =
+        'bw-field';
 
       field.innerHTML = `
         <label
           class="bw-label"
-          for="bw-participant-type">
+          for="bw-participant-type"
+        >
           Which best describes you?
         </label>
 
@@ -1249,33 +1718,43 @@
           name="Participant Type"
           data-name="Participant Type"
           class="bw-input w-select"
-          required>
-
+          required
+        >
           <option value="">
             Select your profile
           </option>
-
         </select>
       `;
 
-      nativeSubmit.before(field);
+      nativeSubmit.before(
+        field
+      );
 
-      profile = field.querySelector('select');
+      profile =
+        field.querySelector(
+          'select'
+        );
 
       Object.keys(
         CONFIG.categoryWeights
-      ).forEach(
-        type => profile.add(new Option(type, type))
-      );
+      ).forEach(type => {
+        profile.add(
+          new Option(
+            type,
+            type
+          )
+        );
+      });
     }
 
     /*
-     * KEEP NATIVE WEBFLOW SUBMIT
+     * NATIVE SUBMIT
      */
 
     nativeSubmit.hidden = true;
 
-    nativeSubmit.style.display = 'none';
+    nativeSubmit.style.display =
+      'none';
 
     nativeSubmit.tabIndex = -1;
 
@@ -1283,45 +1762,68 @@
      * LAUNCH BUTTON
      */
 
-    const launch = document.createElement('button');
+    const launch =
+      document.createElement(
+        'button'
+      );
 
     launch.type = 'button';
 
-    launch.className = 'bw-submit';
+    launch.className =
+      'bw-submit';
 
-    launch.textContent = 'Spin to Win';
+    launch.textContent =
+      'Spin to Win';
 
-    nativeSubmit.before(launch);
+    nativeSubmit.before(
+      launch
+    );
 
-    const inline = document.createElement('p');
+    const inline =
+      document.createElement(
+        'p'
+      );
 
-    inline.className = 'bwf-inline';
+    inline.className =
+      'bwf-inline';
 
-    inline.setAttribute('role', 'status');
+    inline.setAttribute(
+      'role',
+      'status'
+    );
 
     launch.after(inline);
 
     /*
-     * REOPEN BUTTON
+     * SUCCESS REOPEN BUTTON
      */
 
-    const reopen = document.createElement('button');
+    const reopen =
+      document.createElement(
+        'button'
+      );
 
     reopen.type = 'button';
 
-    reopen.className = 'bw-submit';
+    reopen.className =
+      'bw-submit';
 
-    reopen.textContent = 'View My Prize';
+    reopen.textContent =
+      'View My Prize';
 
     success.append(reopen);
 
     /*
-     * CREATE MODAL
+     * DIALOG
      */
 
-    const dialog = document.createElement('dialog');
+    const dialog =
+      document.createElement(
+        'dialog'
+      );
 
-    dialog.className = 'bwf-dialog';
+    dialog.className =
+      'bwf-dialog';
 
     dialog.setAttribute(
       'aria-labelledby',
@@ -1333,7 +1835,8 @@
       <button
         class="bwf-close"
         type="button"
-        aria-label="Close prize window">
+        aria-label="Close prize window"
+      >
         ×
       </button>
 
@@ -1347,14 +1850,20 @@
 
           <h2
             class="bwf-heading"
-            id="bwf-heading">
-          </h2>
+            id="bwf-heading"
+          ></h2>
 
-          <p class="bwf-intro"></p>
+          <p
+            class="bwf-intro"
+          ></p>
 
-          <div class="bwf-content"></div>
+          <div
+            class="bwf-content"
+          ></div>
 
-          <p class="bwf-footnote">
+          <p
+            class="bwf-footnote"
+          >
             DUBAI · 28 NOVEMBER 2026
           </p>
 
@@ -1364,62 +1873,71 @@
 
       <div class="bwf-dock">
 
-        <div class="bwf-actions"></div>
+        <div
+          class="bwf-actions"
+        ></div>
 
         <p
           class="bwf-status"
           role="status"
-          aria-live="polite">
-        </p>
+          aria-live="polite"
+        ></p>
 
       </div>
 
       <canvas
         class="bwf-confetti"
-        aria-hidden="true">
-      </canvas>
+        aria-hidden="true"
+      ></canvas>
 
     `;
 
-    document.body.append(dialog);
-
-    /*
-     * ELEMENT REFERENCES
-     */
-
-    const scroll = dialog.querySelector(
-      '.bwf-scroll'
+    document.body.append(
+      dialog
     );
 
-    const heading = dialog.querySelector(
-      '.bwf-heading'
-    );
+    const scroll =
+      dialog.querySelector(
+        '.bwf-scroll'
+      );
 
-    const intro = dialog.querySelector(
-      '.bwf-intro'
-    );
+    const heading =
+      dialog.querySelector(
+        '.bwf-heading'
+      );
 
-    const content = dialog.querySelector(
-      '.bwf-content'
-    );
+    const intro =
+      dialog.querySelector(
+        '.bwf-intro'
+      );
 
-    const actions = dialog.querySelector(
-      '.bwf-actions'
-    );
+    const content =
+      dialog.querySelector(
+        '.bwf-content'
+      );
 
-    const status = dialog.querySelector(
-      '.bwf-status'
-    );
+    const actions =
+      dialog.querySelector(
+        '.bwf-actions'
+      );
 
-    const close = dialog.querySelector(
-      '.bwf-close'
-    );
+    const status =
+      dialog.querySelector(
+        '.bwf-status'
+      );
 
-    const confettiCanvas = dialog.querySelector(
-      '.bwf-confetti'
-    );
+    const close =
+      dialog.querySelector(
+        '.bwf-close'
+      );
 
-    let entry = readEntry();
+    const confettiCanvas =
+      dialog.querySelector(
+        '.bwf-confetti'
+      );
+
+    let entry =
+      readEntry();
 
     let busy = false;
 
@@ -1436,17 +1954,21 @@
     let confettiFrame = 0;
 
     /*
-     * CLEAR CONFETTI
+     * CONFETTI RESET
      */
 
     function clearConfetti() {
       if (confettiFrame) {
-        cancelAnimationFrame(confettiFrame);
+        cancelAnimationFrame(
+          confettiFrame
+        );
       }
 
       confettiFrame = 0;
 
-      const ctx = confettiCanvas.getContext('2d');
+      const ctx =
+        confettiCanvas
+          .getContext('2d');
 
       if (ctx) {
         ctx.clearRect(
@@ -1459,15 +1981,20 @@
     }
 
     /*
-     * RESET SCREEN
+     * UI RESET
      */
 
-    function reset(title, description) {
+    function reset(
+      title,
+      description
+    ) {
       clearConfetti();
 
-      heading.textContent = title;
+      heading.textContent =
+        title;
 
-      intro.textContent = description;
+      intro.textContent =
+        description;
 
       content.replaceChildren();
 
@@ -1478,50 +2005,60 @@
       scroll.scrollTop = 0;
     }
 
-    /*
-     * CREATE BUTTON
-     */
-
     function button(
       label,
       callback,
       secondary
     ) {
-      const el = document.createElement('button');
+      const element =
+        document.createElement(
+          'button'
+        );
 
-      el.type = 'button';
+      element.type =
+        'button';
 
-      el.className =
+      element.className =
         'bwf-button' +
-        (secondary ? ' secondary' : '');
+        (
+          secondary
+            ? ' secondary'
+            : ''
+        );
 
-      el.textContent = label;
+      element.textContent =
+        label;
 
-      el.addEventListener('click', callback);
+      element.addEventListener(
+        'click',
+        callback
+      );
 
-      actions.append(el);
+      actions.append(
+        element
+      );
 
-      return el;
+      return element;
     }
-
-    /*
-     * BUSY STATE
-     */
 
     function setBusy(value) {
       busy = value;
 
-      close.disabled = value;
+      close.disabled =
+        value;
 
-      actions.querySelectorAll('button').forEach(
-        el => {
-          el.disabled = value;
-        }
-      );
+      actions
+        .querySelectorAll(
+          'button'
+        )
+        .forEach(element => {
+          element.disabled =
+            value;
+        });
     }
 
     /*
-     * OPEN MODAL
+     * OPEN
      */
 
     function open() {
@@ -1529,12 +2066,16 @@
         return;
       }
 
-      previousFocus = document.activeElement;
+      previousFocus =
+        document.activeElement;
 
       previousOverflow =
-        document.body.style.overflow;
+        document.body.style
+          .overflow;
 
-      document.body.style.overflow = 'hidden';
+      document.body.style
+        .overflow =
+        'hidden';
 
       dialog.showModal();
 
@@ -1542,113 +2083,164 @@
     }
 
     /*
-     * CLOSE MODAL
+     * CLOSE
      */
 
-    close.addEventListener('click', () => {
-      if (!busy) {
-        dialog.close();
+    close.addEventListener(
+      'click',
+      () => {
+        if (!busy) {
+          dialog.close();
+        }
       }
-    });
+    );
 
-    dialog.addEventListener('cancel', event => {
-      if (busy) {
-        event.preventDefault();
+    dialog.addEventListener(
+      'cancel',
+      event => {
+        if (busy) {
+          event.preventDefault();
+        }
       }
-    });
+    );
 
-    dialog.addEventListener('close', () => {
-      clearConfetti();
+    dialog.addEventListener(
+      'close',
+      () => {
+        clearConfetti();
 
-      document.body.style.overflow =
-        previousOverflow;
+        document.body.style
+          .overflow =
+          previousOverflow;
 
-      if (
-        previousFocus &&
-        previousFocus.isConnected
-      ) {
-        previousFocus.focus();
+        if (
+          previousFocus &&
+          previousFocus.isConnected
+        ) {
+          previousFocus.focus();
+        }
       }
-    });
+    );
 
     /*
-     * PRIZE INFORMATION
+     * PRIZE DATA
      */
 
     function prizeName() {
-      return entry.category === 'challenge'
-        ? money(entry.challenge) +
-          ' Bullwaves Prime Challenge'
-        : PRIZES[entry.category].name;
+      return (
+        entry.category ===
+        'challenge'
+      )
+        ? (
+            money(
+              entry.challenge
+            ) +
+            ' Bullwaves Prime Challenge'
+          )
+        : PRIZES[
+            entry.category
+          ].name;
     }
 
     function prizeValue() {
-      if (entry.category === 'challenge') {
+      if (
+        entry.category ===
+        'challenge'
+      ) {
         return (
           money(
-            CONFIG.challengePrices[entry.challenge]
+            CONFIG
+              .challengePrices[
+                entry.challenge
+              ]
           ) +
           ' retail value, not cash'
         );
       }
 
-      if (entry.category === 'bonus') {
-        return '$800 tradable account bonus, not cash';
+      if (
+        entry.category ===
+        'bonus'
+      ) {
+        return (
+          '$800 tradable account bonus, not cash'
+        );
       }
 
-      return 'One VIP Ticket, stated value $1,100';
+      return (
+        'One VIP Ticket, stated value $1,100'
+      );
     }
 
     /*
-     * RESTORE FORM
+     * FORM RESTORE
      */
 
     function restoreForm() {
-      first.value = entry.first;
+      first.value =
+        entry.first;
 
-      last.value = entry.last;
+      last.value =
+        entry.last;
 
-      email.value = entry.email;
+      email.value =
+        entry.email;
 
-      profile.value = entry.type;
+      profile.value =
+        entry.type;
     }
 
     /*
-     * WEBFLOW HIDDEN FIELDS
+     * HIDDEN FIELD
      */
 
-    function hidden(name, value) {
-      let el = Array.from(form.elements).find(
-        item => item.name === name
-      );
+    function hidden(
+      name,
+      value
+    ) {
+      let element =
+        Array.from(
+          form.elements
+        ).find(
+          item =>
+            item.name ===
+            name
+        );
 
-      if (!el) {
-        el = document.createElement('input');
+      if (!element) {
+        element =
+          document.createElement(
+            'input'
+          );
 
-        el.type = 'hidden';
+        element.type =
+          'hidden';
 
-        el.name = name;
+        element.name =
+          name;
 
-        el.dataset.name = name;
+        element.dataset.name =
+          name;
 
-        form.append(el);
+        form.append(element);
       }
 
-      el.value = value;
+      element.value =
+        value;
     }
-
-    /*
-     * PREPARE WEBFLOW SUBMISSION
-     */
 
     function prepareSubmission() {
       restoreForm();
 
       hidden(
         'Prize Category',
-        entry.category === 'challenge'
+
+        entry.category ===
+        'challenge'
           ? 'Bullwaves Prime Challenge'
-          : PRIZES[entry.category].name
+          : PRIZES[
+              entry.category
+            ].name
       );
 
       hidden(
@@ -1672,64 +2264,112 @@
       );
     }
 
-    /*
-     * TEXT HELPER
-     */
+    function text(
+      className,
+      value
+    ) {
+      const element =
+        document.createElement(
+          'p'
+        );
 
-    function text(className, value) {
-      const el = document.createElement('p');
+      element.className =
+        className;
 
-      el.className = className;
+      element.textContent =
+        value;
 
-      el.textContent = value;
+      content.append(
+        element
+      );
 
-      content.append(el);
-
-      return el;
+      return element;
     }
 
     /*
-     * PRIZE CARDS
-     *
-     * Always display all prizes.
-     * Never show individual eligibility.
+     * CARDS
      */
 
-    function showCards(keys, challenge) {
-      const grid = document.createElement('div');
+    function showCards(
+      keys,
+      challenge
+    ) {
+      const grid =
+        document.createElement(
+          'div'
+        );
 
       grid.className =
         'bwf-cards' +
-        (challenge ? ' five' : '');
+        (
+          challenge
+            ? ' five'
+            : ''
+        );
 
       keys.forEach(key => {
-        const card = document.createElement('div');
+        const card =
+          document.createElement(
+            'div'
+          );
 
-        card.className = 'bwf-card';
+        card.className =
+          'bwf-card';
 
-        const title = document.createElement('div');
+        const title =
+          document.createElement(
+            'div'
+          );
 
-        title.className = 'bwf-card-title';
+        title.className =
+          'bwf-card-title';
 
-        title.textContent = challenge
-          ? money(key) + ' Challenge'
-          : PRIZES[key].name;
+        title.textContent =
+          challenge
+            ? (
+                money(key) +
+                ' Challenge'
+              )
+            : PRIZES[
+                key
+              ].name;
 
-        const value = document.createElement('div');
+        const value =
+          document.createElement(
+            'div'
+          );
 
-        value.className = 'bwf-card-value';
+        value.className =
+          'bwf-card-value';
 
-        value.textContent = challenge
-          ? money(CONFIG.challengePrices[key])
-          : PRIZES[key].value;
+        value.textContent =
+          challenge
+            ? money(
+                CONFIG
+                  .challengePrices[
+                    key
+                  ]
+              )
+            : PRIZES[
+                key
+              ].value;
 
-        const caption = document.createElement('div');
+        const caption =
+          document.createElement(
+            'div'
+          );
 
-        caption.className = 'bwf-card-caption';
+        caption.className =
+          'bwf-card-caption';
 
-        caption.textContent = challenge
-          ? 'Retail value, not cash'
-          : PRIZES[key].detail;
+        caption.textContent =
+          challenge
+            ? (
+                'Retail value, not cash'
+              )
+            : PRIZES[
+                key
+              ].detail;
 
         card.append(
           title,
@@ -1744,44 +2384,72 @@
     }
 
     /*
-     * DRAW WHEEL
+     * WHEEL
      */
 
-    function wheel(keys, challenge) {
-      const stage = document.createElement('div');
+    function wheel(
+      keys,
+      challenge
+    ) {
+      const stage =
+        document.createElement(
+          'div'
+        );
 
-      stage.className = 'bwf-stage';
+      stage.className =
+        'bwf-stage';
 
-      const pointer = document.createElement('div');
+      const pointer =
+        document.createElement(
+          'div'
+        );
 
-      pointer.className = 'bwf-pointer';
+      pointer.className =
+        'bwf-pointer';
 
       pointer.setAttribute(
         'aria-hidden',
         'true'
       );
 
-      const canvas = document.createElement('canvas');
+      const canvas =
+        document.createElement(
+          'canvas'
+        );
 
-      canvas.className = 'bwf-disc';
+      canvas.className =
+        'bwf-disc';
 
       canvas.width = 960;
 
       canvas.height = 960;
 
-      canvas.setAttribute('role', 'img');
+      canvas.setAttribute(
+        'role',
+        'img'
+      );
 
       canvas.setAttribute(
         'aria-label',
+
         'Prize wheel: ' +
-          keys.map(
-            key => challenge
-              ? money(key) + ' Challenge'
-              : PRIZES[key].name
-          ).join(', ')
+
+        keys.map(key =>
+          challenge
+            ? (
+                money(key) +
+                ' Challenge'
+              )
+            : PRIZES[
+                key
+              ].name
+        ).join(', ')
       );
 
-      const ctx = canvas.getContext('2d');
+      const ctx =
+        canvas.getContext(
+          '2d'
+        );
 
       if (!ctx) {
         throw new Error(
@@ -1790,7 +2458,9 @@
       }
 
       const step =
-        Math.PI * 2 / keys.length;
+        Math.PI *
+        2 /
+        keys.length;
 
       const colors = [
         '#1453ff',
@@ -1800,98 +2470,124 @@
         '#2454c9'
       ];
 
-      keys.forEach((key, i) => {
-        const start =
-          -Math.PI / 2 + i * step;
+      keys.forEach(
+        (key, index) => {
+          const start =
+            -Math.PI / 2 +
+            index * step;
 
-        /*
-         * SECTOR
-         */
+          /*
+           * SEGMENT
+           */
 
-        ctx.beginPath();
+          ctx.beginPath();
 
-        ctx.moveTo(
-          480,
-          480
-        );
-
-        ctx.arc(
-          480,
-          480,
-          451,
-          start,
-          start + step
-        );
-
-        ctx.closePath();
-
-        ctx.fillStyle =
-          colors[i % colors.length];
-
-        ctx.fill();
-
-        ctx.strokeStyle = '#7295ff';
-
-        ctx.lineWidth = 3;
-
-        ctx.stroke();
-
-        /*
-         * SECTOR LABEL
-         */
-
-        ctx.save();
-
-        ctx.translate(
-          480,
-          480
-        );
-
-        ctx.rotate(
-          start + step / 2
-        );
-
-        ctx.translate(
-          300,
-          0
-        );
-
-        ctx.rotate(
-          Math.PI / 2
-        );
-
-        ctx.textAlign = 'center';
-
-        ctx.fillStyle = '#fff';
-
-        const lines = challenge
-          ? [
-              money(key),
-              'CHALLENGE'
-            ]
-          : PRIZES[key].lines;
-
-        lines.forEach((line, n) => {
-          ctx.font =
-            n === 0
-              ? '800 44px Inter, Arial, sans-serif'
-              : '700 37px Inter, Arial, sans-serif';
-
-          ctx.fillText(
-            line,
-            0,
-            (
-              n - (lines.length - 1) / 2
-            ) * 53,
-            260
+          ctx.moveTo(
+            480,
+            480
           );
-        });
 
-        ctx.restore();
-      });
+          ctx.arc(
+            480,
+            480,
+            451,
+            start,
+            start + step
+          );
+
+          ctx.closePath();
+
+          ctx.fillStyle =
+            colors[
+              index %
+              colors.length
+            ];
+
+          ctx.fill();
+
+          ctx.strokeStyle =
+            '#7295ff';
+
+          ctx.lineWidth = 3;
+
+          ctx.stroke();
+
+          /*
+           * LABEL
+           */
+
+          ctx.save();
+
+          ctx.translate(
+            480,
+            480
+          );
+
+          ctx.rotate(
+            start +
+            step / 2
+          );
+
+          ctx.translate(
+            300,
+            0
+          );
+
+          ctx.rotate(
+            Math.PI / 2
+          );
+
+          ctx.textAlign =
+            'center';
+
+          ctx.fillStyle =
+            '#fff';
+
+          const lines =
+            challenge
+              ? [
+                  money(key),
+                  'CHALLENGE'
+                ]
+              : PRIZES[
+                  key
+                ].lines;
+
+          lines.forEach(
+            (line, lineIndex) => {
+              ctx.font =
+                lineIndex === 0
+                  ? (
+                      '800 44px Inter, Arial, sans-serif'
+                    )
+                  : (
+                      '700 37px Inter, Arial, sans-serif'
+                    );
+
+              ctx.fillText(
+                line,
+                0,
+                (
+                  lineIndex -
+                  (
+                    lines.length -
+                    1
+                  ) / 2
+                ) * 53,
+                260
+              );
+            }
+          );
+
+          ctx.restore();
+        }
+      );
 
       /*
-       * CENTER CIRCLE
+       * CENTER BACKGROUND
+       *
+       * Logo itself is HTML so it
+       * stays sharp and upright.
        */
 
       ctx.beginPath();
@@ -1899,322 +2595,394 @@
       ctx.arc(
         480,
         480,
-        90,
+        108,
         0,
         Math.PI * 2
       );
 
-      ctx.fillStyle = '#091126';
+      ctx.fillStyle =
+        '#091126';
 
       ctx.fill();
 
-      ctx.strokeStyle = '#abc1ff';
+      ctx.strokeStyle =
+        '#abc1ff';
 
       ctx.lineWidth = 4;
 
       ctx.stroke();
 
       /*
-       * CENTER LOGO TEXT
+       * LOGO OVERLAY
        */
 
-      ctx.fillStyle = '#fff';
+      const logo =
+        document.createElement(
+          'div'
+        );
 
-      ctx.textAlign = 'center';
+      logo.className =
+        'bwf-center-logo';
 
-      ctx.font =
-        '800 29px Inter, Arial, sans-serif';
+      const logoImage =
+        document.createElement(
+          'img'
+        );
 
-      ctx.fillText(
-        'BULL',
-        480,
-        472
-      );
+      logoImage.src =
+        CONFIG.logo;
 
-      ctx.fillText(
-        'WAVES',
-        480,
-        508
+      logoImage.alt =
+        'Bullwaves';
+
+      logoImage.decoding =
+        'async';
+
+      logoImage.draggable =
+        false;
+
+      logo.append(
+        logoImage
       );
 
       stage.append(
         pointer,
-        canvas
+        canvas,
+        logo
       );
 
-      content.append(stage);
+      content.append(
+        stage
+      );
 
       text(
         'bwf-wheel-note',
+
         challenge
-          ? 'Five challenge sizes, one winning account.'
-          : 'Prize availability and odds vary by participant type.'
+          ? (
+              'Five challenge sizes, one winning account.'
+            )
+          : (
+              'Prize availability and odds vary by participant type.'
+            )
       );
 
       return {
         canvas,
-        stage
+        stage,
+        challenge
       };
     }
 
     /*
-     * CENTER WHEEL AUTOMATICALLY
-     *
-     * This is the important scroll behavior.
-     *
-     * The content scrolls inside the popup.
-     * The sticky CTA remains at the bottom.
+     * CENTER WHEEL
      */
 
-    async function centerWheel(stage) {
+    async function centerWheel(
+      stage
+    ) {
       await new Promise(
         resolve =>
           requestAnimationFrame(
-            () => requestAnimationFrame(resolve)
+            () =>
+              requestAnimationFrame(
+                resolve
+              )
           )
       );
 
-      const rect = stage.getBoundingClientRect();
+      const rect =
+        stage.getBoundingClientRect();
 
-      const viewport = scroll.getBoundingClientRect();
+      const viewport =
+        scroll.getBoundingClientRect();
 
       const offset =
-        rect.top - viewport.top;
-
-      /*
-       * Center the wheel in the visible
-       * area above the sticky button.
-       */
+        rect.top -
+        viewport.top;
 
       const target =
         scroll.scrollTop +
         offset -
         (
-          scroll.clientHeight - rect.height
+          scroll.clientHeight -
+          rect.height
         ) / 2;
 
-      const reduced = matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
+      const reduced =
+        window.matchMedia &&
+        matchMedia(
+          '(prefers-reduced-motion: reduce)'
+        ).matches;
 
       scroll.scrollTo({
-        top: Math.max(0, target),
-        behavior: reduced
-          ? 'instant'
-          : 'smooth'
-      });
+        top:
+          Math.max(
+            0,
+            target
+          ),
 
-      /*
-       * Allow smooth scrolling to begin
-       * before the wheel starts spinning.
-       */
+        behavior:
+          reduced
+            ? 'auto'
+            : 'smooth'
+      });
 
       if (!reduced) {
         await new Promise(
-          resolve => setTimeout(resolve, 480)
+          resolve =>
+            setTimeout(
+              resolve,
+              480
+            )
         );
       }
     }
 
     /*
      * CONFETTI
-     *
-     * Lightweight canvas animation.
-     * No external libraries.
-     * Only 42 particles.
      */
 
-    function confetti(stage) {
-      return new Promise(resolve => {
-        const ctx = confettiCanvas.getContext('2d');
-
-        if (!ctx) {
-          resolve();
-          return;
-        }
-
-        const rect = dialog.getBoundingClientRect();
-
-        const wheelRect =
-          stage.getBoundingClientRect();
-
-        const width = dialog.clientWidth;
-
-        const height = dialog.clientHeight;
-
-        const dpr = Math.min(
-          window.devicePixelRatio || 1,
-          2
-        );
-
-        /*
-         * High resolution canvas.
-         */
-
-        confettiCanvas.width =
-          Math.round(width * dpr);
-
-        confettiCanvas.height =
-          Math.round(height * dpr);
-
-        ctx.setTransform(
-          dpr,
-          0,
-          0,
-          dpr,
-          0,
-          0
-        );
-
-        /*
-         * Confetti originates from the wheel.
-         */
-
-        const x0 =
-          wheelRect.left -
-          rect.left +
-          wheelRect.width / 2;
-
-        const y0 =
-          wheelRect.top -
-          rect.top +
-          wheelRect.height * .34;
-
-        const palette = [
-          '#ffffff',
-          '#8eb1ff',
-          '#386aff',
-          '#c2d5ff',
-          '#cbbdff'
-        ];
-
-        /*
-         * Create a small number of particles.
-         */
-
-        const pieces = Array.from(
-          { length: 42 },
-          () => ({
-            vx: (Math.random() - .5) * 330,
-
-            vy:
-              -60 -
-              Math.random() * 200,
-
-            drift:
-              (Math.random() - .5) * 28,
-
-            angle:
-              Math.random() * Math.PI * 2,
-
-            spin:
-              (Math.random() - .5) * 9,
-
-            w:
-              3 + Math.random() * 4,
-
-            h:
-              5 + Math.random() * 6,
-
-            color:
-              palette[
-                Math.floor(
-                  Math.random() * palette.length
-                )
-              ]
-          })
-        );
-
-        const start = performance.now();
-
-        /*
-         * ANIMATION LOOP
-         */
-
-        function frame(now) {
-          const elapsed =
-            now - start;
-
-          const t =
-            elapsed / 1000;
-
-          ctx.clearRect(
-            0,
-            0,
-            width,
-            height
-          );
-
-          pieces.forEach(p => {
-            const x =
-              x0 +
-              p.vx * t +
-              Math.sin(t * 3 + p.angle) *
-                p.drift;
-
-            const y =
-              y0 +
-              p.vy * t +
-              230 * t * t;
-
-            if (y > height + 20) {
-              return;
-            }
-
-            ctx.save();
-
-            /*
-             * Fade out gradually.
-             */
-
-            ctx.globalAlpha =
-              Math.max(
-                0,
-                Math.min(
-                  1,
-                  (1750 - elapsed) / 450
-                )
+    function confetti(
+      stage
+    ) {
+      return new Promise(
+        resolve => {
+          const ctx =
+            confettiCanvas
+              .getContext(
+                '2d'
               );
 
-            ctx.translate(x, y);
-
-            ctx.rotate(
-              p.angle + p.spin * t
-            );
-
-            ctx.fillStyle = p.color;
-
-            ctx.fillRect(
-              -p.w / 2,
-              -p.h / 2,
-              p.w,
-              p.h
-            );
-
-            ctx.restore();
-          });
-
-          if (
-            elapsed < 1750 &&
-            dialog.open
-          ) {
-            confettiFrame =
-              requestAnimationFrame(frame);
-
-          } else {
-            clearConfetti();
-
+          if (!ctx) {
             resolve();
-          }
-        }
 
-        confettiFrame =
-          requestAnimationFrame(frame);
-      });
+            return;
+          }
+
+          const dialogRect =
+            dialog
+              .getBoundingClientRect();
+
+          const wheelRect =
+            stage
+              .getBoundingClientRect();
+
+          const width =
+            dialog.clientWidth;
+
+          const height =
+            dialog.clientHeight;
+
+          const dpr =
+            Math.min(
+              window.devicePixelRatio ||
+              1,
+              2
+            );
+
+          confettiCanvas.width =
+            Math.round(
+              width * dpr
+            );
+
+          confettiCanvas.height =
+            Math.round(
+              height * dpr
+            );
+
+          ctx.setTransform(
+            dpr,
+            0,
+            0,
+            dpr,
+            0,
+            0
+          );
+
+          const x0 =
+            wheelRect.left -
+            dialogRect.left +
+            wheelRect.width / 2;
+
+          const y0 =
+            wheelRect.top -
+            dialogRect.top +
+            wheelRect.height *
+            .34;
+
+          const palette = [
+            '#ffffff',
+            '#8eb1ff',
+            '#386aff',
+            '#c2d5ff',
+            '#cbbdff'
+          ];
+
+          const pieces =
+            Array.from(
+              {
+                length: 42
+              },
+
+              () => ({
+                vx:
+                  (
+                    Math.random() -
+                    .5
+                  ) * 330,
+
+                vy:
+                  -60 -
+                  Math.random() *
+                  200,
+
+                drift:
+                  (
+                    Math.random() -
+                    .5
+                  ) * 28,
+
+                angle:
+                  Math.random() *
+                  Math.PI *
+                  2,
+
+                spin:
+                  (
+                    Math.random() -
+                    .5
+                  ) * 9,
+
+                w:
+                  3 +
+                  Math.random() *
+                  4,
+
+                h:
+                  5 +
+                  Math.random() *
+                  6,
+
+                color:
+                  palette[
+                    Math.floor(
+                      Math.random() *
+                      palette.length
+                    )
+                  ]
+              })
+            );
+
+          const start =
+            performance.now();
+
+          function frame(now) {
+            const elapsed =
+              now - start;
+
+            const time =
+              elapsed / 1000;
+
+            ctx.clearRect(
+              0,
+              0,
+              width,
+              height
+            );
+
+            pieces.forEach(
+              piece => {
+                const x =
+                  x0 +
+                  piece.vx *
+                  time +
+                  Math.sin(
+                    time * 3 +
+                    piece.angle
+                  ) *
+                  piece.drift;
+
+                const y =
+                  y0 +
+                  piece.vy *
+                  time +
+                  230 *
+                  time *
+                  time;
+
+                if (
+                  y >
+                  height + 20
+                ) {
+                  return;
+                }
+
+                ctx.save();
+
+                ctx.globalAlpha =
+                  Math.max(
+                    0,
+                    Math.min(
+                      1,
+                      (
+                        1750 -
+                        elapsed
+                      ) / 450
+                    )
+                  );
+
+                ctx.translate(
+                  x,
+                  y
+                );
+
+                ctx.rotate(
+                  piece.angle +
+                  piece.spin *
+                  time
+                );
+
+                ctx.fillStyle =
+                  piece.color;
+
+                ctx.fillRect(
+                  -piece.w / 2,
+                  -piece.h / 2,
+                  piece.w,
+                  piece.h
+                );
+
+                ctx.restore();
+              }
+            );
+
+            if (
+              elapsed < 1750 &&
+              dialog.open
+            ) {
+              confettiFrame =
+                requestAnimationFrame(
+                  frame
+                );
+
+            } else {
+              clearConfetti();
+
+              resolve();
+            }
+          }
+
+          confettiFrame =
+            requestAnimationFrame(
+              frame
+            );
+        }
+      );
     }
 
     /*
-     * SPIN ANIMATION
+     * SPIN
      */
 
     async function animate(
@@ -2222,41 +2990,33 @@
       keys,
       winner
     ) {
-      /*
-       * Immediately indicate that
-       * the button has been pressed.
-       */
-
       setBusy(true);
 
       status.textContent =
         'Your prize is being revealed…';
 
-      /*
-       * First scroll to the wheel.
-       */
-
-      await centerWheel(selection.stage);
-
-      /*
-       * Calculate exact landing position.
-       */
+      await centerWheel(
+        selection.stage
+      );
 
       const rotation =
         360 * 7 -
         (
-          keys.indexOf(winner) + .5
-        ) * (
-          360 / keys.length
+          keys.indexOf(
+            winner
+          ) +
+          .5
+        ) *
+        (
+          360 /
+          keys.length
         );
 
-      const reduced = matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
-
-      /*
-       * Animate the wheel.
-       */
+      const reduced =
+        window.matchMedia &&
+        matchMedia(
+          '(prefers-reduced-motion: reduce)'
+        ).matches;
 
       if (
         !reduced &&
@@ -2266,7 +3026,8 @@
           selection.canvas.animate(
             [
               {
-                transform: 'rotate(0deg)'
+                transform:
+                  'rotate(0deg)'
               },
 
               {
@@ -2278,12 +3039,15 @@
             ],
 
             {
-              duration: CONFIG.spinDuration,
+              duration:
+                CONFIG
+                  .spinDuration,
 
               easing:
                 'cubic-bezier(.16,.02,.10,1)',
 
-              fill: 'forwards'
+              fill:
+                'forwards'
             }
           );
 
@@ -2291,7 +3055,8 @@
           await animation.finished;
         } catch (_) {}
 
-        selection.canvas.style.transform =
+        selection.canvas
+          .style.transform =
           'rotate(' +
           rotation +
           'deg)';
@@ -2299,31 +3064,33 @@
         animation.cancel();
 
       } else {
-        selection.canvas.style.transform =
+        selection.canvas
+          .style.transform =
           'rotate(' +
           rotation +
           'deg)';
       }
 
-      /*
-       * ANNOUNCE THE RESULT
-       */
-
       status.textContent =
         'You won ' +
         (
-          keys === CHALLENGE_ORDER
-            ? money(winner) + ' Challenge'
-            : PRIZES[winner].name
+          selection.challenge
+            ? (
+                money(
+                  winner
+                ) +
+                ' Challenge'
+              )
+            : PRIZES[
+                winner
+              ].name
         ) +
         '!';
 
-      /*
-       * CONFETTI
-       */
-
       if (!reduced) {
-        await confetti(selection.stage);
+        await confetti(
+          selection.stage
+        );
       }
 
       setBusy(false);
@@ -2336,28 +3103,23 @@
     function firstWheel() {
       reset(
         'Your next big win starts here.',
+
         'Three extraordinary prizes. One spin. Discover your reward.'
       );
 
-      const type = profile.value;
-
-      /*
-       * Always show all three prizes.
-       */
+      const type =
+        profile.value;
 
       showCards(
         CATEGORY_ORDER,
         false
       );
 
-      const selection = wheel(
-        CATEGORY_ORDER,
-        false
-      );
-
-      /*
-       * STICKY SPIN BUTTON
-       */
+      const selection =
+        wheel(
+          CATEGORY_ORDER,
+          false
+        );
 
       button(
         'Spin to Win',
@@ -2367,10 +3129,12 @@
             return;
           }
 
-          const previous = readEntry();
+          const previous =
+            readEntry();
 
           if (previous) {
-            entry = previous;
+            entry =
+              previous;
 
             restoreForm();
 
@@ -2379,34 +3143,42 @@
             return;
           }
 
-          /*
-           * Determine both results
-           * before starting the animation.
-           */
-
           try {
-            const category = choose(
-              CONFIG.categoryWeights[type]
-            );
+            const category =
+              choose(
+                CONFIG
+                  .categoryWeights[
+                    type
+                  ]
+              );
 
             const challenge =
-              category === 'challenge'
+              category ===
+              'challenge'
                 ? choose(
-                    CONFIG.challengeWeights[type]
+                    CONFIG
+                      .challengeWeights[
+                        type
+                      ]
                   )
                 : null;
 
             entry = {
               version: 2,
 
-              id: makeID(),
+              id:
+                makeID(),
 
-              first: first.value.trim(),
+              first:
+                first.value.trim(),
 
-              last: last.value.trim(),
+              last:
+                last.value.trim(),
 
               email:
-                email.value.trim().toLowerCase(),
+                email.value
+                  .trim()
+                  .toLowerCase(),
 
               type,
 
@@ -2415,12 +3187,14 @@
               challenge,
 
               stage:
-                category === 'challenge'
+                category ===
+                'challenge'
                   ? 'challenge'
                   : 'ready',
 
               date:
-                new Date().toISOString()
+                new Date()
+                  .toISOString()
             };
 
           } catch (_) {
@@ -2430,11 +3204,9 @@
             return;
           }
 
-          /*
-           * Save before animation.
-           */
-
-          if (!saveEntry(entry)) {
+          if (
+            !saveEntry(entry)
+          ) {
             entry = null;
 
             status.textContent =
@@ -2446,23 +3218,15 @@
           launch.textContent =
             'View My Prize';
 
-          /*
-           * Center wheel, spin and celebrate.
-           */
-
           await animate(
             selection,
             CATEGORY_ORDER,
             entry.category
           );
 
-          /*
-           * Continue to second wheel
-           * or submit registration.
-           */
-
           if (
-            entry.category === 'challenge'
+            entry.category ===
+            'challenge'
           ) {
             secondWheel();
 
@@ -2480,26 +3244,20 @@
     function secondWheel() {
       reset(
         'You won a Prime Challenge!',
+
         'Spin again to reveal your challenge account size.'
       );
-
-      /*
-       * Always show all five sizes.
-       */
 
       showCards(
         CHALLENGE_ORDER,
         true
       );
 
-      const selection = wheel(
-        CHALLENGE_ORDER,
-        true
-      );
-
-      /*
-       * STICKY SECOND SPIN BUTTON
-       */
+      const selection =
+        wheel(
+          CHALLENGE_ORDER,
+          true
+        );
 
       button(
         'Reveal My Challenge',
@@ -2509,20 +3267,20 @@
             return;
           }
 
-          entry.stage = 'ready';
+          entry.stage =
+            'ready';
 
-          if (!saveEntry(entry)) {
-            entry.stage = 'challenge';
+          if (
+            !saveEntry(entry)
+          ) {
+            entry.stage =
+              'challenge';
 
             status.textContent =
               'Please enable storage and try again.';
 
             return;
           }
-
-          /*
-           * Center wheel, spin and celebrate.
-           */
 
           await animate(
             selection,
@@ -2536,42 +3294,77 @@
     }
 
     /*
-     * WINNING PRIZE PANEL
+     * PRIZE PANEL
      */
 
     function prizePanel() {
-      const panel = document.createElement('div');
+      const panel =
+        document.createElement(
+          'div'
+        );
 
-      panel.className = 'bwf-win';
+      panel.className =
+        'bwf-win';
 
-      const kicker = document.createElement('div');
+      const kicker =
+        document.createElement(
+          'div'
+        );
 
-      kicker.className = 'bwf-win-kicker';
+      kicker.className =
+        'bwf-win-kicker';
 
-      kicker.textContent = 'YOUR WINNING PRIZE';
+      kicker.textContent =
+        'YOUR WINNING PRIZE';
 
-      const title = document.createElement('div');
+      const title =
+        document.createElement(
+          'div'
+        );
 
-      title.className = 'bwf-win-title';
+      title.className =
+        'bwf-win-title';
 
-      title.textContent = prizeName();
+      title.textContent =
+        prizeName();
 
-      const value = document.createElement('div');
+      const value =
+        document.createElement(
+          'div'
+        );
 
-      value.className = 'bwf-win-value';
+      value.className =
+        'bwf-win-value';
 
       value.textContent =
-        entry.category === 'challenge'
-          ? money(
-              CONFIG.challengePrices[entry.challenge]
-            ) + ' VALUE'
-          : PRIZES[entry.category].value + ' VALUE';
+        entry.category ===
+        'challenge'
+          ? (
+              money(
+                CONFIG
+                  .challengePrices[
+                    entry.challenge
+                  ]
+              ) +
+              ' VALUE'
+            )
+          : (
+              PRIZES[
+                entry.category
+              ].value +
+              ' VALUE'
+            );
 
-      const detail = document.createElement('p');
+      const detail =
+        document.createElement(
+          'p'
+        );
 
-      detail.className = 'bwf-win-detail';
+      detail.className =
+        'bwf-win-detail';
 
-      detail.textContent = prizeValue();
+      detail.textContent =
+        prizeValue();
 
       panel.append(
         kicker,
@@ -2580,16 +3373,22 @@
         detail
       );
 
-      content.append(panel);
+      content.append(
+        panel
+      );
     }
 
     /*
-     * REGISTRATION STATUS
+     * PENDING
      */
 
-    function pending(message, retry) {
+    function pending(
+      message,
+      retry
+    ) {
       reset(
         'Your prize is saved.',
+
         'Your reward and Claim ID will remain the same.'
       );
 
@@ -2600,7 +3399,8 @@
         entry.id
       );
 
-      status.textContent = message;
+      status.textContent =
+        message;
 
       if (retry) {
         button(
@@ -2612,33 +3412,40 @@
         button(
           'Contact Support',
 
-          () => window.open(
-            entry.category === 'challenge'
-              ? CONFIG.support.prime
-              : CONFIG.support.broker,
+          () =>
+            window.open(
+              entry.category ===
+              'challenge'
+                ? CONFIG
+                    .support
+                    .prime
+                : CONFIG
+                    .support
+                    .broker,
 
-            '_blank',
+              '_blank',
 
-            'noopener,noreferrer'
-          ),
+              'noopener,noreferrer'
+            ),
 
           true
         );
       }
     }
 
-    /*
-     * SUBMISSION FAILURE
-     */
-
-    function submissionFailed(message) {
-      clearTimeout(timeoutID);
+    function submissionFailed(
+      message
+    ) {
+      clearTimeout(
+        timeoutID
+      );
 
       submitting = false;
 
       setBusy(false);
 
-      entry.stage = 'ready';
+      entry.stage =
+        'ready';
 
       saveEntry(entry);
 
@@ -2649,7 +3456,7 @@
     }
 
     /*
-     * NATIVE WEBFLOW SUBMISSION
+     * WEBFLOW SUBMIT
      */
 
     function submitEntry() {
@@ -2662,7 +3469,9 @@
 
       prepareSubmission();
 
-      if (!form.checkValidity()) {
+      if (
+        !form.checkValidity()
+      ) {
         pending(
           'Please complete the required fields before retrying.',
           true
@@ -2673,8 +3482,13 @@
 
       if (
         !window.Webflow ||
-        typeof window.Webflow.require !== 'function' ||
-        !window.Webflow.require('forms')
+
+        typeof
+        window.Webflow.require !==
+        'function' ||
+
+        !window.Webflow
+          .require('forms')
       ) {
         pending(
           'Registration is available on the published Webflow site. Your prize is saved.',
@@ -2684,7 +3498,8 @@
         return;
       }
 
-      entry.stage = 'sending';
+      entry.stage =
+        'sending';
 
       saveEntry(entry);
 
@@ -2697,14 +3512,18 @@
 
       setBusy(true);
 
-      success.style.display = 'none';
+      success.style.display =
+        'none';
 
-      failure.style.display = 'none';
+      failure.style.display =
+        'none';
 
       nativeAllowed = true;
 
       try {
-        form.requestSubmit(nativeSubmit);
+        form.requestSubmit(
+          nativeSubmit
+        );
 
       } catch (_) {
         submissionFailed(
@@ -2712,36 +3531,33 @@
         );
 
       } finally {
-        nativeAllowed = false;
+        nativeAllowed =
+          false;
       }
 
-      /*
-       * Do not automatically resubmit
-       * if Webflow confirmation is delayed.
-       */
-
       if (submitting) {
-        timeoutID = setTimeout(
-          () => {
-            setBusy(false);
+        timeoutID =
+          setTimeout(
+            () => {
+              setBusy(false);
 
-            status.textContent =
-              'Confirmation is taking longer than expected. Your prize is saved. Please contact support before trying again to avoid duplicate entries.';
-          },
+              status.textContent =
+                'Confirmation is taking longer than expected. Your prize is saved. Please contact support before trying again to avoid duplicate entries.';
+            },
 
-          45000
-        );
+            45000
+          );
       }
     }
 
-    /*
-     * WEBFLOW SUCCESS OBSERVER
-     */
-
-    const visible = el =>
-      el &&
-      !el.hidden &&
-      getComputedStyle(el).display !== 'none';
+    const visible =
+      element =>
+        element &&
+        !element.hidden &&
+        getComputedStyle(
+          element
+        ).display !==
+          'none';
 
     new MutationObserver(
       () => {
@@ -2749,20 +3565,27 @@
           return;
         }
 
-        if (visible(success)) {
-          clearTimeout(timeoutID);
+        if (
+          visible(success)
+        ) {
+          clearTimeout(
+            timeoutID
+          );
 
           submitting = false;
 
           setBusy(false);
 
-          entry.stage = 'submitted';
+          entry.stage =
+            'submitted';
 
           saveEntry(entry);
 
           finalScreen();
 
-        } else if (visible(failure)) {
+        } else if (
+          visible(failure)
+        ) {
           submissionFailed(
             'Webflow could not save your entry. Your prize and Claim ID are unchanged.'
           );
@@ -2787,12 +3610,13 @@
     );
 
     /*
-     * FINAL WINNING SCREEN
+     * FINAL SCREEN
      */
 
     function finalScreen() {
       reset(
         'Congratulations!',
+
         'Your registration has been received. Claim your prize with our team.'
       );
 
@@ -2805,42 +3629,44 @@
 
       text(
         'bwf-help',
+
         'Copy this message and paste it into our support chat. The team will verify your registration before awarding the prize.'
       );
 
-      /*
-       * SUPPORT MESSAGE
-       */
-
       const message = [
         'Hello ' +
-          (
-            entry.category === 'challenge'
-              ? 'Bullwaves Prime'
-              : 'Bullwaves'
-          ) +
-          ' Support,',
+        (
+          entry.category ===
+          'challenge'
+            ? 'Bullwaves Prime'
+            : 'Bullwaves'
+        ) +
+        ' Support,',
 
         '',
 
         'I participated in the A1 Combat × Bullwaves Dubai giveaway and won ' +
-          prizeName() +
-          '.',
+        prizeName() +
+        '.',
 
         '',
 
         'Name: ' +
-          entry.first +
-          ' ' +
-          entry.last,
+        entry.first +
+        ' ' +
+        entry.last,
 
-        'Email: ' + entry.email,
+        'Email: ' +
+        entry.email,
 
-        'Prize: ' + prizeName(),
+        'Prize: ' +
+        prizeName(),
 
-        'Prize value: ' + prizeValue(),
+        'Prize value: ' +
+        prizeValue(),
 
-        'Claim ID: ' + entry.id,
+        'Claim ID: ' +
+        entry.id,
 
         '',
 
@@ -2849,37 +3675,42 @@
         '',
 
         'Thank you!'
+
       ].join('\n');
 
-      const textarea = document.createElement('textarea');
+      const textarea =
+        document.createElement(
+          'textarea'
+        );
 
-      textarea.className = 'bwf-message';
+      textarea.className =
+        'bwf-message';
 
-      textarea.readOnly = true;
+      textarea.readOnly =
+        true;
 
       textarea.setAttribute(
         'aria-label',
         'Your claim message'
       );
 
-      textarea.value = message;
+      textarea.value =
+        message;
 
-      content.append(textarea);
-
-      /*
-       * COPY MESSAGE BUTTON
-       *
-       * Also stays in the bottom dock.
-       */
+      content.append(
+        textarea
+      );
 
       button(
         'Copy Claim Message',
 
         async () => {
           try {
-            await navigator.clipboard.writeText(
-              message
-            );
+            await navigator
+              .clipboard
+              .writeText(
+                message
+              );
 
             status.textContent =
               'Message copied!';
@@ -2889,24 +3720,29 @@
 
             textarea.select();
 
-            let copied = false;
+            let copied =
+              false;
 
             try {
-              copied = document.execCommand('copy');
+              copied =
+                document.execCommand(
+                  'copy'
+                );
+
             } catch (_) {}
 
-            status.textContent = copied
-              ? 'Message copied!'
-              : 'Copy the message above and paste it into support chat.';
+            status.textContent =
+              copied
+                ? 'Message copied!'
+                : 'Copy the message above and paste it into support chat.';
           }
         }
       );
 
-      /*
-       * SUPPORT LINK
-       */
-
-      const support = document.createElement('a');
+      const support =
+        document.createElement(
+          'a'
+        );
 
       support.className =
         'bwf-button secondary';
@@ -2915,22 +3751,31 @@
         'Contact Support';
 
       support.href =
-        entry.category === 'challenge'
-          ? CONFIG.support.prime
-          : CONFIG.support.broker;
+        entry.category ===
+        'challenge'
+          ? CONFIG
+              .support
+              .prime
+          : CONFIG
+              .support
+              .broker;
 
-      support.target = '_blank';
+      support.target =
+        '_blank';
 
-      support.rel = 'noopener noreferrer';
+      support.rel =
+        'noopener noreferrer';
 
-      actions.append(support);
+      actions.append(
+        support
+      );
 
       launch.textContent =
         'View My Prize';
     }
 
     /*
-     * RESUME EXISTING PARTICIPATION
+     * RESUME
      */
 
     function resume() {
@@ -2939,17 +3784,20 @@
       }
 
       if (
-        entry.stage === 'submitted'
+        entry.stage ===
+        'submitted'
       ) {
         finalScreen();
 
       } else if (
-        entry.stage === 'challenge'
+        entry.stage ===
+        'challenge'
       ) {
         secondWheel();
 
       } else if (
-        entry.stage === 'sending'
+        entry.stage ===
+        'sending'
       ) {
         pending(
           'Your submission may still be processing. Contact support with your Claim ID before trying again.',
@@ -2965,7 +3813,7 @@
     }
 
     /*
-     * START EXPERIENCE
+     * START
      */
 
     function start() {
@@ -2975,10 +3823,13 @@
 
       if (submitting) {
         open();
+
         return;
       }
 
-      entry = readEntry() || entry;
+      entry =
+        readEntry() ||
+        entry;
 
       if (entry) {
         restoreForm();
@@ -2999,20 +3850,19 @@
       email.value =
         email.value.trim();
 
-      if (!form.reportValidity()) {
+      if (
+        !form.reportValidity()
+      ) {
         return;
       }
 
-      inline.textContent = '';
+      inline.textContent =
+        '';
 
       open();
 
       firstWheel();
     }
-
-    /*
-     * EVENT LISTENERS
-     */
 
     launch.addEventListener(
       'click',
@@ -3023,10 +3873,6 @@
       'click',
       start
     );
-
-    /*
-     * Preserve native Webflow submission.
-     */
 
     form.addEventListener(
       'submit',
@@ -3046,16 +3892,14 @@
       true
     );
 
-    /*
-     * ENTER KEY SUPPORT
-     */
-
     form.addEventListener(
       'keydown',
 
       event => {
         if (
-          event.key === 'Enter' &&
+          event.key ===
+          'Enter' &&
+
           event.target.matches(
             'input:not([type="submit"])'
           )
@@ -3066,10 +3910,6 @@
         }
       }
     );
-
-    /*
-     * RESTORE PREVIOUS PRIZE
-     */
 
     if (entry) {
       restoreForm();
@@ -3082,17 +3922,16 @@
     }
   }
 
-  /*
-   * DOM READY
-   */
-
   if (
-    document.readyState === 'loading'
+    document.readyState ===
+    'loading'
   ) {
     document.addEventListener(
       'DOMContentLoaded',
       init,
-      { once: true }
+      {
+        once: true
+      }
     );
 
   } else {
